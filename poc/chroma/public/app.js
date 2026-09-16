@@ -486,7 +486,7 @@
       wrap.className = 'lock-row';
       const lock = document.createElement('button');
       lock.type = 'button';
-      lock.className = 'prop-lock panel-icon';
+      lock.className = 'prop-lock';
       lock.dataset.lock = 'color' + i;
       lock.title = `Lock ${COLOR_ROLES[i].toLowerCase()}`;
       lock.innerHTML = LOCK_ICON;

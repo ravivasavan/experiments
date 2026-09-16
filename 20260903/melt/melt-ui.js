@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
         : 'Drop an SVG to start';
   }
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+  const X = '<svg viewBox="4 4 16 16" fill="none" stroke="currentColor" stroke-width="1.6667" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
 
   function buildList() {
     const box = $('ptlist');
@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <input class="dial" type="range" data-k="r" min="20" max="600" step="1" value="${Math.round(p.r)}" aria-label="Reach of point ${i + 1}">
         </label>
       </div>
-      <button class="pt__x panel-icon" type="button" data-x="${i}" aria-label="Remove point ${i + 1}">${X}</button>
+      <button class="pt__x" type="button" data-x="${i}" aria-label="Remove point ${i + 1}">${X}</button>
     </div>`).join('');
     dials(box);
   }

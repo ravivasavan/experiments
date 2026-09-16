@@ -447,16 +447,28 @@ units — multiply by `clientWidth / viewBox.width` to get what is drawn.
 
 DialKit's own icons are exempt. It is a plugin and it brings its own set.
 
-**The hover is the inner surface growing, never the control moving.** It is the
-move the main site's pills make and every one of the three above now makes it:
-`::before` inset 6px (4 on a `.panel-icon`) growing to inset 2 (0), over 240ms
-on `cubic-bezier(0.4, 0, 0.2, 1)`, with the control itself still. A round
-control grows a disc and a labelled one grows a rounded rect — the same gesture
-at a different aspect. `:focus-visible` does the same thing as `:hover`.
+**The growing inner surface is level-1 chrome and nothing else.** `.icon-pill`
+grows a `::before` from inset 8 to inset 3.2 over 240ms on
+`cubic-bezier(0.4, 0, 0.2, 1)`, with the pill itself still. That move needs
+empty ground to arrive on, and the header is the only place there is any.
 
-`.btn` is the exception and stays one: it is a filled form control alongside
-`.select` and `.input`, it has no inner face to grow, and it tints. It shares
-the glyph size and the timing.
+**Everywhere else the control already has a fill, so the hover works that fill.**
+A play-space button is glass or a tinted chip before you touch it; growing a
+second surface underneath reads as a second object arriving. Instead:
+
+| | rest | hover |
+|---|---|---|
+| `.tool-pill` | glass | `inset 0 0 0 999px var(--wash)` over the glass, shadow lifts |
+| `.sheet__icon` | transparent on glass | `background: var(--wash)` |
+| `.panel-icon`, `.sheet__min` | 6% chip | `var(--wash-strong)` + a 22% hairline |
+| `.btn` | filled form control | tints, like `.select` and `.input` |
+
+`--wash` and `--wash-strong` are the two steps; `--focus-ring` is the one ring.
+`:focus-visible` is the hover state **plus** the ring — not a second idiom, and
+never a `box-shadow` that silently replaces a base hairline (restate it).
+
+There is exactly one `::before` grow left in `play.css`. If you add a second,
+it is wrong.
 
 Glass: `--glass-bg --glass-blur --glass-edge --glass-specular --glass-shadow
 --glass-shadow-sm --glass-radius`. Apply them with the `.glass` class rather
@@ -644,3 +656,47 @@ not hold the export's pixels to show you.
 
 Camouflage has neither attribute on purpose — its pattern is full-bleed, so
 there is nothing behind the glass but more of the same pattern.
+
+---
+
+## 10. DialKit is a plugin — recolour it, do not redesign it
+
+`poc/shared/dialkit-skin.css` maps DialKit's own `--dial-*` tokens onto the
+site's colours and does **nothing else**. The panel is then the site's palette
+in DialKit's layout: its row shapes, its slider, its folders, its buttons.
+
+This file used to rebuild all of that — a slider taken apart and reassembled as
+`.dial`, a 40px row height forced onto controls that are not rows, folder
+headers restyled as section labels. The result read as neither DialKit nor the
+site, and it squashed DialKit's own buttons into a shape they were never drawn
+for.
+
+**Nothing in that file may change a size, a shape or a spacing DialKit chose.**
+The only exceptions are the handful of rules that hosting it *inline* requires —
+without them a panel that thinks it is a floating window draws its own window
+inside ours — and the two dropdowns, which portal to `<body>` where no token of
+ours can reach them.
+
+DialKit's icons are exempt from §6's glyph rule for the same reason. It brings
+its own set.
+
+Anything of ours that sits beside a DialKit control — chroma's padlocks — goes
+in a gutter we make on our own container (`#dial-mount { padding-right }`), not
+by reshaping a row DialKit drew.
+
+---
+
+## 11. The header band
+
+`.chrome-rule::before` is a `--chrome-rule`-tall band of `--glass-bg` and
+`--glass-blur` hanging off the hairline, so level 1 is a moment of glass rather
+than pills floating on nothing. It hangs off the rule and not off `.chrome`,
+because `.chrome` is a `pointer-events: none` grid whose box is only as tall as
+its pills.
+
+It is worth having only where the artwork runs **underneath** it — a glass band
+over bare page is just a slightly different shade of page. That is one more
+reason a stage should be the whole viewport with no padding reserved for the
+chrome: chroma's preview bleeds to all four edges and the band has something to
+blur. It is in the `prefers-reduced-transparency` list with every other glass
+surface.

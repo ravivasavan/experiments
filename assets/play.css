@@ -24,6 +24,13 @@
      than snapping. Ignored where it isn't supported; nothing depends on it. */
   interpolate-size: allow-keywords;
 
+  /* Play-space buttons already have a fill, so their hover is a wash over it
+     rather than a surface growing underneath — that move belongs to the level-1
+     chrome and nothing else. One ring for focus, so every control agrees. */
+  --wash: color-mix(in srgb, var(--fg) 10%, transparent);
+  --wash-strong: color-mix(in srgb, var(--fg) 16%, transparent);
+  --focus-ring: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent);
+
   /* Brand colours — inherited from ravivasavan.com */
   --night: #0d1b1e;
   --orange: #ff795c;
@@ -201,6 +208,23 @@ a { color: inherit; }
 .header-pills > .header-pill      { grid-column: 2; justify-self: center; }
 .header-pills > .icon-pill--theme { grid-column: 3; justify-self: start;  margin-left: 8px; }
 
+/* The header is a moment of glass, not a row of pills floating on nothing: the
+   band hangs off the rule rather than off .chrome, because .chrome is a
+   pointer-events:none grid whose own box is only as tall as its pills. */
+.chrome-rule::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--chrome-rule);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  pointer-events: none;
+  z-index: -1;
+}
+
 .chrome-rule {
   position: fixed;
   top: var(--chrome-rule);
@@ -368,32 +392,24 @@ a { color: inherit; }
   line-height: 1;
   cursor: pointer;
   text-decoration: none;
-  position: relative;
-  overflow: hidden;
-  transition: color 240ms ease;
-}
-/* The hover is the inner surface growing, not the pill — the same move the
-   header's icon pills make, on the same curve and the same 240ms. A labelled
-   pill grows a rounded rect where a round one grows a disc; it is the same
-   gesture at a different aspect. */
-.tool-pill::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border-radius: 16px;
-  background: var(--separator);
-  z-index: 0;
   transition:
-    inset         240ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius 240ms cubic-bezier(0.4, 0, 0.2, 1);
+    color      240ms ease,
+    box-shadow 240ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.tool-pill:hover::before,
-.tool-pill:focus-visible::before {
-  inset: 2px;
-  border-radius: 20px;
+/* The pill is already a pane of glass, so the hover washes that glass and
+   lifts its shadow. The header's growing disc is not available here: it reads
+   as a second surface arriving, and there is no empty ground for it to arrive
+   on. An inset spread is the whole face, so it is unmistakable at 44px. */
+.tool-pill:hover,
+.tool-pill:focus-visible {
+  box-shadow:
+    inset 0 0 0 999px var(--wash),
+    var(--glass-edge),
+    var(--glass-specular),
+    var(--glass-shadow);
 }
-/* Everything the pill draws sits above that surface. */
-.tool-pill > * { position: relative; z-index: 1; }
+.tool-pill:focus-visible { outline: none; box-shadow: inset 0 0 0 999px var(--wash), var(--glass-edge), var(--glass-specular), var(--focus-ring); }
+.tool-pill:active { box-shadow: inset 0 0 0 999px var(--wash-strong), var(--glass-edge), var(--glass-shadow-sm); }
 .tool-pill__icon { display: grid; place-items: center; width: 16px; height: 16px; flex-shrink: 0; }
 .tool-pill__icon svg {
   grid-area: 1 / 1;
@@ -410,8 +426,12 @@ a { color: inherit; }
 }
 .tool-pill--danger:hover { color: var(--accent); }
 .tool-pill[disabled] { opacity: 0.4; cursor: default; }
-.tool-pill[disabled]:hover { color: var(--ink); }
-.tool-pill[disabled]:hover::before { inset: 6px; border-radius: 16px; }
+/* Restate the resting fill, not the resting geometry — the reset then survives
+   any change to what the hover actually does. */
+.tool-pill[disabled]:hover {
+  color: var(--ink);
+  box-shadow: var(--glass-edge), var(--glass-specular), var(--glass-shadow-sm);
+}
 
 /* --------------------------------------------- level 2: rail and dock --- */
 /* The experiment's own buttons, split by what they do rather than piled into
@@ -543,10 +563,10 @@ a { color: inherit; }
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
-  /* A visible thumb when it does overflow: the drawer is the one surface here
-     long enough to hide something below its own fold. */
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--fg) 22%, transparent) transparent;
+  /* No scrollbar, on either engine. That it scrolls is said by the shadow the
+     content passes under at the top and bottom edges — see the box-shadow
+     below, where the two inset hints ride along with the glass. */
+  scrollbar-width: none;
   overscroll-behavior: contain;
   /* Secondary type inside the sheet, redefined once for everything in it —
      the shared labels, DialKit's, and each experiment's own. :root's --muted
@@ -563,6 +583,9 @@ a { color: inherit; }
   box-shadow:
     var(--glass-edge),
     inset 0 1px 0 color-mix(in srgb, white var(--sheet-spec), transparent),
+    /* the scroll hint: content darkens as it passes under either edge */
+    inset 0 -18px 14px -14px color-mix(in srgb, var(--fg) 20%, transparent),
+    inset 0 18px 14px -14px color-mix(in srgb, var(--fg) 14%, transparent),
     var(--glass-shadow);
   transition:
     width         240ms cubic-bezier(0.4, 0, 0.2, 1),
@@ -572,7 +595,9 @@ a { color: inherit; }
 .sheet::-webkit-scrollbar { display: none; }
 
 /* The grabber only exists folded; play.js adds it if the markup left it out. */
+.sheet__grab:hover { background: color-mix(in srgb, var(--fg) 34%, transparent); }
 .sheet__grab {
+  cursor: grab;
   display: none;
   position: absolute;
   top: 8px;
@@ -616,33 +641,26 @@ a { color: inherit; }
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
   color: var(--ink);
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-/* Same gesture, at the panel's size. */
-.sheet__min::before,
-.panel-icon::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--fg) 10%, transparent);
-  z-index: 0;
   transition:
-    inset         240ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius 240ms cubic-bezier(0.4, 0, 0.2, 1);
+    background-color 240ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow       240ms cubic-bezier(0.4, 0, 0.2, 1),
+    color            240ms ease;
 }
-.sheet__min:hover::before,
-.sheet__min:focus-visible::before,
-.panel-icon:hover::before,
-.panel-icon:focus-visible::before { inset: 0; border-radius: 16px; }
-.sheet__min svg,
-.panel-icon svg { width: 16px; height: 16px; display: block; position: relative; z-index: 1; }
-.sheet__min:focus-visible {
+/* Already a filled chip at 6% — the hover deepens that fill and firms the
+   hairline, which is legible at 32px where a growing surface is not. */
+.sheet__min:hover,
+.panel-icon:hover {
+  background: var(--wash-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 22%, transparent);
+}
+.sheet__min:focus-visible,
+.panel-icon:focus-visible {
   outline: none;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent),
-              0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
+  background: var(--wash-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 22%, transparent), var(--focus-ring);
 }
+.sheet__min svg,
+.panel-icon svg { width: 16px; height: 16px; display: block; }
 
 /* And what is left of the sheet once it is minimised: the disc's whole face is
    this button, so the glass is still the sheet — nothing else moves. */
@@ -657,28 +675,16 @@ a { color: inherit; }
   background: transparent;
   color: var(--ink);
   cursor: pointer;
-  position: relative;
   overflow: hidden;
+  transition: background-color 240ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-/* And again on the minimised disc, which is a tool pill in every other way. */
-.sheet__icon::before {
-  content: '';
-  position: absolute;
-  inset: 6px;
-  border-radius: 16px;
-  background: var(--separator);
-  z-index: 0;
-  transition:
-    inset         240ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius 240ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-.sheet__icon:hover::before,
-.sheet__icon:focus-visible::before { inset: 2px; border-radius: 20px; }
-.sheet__icon svg { width: 16px; height: 16px; display: block; position: relative; z-index: 1; }
-.sheet__icon:focus-visible {
-  outline: none;
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 60%, transparent);
-}
+/* NO position here. The rule opens with `position: absolute; inset: 0`, and a
+   second position declaration in the same block silently outranks it — which
+   is what took the button out of the disc and left the glyph sitting against
+   its top edge instead of centred in it. */
+.sheet__icon:hover { background: var(--wash); }
+.sheet__icon:focus-visible { outline: none; background: var(--wash); box-shadow: var(--focus-ring); }
+.sheet__icon svg { width: 16px; height: 16px; display: block; }
 
 .sheet__body {
   display: flex;
@@ -752,6 +758,9 @@ input[type="range"].dial {
   transition: transform 140ms ease;
 }
 .dial:hover::-webkit-slider-thumb { transform: scale(1.08); }
+/* Its own statement, never a selector list — one unrecognised pseudo-element
+   drops the whole rule, so pairing these would cost both engines the hover. */
+.dial:hover::-moz-range-thumb { transform: scale(1.08); }
 .dial::-moz-range-track { height: 2px; border-radius: 2px; background: color-mix(in srgb, var(--fg) 18%, transparent); }
 .dial::-moz-range-progress { height: 2px; border-radius: 2px; background: var(--accent); }
 .dial::-moz-range-thumb {
@@ -852,7 +861,11 @@ input[type="range"].dial {
 }
 .switch input:checked + .switch__track { background: var(--accent); }
 .switch input:checked + .switch__track::after { transform: translateX(16px); }
-.switch input:focus-visible + .switch__track { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 35%, transparent); }
+/* The hairline is restated because box-shadow replaces rather than adds —
+   without it, focusing the switch deletes the track's own edge. */
+.switch input:focus-visible + .switch__track {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent), var(--focus-ring);
+}
 .switch input:disabled + .switch__track { opacity: 0.4; }
 
 /* --- buttons --- */
@@ -884,6 +897,12 @@ input[type="range"].dial {
 .btn:focus-visible { outline: none; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent), 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
 .btn--primary { background: var(--accent); color: var(--night); box-shadow: none; }
 .btn--primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--night)); }
+/* .btn[disabled]:hover outranks .btn--primary:hover, so without this a disabled
+   primary repaints itself grey under the pointer. */
+.btn--primary[disabled]:hover { background: var(--accent); }
+/* An accent hairline inside an accent fill is not a ring — this one sits on the
+   page instead. */
+.btn--primary:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--bg), var(--focus-ring); }
 .btn[disabled] { opacity: 0.4; cursor: default; }
 .btn[disabled]:hover { background: color-mix(in srgb, var(--fg) 6%, transparent); }
 
@@ -946,7 +965,9 @@ input[type="range"].dial {
      underneath it. */
   .rail {
     left: var(--chrome-pad);
-    max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) * 2 - 60px - 44px);
+    /* + 64px hands back the 32px of shadow padding at each end, the way the
+       desktop rule does — without it the folded rail scrolls a pill early. */
+    max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) * 2 - 60px - 44px + 64px);
   }
 
   /* --- bottom sheet --- */
@@ -1072,6 +1093,7 @@ input[type="range"].dial {
 /* Some people get motion sick from a blur that samples a moving page, and some
    just want the text solid. Both get an opaque panel instead. */
 @media (prefers-reduced-transparency: reduce) {
+  .chrome-rule::before,
   .glass,
   .sheet,
   .tool-pill,
@@ -1086,6 +1108,8 @@ input[type="range"].dial {
 /* Scoped to the chrome deliberately: an experiment's own motion is the point of
    the page, and each one handles reduced motion itself. */
 @media (prefers-reduced-motion: reduce) {
+  .panel-icon,
+  .btn,
   body,
   .sheet,
   .sheet__min,

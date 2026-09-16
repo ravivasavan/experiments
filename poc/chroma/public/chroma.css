@@ -1,3 +1,8 @@
+/* Chroma is entirely fixed-position and the document never scrolls, so the
+   root scrollbar gutter play.css keeps for scrolling pages would sit here as a
+   permanent strip of page down the right edge. */
+html, body { height: 100%; overflow: hidden; }
+
 /* Chroma — page-specific only.
 
    The tokens, the reset, the chrome, the rail and dock pills, the drawer and
@@ -29,7 +34,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--chrome-tools) var(--chrome-pad) calc(var(--panel-gap) + 60px);
+  /* No padding at all: the preview is the whole window and the chrome lies on
+     top of it, which is the bargain every other play already makes. Reserving
+     136px at the top also left the header band with nothing behind it to blur —
+     a glass header over bare page is just a slightly different shade of page. */
+  padding: 0;
   z-index: 1;
   /* A size container, so 100cqw/100cqh below are the free space the chrome
      actually leaves — measured inside this padding. */
@@ -216,52 +225,45 @@ input[type="color"]:hover { transform: scale(1.08); }
 input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
 input[type="color"]::-webkit-color-swatch { border: 0; }
 
-/* Every lock sits beside the thing it locks: the four colours on their own
-   swatch rows, and the rest on DialKit's dial rows, where React puts them.
-   The row makes space on its right and the value slides over to leave it. */
-/* Matched to the skin's own selector weight — it pins the value to right: 0
-   with three classes, and a shorter selector loses the tie whatever the source
-   order turns out to be. */
-.sheet .dialkit-root .dialkit-slider-wrapper.has-lock { position: relative; }
-.sheet .dialkit-root .dialkit-slider-wrapper.has-lock .dialkit-slider-value,
-.sheet .dialkit-root .dialkit-slider-wrapper.has-lock .dialkit-slider-input {
-  right: 30px;
-}
-/* Centred on the label line the value sits on, and hung off the row's right so
-   the 32px box does not push the dial narrower than its neighbours. */
-.sheet .dialkit-root .dialkit-slider-wrapper.has-lock .prop-lock {
-  position: absolute;
-  top: -8px;
-  right: -8px;
-  z-index: 1;
-}
+/* The padlocks are ours, not DialKit's, so they live in a gutter we make to the
+   right of the panel rather than inside a row DialKit drew. #dial-mount is our
+   container; giving it a right padding insets every row by the width of a lock
+   and leaves somewhere to put one. The only thing this asks of DialKit is a
+   positioning context, which costs it nothing visually. */
+#dial-mount { padding-right: 26px; }
+#dial-mount .dialkit-slider-wrapper { position: relative; }
 
-/* A colour keeps its padlock beside it — it is the one lock that has to say
-   which of the four it belongs to. The rest are collected under Locked. */
-.lock-row { display: flex; align-items: center; gap: 6px; }
-.lock-row > :first-child { flex: 1; min-width: 0; }
-
-/* Size, glyph and hover come from .panel-icon in play.css. What is chroma's is
-   the shackle swap and the dimming of a lock that is open. */
 .prop-lock {
+  width: 22px;
+  height: 22px;
+  flex: none;
   border: 0;
+  padding: 0;
   background: none;
   cursor: pointer;
-  color: var(--muted);
   display: grid;
   place-items: center;
+  color: color-mix(in srgb, var(--fg) 40%, transparent);
   transition: color 240ms ease;
 }
-/* An open lock is quiet; the dimming is on the glyph, not the button, so the
-   surface behind it stays the same weight as every other .panel-icon. */
-.prop-lock svg { opacity: 0.45; transition: opacity 240ms ease; }
-.prop-lock:hover svg,
-.prop-lock[aria-pressed="true"] svg { opacity: 1; }
+.prop-lock svg { width: 14px; height: 14px; display: block; }
 .prop-lock .shackle-shut { opacity: 0; }
 .prop-lock[aria-pressed="true"] .shackle-open { opacity: 0; }
 .prop-lock[aria-pressed="true"] .shackle-shut { opacity: 1; }
-.prop-lock:hover { opacity: 1; color: var(--ink); }
-.prop-lock[aria-pressed="true"] { opacity: 1; color: var(--accent); }
+.prop-lock:hover { color: var(--ink); }
+.prop-lock[aria-pressed="true"] { color: var(--accent); }
+.prop-lock:focus-visible { outline: none; color: var(--accent); box-shadow: var(--focus-ring); border-radius: 6px; }
+
+#dial-mount .prop-lock {
+  position: absolute;
+  right: -24px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* A colour swatch keeps its lock inline — that row is ours end to end. */
+.lock-row { display: flex; align-items: center; gap: 6px; }
+.lock-row > :first-child { flex: 1; min-width: 0; }
 
 /* ------------------------------------------------- angle chips + locks -- */
 
@@ -339,7 +341,7 @@ input[type="color"]::-webkit-color-swatch { border: 0; }
 }
 
 @media (max-width: 900px) {
-  .viewport { padding: var(--chrome-tools) var(--chrome-pad) calc(var(--panel-gap) + 60px + 52px); }
+  .viewport { padding: 0; }
   /* Collapsed, the drawer is 60px of head — nothing inside it may insist on
      being taller than that. */
   .palettes { min-height: 0; max-height: 220px; }
