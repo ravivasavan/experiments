@@ -31,18 +31,25 @@
   justify-content: center;
   padding: var(--chrome-tools) var(--chrome-pad) calc(var(--panel-gap) + 60px);
   z-index: 1;
+  /* A size container, so 100cqw/100cqh below are the free space the chrome
+     actually leaves — measured inside this padding. */
+  container-type: size;
 }
 
 .stage {
-  /* Fit the export's aspect into whatever the chrome leaves: take the height
-     and let the ratio give the width, clamped when the ratio is wider than the
-     screen is. height:auto would collapse — the flex line has the height, the
-     preview has no content of its own to stand it up. */
-  height: 100%;
-  width: auto;
+  /* Contain, properly: the narrower of the two constraints wins. 100cqw is the
+     width the free box allows; 100cqh × the ratio is the width that same box
+     allows at its height. min() of the pair fits an 8K landscape and a 1440 ×
+     3200 phone alike, which height:100% + max-width could not — clamping the
+     width there left the height where it was and broke the ratio.
+
+     --preview-aspect arrives as "7680 / 4320", which is why it multiplies
+     cleanly inside the calc. */
+  width: min(100cqw, calc(100cqh * var(--preview-aspect, 16 / 9)));
+  height: auto;
   max-width: 100%;
   max-height: 100%;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   aspect-ratio: var(--preview-aspect, 16 / 9);
   background: #111;
   position: relative;

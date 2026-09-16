@@ -9,6 +9,22 @@ import '../../shared/dialkit-skin.css'
    <input type="range"> it always did. DialKit sets that input and fires the
    event, so every lock, the horizon's 15-degree snap, the recipe in the hash
    and Randomise all go on working without knowing the panel changed. */
+const COMPOSITIONS = [
+  { value: '0', label: 'Field' },
+  { value: '1', label: 'Aperture' },
+  { value: '2', label: 'Horizon' },
+]
+
+/* The composition is a style, not a tool, so it is a dial rather than a pill on
+   the rail. app.js still owns it: its three [data-mode] buttons are on the page
+   the way the range inputs are, just never looked at, and this clicks the one
+   the dial names. Everything that follows from a mode change — the angle chips
+   appearing, the horizon's 15-degree snap — is already wired to that click. */
+function driveMode(value) {
+  const btn = document.querySelector('[data-mode="' + value + '"]')
+  if (btn && btn.getAttribute('aria-pressed') !== 'true') btn.click()
+}
+
 const WIRING = {
   diffusion: { id: 'flow', event: 'input' },
   scale: { id: 'scale', event: 'input' },
@@ -32,7 +48,13 @@ function Controls() {
     return el ? Number(el.value) : fallback
   }
 
+  const readMode = () => {
+    const on = document.querySelector('[data-mode][aria-pressed="true"]')
+    return on ? on.getAttribute('data-mode') : '1'
+  }
+
   const controller = useDialKitController('Chroma', {
+    composition: { type: 'select', options: COMPOSITIONS, default: readMode() },
     diffusion: [read('flow', 60), 0, 100, 1],
     scale: [read('scale', 55), 0, 100, 1],
     angle: [read('rotation', 0), -180, 180, 1],
@@ -52,6 +74,7 @@ function Controls() {
       const s = e.detail
       echoing.current = true
       controller.setValues({
+        composition: String(s.mode),
         diffusion: s.flow, scale: s.scale, angle: s.rotation,
         radiance: s.glow, grain: s.grain, seed: s.seed,
       })
@@ -64,8 +87,9 @@ function Controls() {
   useEffect(() => {
     if (!mounted.current) { mounted.current = true; return }
     if (echoing.current) { echoing.current = false; return }
+    driveMode(v.composition)
     for (const key of Object.keys(WIRING)) drive(key, v[key])
-  }, [v.diffusion, v.scale, v.angle, v.radiance, v.grain, v.seed])
+  }, [v.composition, v.diffusion, v.scale, v.angle, v.radiance, v.grain, v.seed])
 
   return null
 }

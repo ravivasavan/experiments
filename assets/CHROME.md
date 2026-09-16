@@ -426,6 +426,27 @@ Pills: `--pill-bg --pill-filter --pill-edge`.
 Every glyph is 16px on the 24 grid. Nothing else is a size: 28, 24 and 14 were
 all in here and are not any more.
 
+**And the artwork inside the glyph box is normalised too.** A 16px box is not
+the same as a 16px icon: Lucide draws an eye 20 wide, a chevron 16, a download
+18, and side by side on a rail the difference is the first thing you see. Every
+glyph in a rail or a dock is scaled so its content spans **18 of the 24 grid**,
+which draws at 12.0px, with the stroke compensated so it stays 1.33px whatever
+the scale. That is done on the `<svg>` itself rather than by touching path data:
+
+```html
+<!-- content spans 20 → widen the viewBox by 20/18 and thicken the stroke to match -->
+<svg viewBox="-1.3333 -1.3333 26.6667 26.6667" stroke-width="2.2222" …>
+<!-- content spans 16 → narrow it -->
+<svg viewBox="1.3333 1.3333 21.3333 21.3333" stroke-width="1.7778" …>
+```
+
+For a span S the box is `(12 − w/2) (12 − w/2) w w` where `w = S × 24 ÷ 18`, and
+the stroke is `w ÷ 12`. A glyph already spanning 18 keeps `0 0 24 24` and
+`stroke-width="2"`. Measure with `getBBox()`, but remember it answers in viewBox
+units — multiply by `clientWidth / viewBox.width` to get what is drawn.
+
+DialKit's own icons are exempt. It is a plugin and it brings its own set.
+
 **The hover is the inner surface growing, never the control moving.** It is the
 move the main site's pills make and every one of the three above now makes it:
 `::before` inset 6px (4 on a `.panel-icon`) growing to inset 2 (0), over 240ms
