@@ -218,12 +218,14 @@ input[type="color"]::-webkit-color-swatch { border: 0; }
 .sheet .dialkit-root .dialkit-slider-wrapper.has-lock { position: relative; }
 .sheet .dialkit-root .dialkit-slider-wrapper.has-lock .dialkit-slider-value,
 .sheet .dialkit-root .dialkit-slider-wrapper.has-lock .dialkit-slider-input {
-  right: 26px;
+  right: 30px;
 }
+/* Centred on the label line the value sits on, and hung off the row's right so
+   the 32px box does not push the dial narrower than its neighbours. */
 .sheet .dialkit-root .dialkit-slider-wrapper.has-lock .prop-lock {
   position: absolute;
-  top: -5px;
-  right: -6px;
+  top: -8px;
+  right: -8px;
   z-index: 1;
 }
 
@@ -232,27 +234,27 @@ input[type="color"]::-webkit-color-swatch { border: 0; }
 .lock-row { display: flex; align-items: center; gap: 6px; }
 .lock-row > :first-child { flex: 1; min-width: 0; }
 
+/* Size, glyph and hover come from .panel-icon in play.css. What is chroma's is
+   the shackle swap and the dimming of a lock that is open. */
 .prop-lock {
-  width: 28px;
-  height: 28px;
-  flex: none;
   border: 0;
   background: none;
   cursor: pointer;
-  border-radius: 6px;
   color: var(--muted);
   display: grid;
   place-items: center;
-  opacity: 0.45;
-  transition: background 0.15s, color 0.15s, opacity 0.15s, transform 0.15s var(--chroma-spring);
+  transition: color 240ms ease;
 }
-.prop-lock svg { width: 14px; height: 14px; }
+/* An open lock is quiet; the dimming is on the glyph, not the button, so the
+   surface behind it stays the same weight as every other .panel-icon. */
+.prop-lock svg { opacity: 0.45; transition: opacity 240ms ease; }
+.prop-lock:hover svg,
+.prop-lock[aria-pressed="true"] svg { opacity: 1; }
 .prop-lock .shackle-shut { opacity: 0; }
 .prop-lock[aria-pressed="true"] .shackle-open { opacity: 0; }
 .prop-lock[aria-pressed="true"] .shackle-shut { opacity: 1; }
-.prop-lock:hover { opacity: 1; color: var(--ink); background: var(--chroma-surface); }
+.prop-lock:hover { opacity: 1; color: var(--ink); }
 .prop-lock[aria-pressed="true"] { opacity: 1; color: var(--accent); }
-.prop-lock:active { transform: scale(0.92); }
 
 /* ------------------------------------------------- angle chips + locks -- */
 

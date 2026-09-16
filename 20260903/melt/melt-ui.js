@@ -243,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <input class="dial" type="range" data-k="r" min="20" max="600" step="1" value="${Math.round(p.r)}" aria-label="Reach of point ${i + 1}">
         </label>
       </div>
-      <button class="pt__x" type="button" data-x="${i}" aria-label="Remove point ${i + 1}">${X}</button>
+      <button class="pt__x panel-icon" type="button" data-x="${i}" aria-label="Remove point ${i + 1}">${X}</button>
     </div>`).join('');
     dials(box);
   }

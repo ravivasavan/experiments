@@ -102,12 +102,10 @@
     /* The value is a <b> because the point list's JS reads b[data-v]; Labil
        Grotesk ships 400 only, so synthetic bold is the one thing to undo. */
     .pt b { font-weight: 400; }
-    .pt__x {
-      width: 24px; height: 24px; border-radius: 24px; border: 0; background: transparent;
-      color: var(--muted); cursor: pointer; display: grid; place-items: center; padding: 0;
-    }
-    .pt__x svg { width: 12px; height: 12px; }
-    .pt__x:hover { color: var(--accent); background: var(--separator); }
+    /* Size, glyph and hover all come from .panel-icon in play.css — the one
+       small icon button the family has. Only the colour is melt's. */
+    .pt__x { border-radius: 16px; border: 0; background: transparent; color: var(--muted); cursor: pointer; display: grid; place-items: center; padding: 0; }
+    .pt__x:hover { color: var(--accent); }
 
     .about { border-top: 1px solid var(--separator); padding-top: 16px; margin-top: auto; }
     /* Labil Grotesk ships 400 only, so emphasis is colour, not weight. */

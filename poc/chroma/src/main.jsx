@@ -104,7 +104,7 @@ function useDialLocks() {
         if (!key) return
         const b = document.createElement('button')
         b.type = 'button'
-        b.className = 'prop-lock'
+        b.className = 'prop-lock panel-icon'
         b.dataset.lock = key
         b.innerHTML = api.lockIcon
         row.classList.add('has-lock')

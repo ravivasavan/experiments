@@ -368,17 +368,32 @@ a { color: inherit; }
   line-height: 1;
   cursor: pointer;
   text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  transition: color 240ms ease;
+}
+/* The hover is the inner surface growing, not the pill — the same move the
+   header's icon pills make, on the same curve and the same 240ms. A labelled
+   pill grows a rounded rect where a round one grows a disc; it is the same
+   gesture at a different aspect. */
+.tool-pill::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 16px;
+  background: var(--separator);
+  z-index: 0;
   transition:
-    transform  200ms cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 200ms ease,
-    color      200ms ease;
+    inset         240ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 240ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.tool-pill:hover,
-.tool-pill:focus-visible {
-  transform: translateY(-1px);
-  box-shadow: var(--glass-edge), var(--glass-specular), var(--glass-shadow);
+.tool-pill:hover::before,
+.tool-pill:focus-visible::before {
+  inset: 2px;
+  border-radius: 20px;
 }
-.tool-pill:active { transform: translateY(0) scale(0.98); }
+/* Everything the pill draws sits above that surface. */
+.tool-pill > * { position: relative; z-index: 1; }
 .tool-pill__icon { display: grid; place-items: center; width: 16px; height: 16px; flex-shrink: 0; }
 .tool-pill__icon svg {
   grid-area: 1 / 1;
@@ -395,7 +410,8 @@ a { color: inherit; }
 }
 .tool-pill--danger:hover { color: var(--accent); }
 .tool-pill[disabled] { opacity: 0.4; cursor: default; }
-.tool-pill[disabled]:hover { transform: none; color: var(--ink); box-shadow: var(--glass-edge), var(--glass-specular), var(--glass-shadow-sm); }
+.tool-pill[disabled]:hover { color: var(--ink); }
+.tool-pill[disabled]:hover::before { inset: 6px; border-radius: 16px; }
 
 /* --------------------------------------------- level 2: rail and dock --- */
 /* The experiment's own buttons, split by what they do rather than piled into
@@ -582,7 +598,12 @@ a { color: inherit; }
 
 /* The minimise control — play.js appends it to the head if the markup has
    none, the way it appends the grabber. Glass-inset disc, 16px glyph. */
-.sheet__min {
+/* The small in-panel icon button: the drawer's minimise, melt's remove-point,
+   chroma's padlocks. 32px around the same 16px glyph, and the same growing
+   surface as everything else — a panel is a tighter place than the chrome, so
+   it is the one size below 44px, and it is the only one. */
+.sheet__min,
+.panel-icon {
   flex: 0 0 auto;
   width: 32px;
   height: 32px;
@@ -595,10 +616,28 @@ a { color: inherit; }
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
   color: var(--ink);
   cursor: pointer;
-  transition: background-color 160ms ease;
+  position: relative;
+  overflow: hidden;
 }
-.sheet__min svg { width: 16px; height: 16px; display: block; }
-.sheet__min:hover { background: color-mix(in srgb, var(--fg) 12%, transparent); }
+/* Same gesture, at the panel's size. */
+.sheet__min::before,
+.panel-icon::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--fg) 10%, transparent);
+  z-index: 0;
+  transition:
+    inset         240ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sheet__min:hover::before,
+.sheet__min:focus-visible::before,
+.panel-icon:hover::before,
+.panel-icon:focus-visible::before { inset: 0; border-radius: 16px; }
+.sheet__min svg,
+.panel-icon svg { width: 16px; height: 16px; display: block; position: relative; z-index: 1; }
 .sheet__min:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent),
@@ -618,10 +657,24 @@ a { color: inherit; }
   background: transparent;
   color: var(--ink);
   cursor: pointer;
-  transition: background-color 160ms ease;
+  position: relative;
+  overflow: hidden;
 }
-.sheet__icon svg { width: 16px; height: 16px; display: block; }
-.sheet__icon:hover { background: color-mix(in srgb, var(--fg) 8%, transparent); }
+/* And again on the minimised disc, which is a tool pill in every other way. */
+.sheet__icon::before {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 16px;
+  background: var(--separator);
+  z-index: 0;
+  transition:
+    inset         240ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-radius 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.sheet__icon:hover::before,
+.sheet__icon:focus-visible::before { inset: 2px; border-radius: 20px; }
+.sheet__icon svg { width: 16px; height: 16px; display: block; position: relative; z-index: 1; }
 .sheet__icon:focus-visible {
   outline: none;
   box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--accent) 60%, transparent);
@@ -819,9 +872,14 @@ input[type="range"].dial {
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease;
+  /* .btn is a filled form control and tints like .select and .input rather than
+     growing a surface like the pills — it has no inner face to grow. What it
+     does share is the glyph size and the timing. */
+  transition:
+    background-color 240ms cubic-bezier(0.4, 0, 0.2, 1),
+    color            240ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.btn svg { width: 14px; height: 14px; }
+.btn svg { width: 16px; height: 16px; }
 .btn:hover { background: color-mix(in srgb, var(--fg) 12%, transparent); }
 .btn:focus-visible { outline: none; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 60%, transparent), 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
 .btn--primary { background: var(--accent); color: var(--night); box-shadow: none; }

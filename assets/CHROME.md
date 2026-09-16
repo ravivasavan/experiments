@@ -415,10 +415,27 @@ both, so use whichever your page already says.
 
 Pills: `--pill-bg --pill-filter --pill-edge`.
 
-**One icon size, one container size.** Level 2 is 44px of glass around a 16px
-glyph, everywhere: a rail pill, a dock pill, and the minimised drawer disc
-(`--sheet-min`) are all the same object. Level 1's identity row is 64px around
-16px, and is the only thing that differs.
+**One glyph size, three container sizes, one hover.**
+
+| | container | glyph | what it is |
+|---|---|---|---|
+| `.icon-pill` | 64 (48 inner) | 16 | level 1 — back, home, theme |
+| `.tool-pill` | 44 | 16 | level 2 — rail and dock, and the minimised drawer disc (`--sheet-min`) |
+| `.panel-icon` | 32 | 16 | inside a panel — the drawer's minimise, melt's remove-point, chroma's padlocks |
+
+Every glyph is 16px on the 24 grid. Nothing else is a size: 28, 24 and 14 were
+all in here and are not any more.
+
+**The hover is the inner surface growing, never the control moving.** It is the
+move the main site's pills make and every one of the three above now makes it:
+`::before` inset 6px (4 on a `.panel-icon`) growing to inset 2 (0), over 240ms
+on `cubic-bezier(0.4, 0, 0.2, 1)`, with the control itself still. A round
+control grows a disc and a labelled one grows a rounded rect — the same gesture
+at a different aspect. `:focus-visible` does the same thing as `:hover`.
+
+`.btn` is the exception and stays one: it is a filled form control alongside
+`.select` and `.input`, it has no inner face to grow, and it tints. It shares
+the glyph size and the timing.
 
 Glass: `--glass-bg --glass-blur --glass-edge --glass-specular --glass-shadow
 --glass-shadow-sm --glass-radius`. Apply them with the `.glass` class rather
