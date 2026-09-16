@@ -11,12 +11,22 @@ out of the page.**
 - Level 1 — 64px glass pills at `--chrome-top` (40 / 16 / 12 by fold): back or
   home at the left, the identity pill dead centre, the theme pill at the right.
 - A full-width hairline at `--chrome-rule` (120 / 96 / 88).
-- Level 2 — the experiment's own 44px glass tool pills at `--chrome-tools`
-  (136 / 112 / 104), right-aligned, scrolling sideways when folded.
-- The settings sheet — one pane of glass, `--panel-w` wide, inset `--panel-gap`
-  from the viewport, floating over the content and starting below the tools
-  row. On a phone it swings down to the bottom of the screen and collapses to
-  its head. Either way it minimises into a single round glass button.
+- Level 2 — the experiment's own 44px glass tool pills, split by what they do.
+  The **rail** runs down the left from `--chrome-tools` (136 / 112 / 104) and
+  holds what changes the view: modes, zoom, step back. Icon only. The **dock**
+  floats at the bottom edge and holds the verbs: upload, export, shuffle,
+  clear. Labels kept.
+- The dials drawer — one pane of glass, `--panel-w` wide, inset `--panel-gap`
+  from the viewport, floating over the content and starting on the first line
+  below the chrome. On a phone it swings down to the bottom of the screen and
+  collapses to its head. Either way it minimises into a single round glass
+  button.
+
+Inside the drawer, the dials themselves are **DialKit**, rendered inline. A
+play keeps its own engine in plain JS and mounts a small React root whose only
+job is the panel; what DialKit has no control for — a body of copy, a palette
+swatch, a list that grows as you click the canvas — stays in the drawer beside
+it. See §8.
 
 ## Layout: the content is the whole viewport, the sheet overlays it
 
@@ -176,55 +186,61 @@ different thing and play.css supports both.)
 
 ---
 
-## 3. Level 2 — the tools row
+## 3. Level 2 — the rail and the dock
 
-One `<nav class="tools">` holding 44px glass pills, each an icon and one word.
+The experiment's own buttons, split by what they do rather than piled into one
+row above the artwork. Both are `.tool-pill`s — same 44px glass, same icon and
+word — and both are glass over the artwork that reserves no room.
 
-There is no `tools--sheet` any more — **delete the class**. The row runs the
-full width at every size; on a page that has a sheet play.css hangs its right
-edge off `--panel-gap` instead of `--chrome-pad`, so the pills and the glass
-below them share a margin, and the sheet starts *below* the row rather than
-beside it.
-
-The row is a sideways scroller at every width, right-aligned by an auto margin
-on its first child rather than by `justify-content`, so a row too wide for the
-space left over scrolls instead of spilling off the left of the screen. Its box
-is `pointer-events: none` (the pills are `auto`), because the padding that
-keeps the scroller from clipping their shadow makes it taller than the pills —
-put nothing in it that needs to be clicked but a `.tool-pill`.
+**The rail** takes what changes *what you are looking at*: view modes, zoom, the
+step back through history. It is icon only; a vertical column of words is a
+menu, not a rail. The label stays in the markup and stays in the a11y tree.
 
 ```html
-<nav class="tools" aria-label="Teletext controls">
-  <button class="tool-pill" id="p-random" type="button" aria-label="Randomise the page">
-    <span class="tool-pill__icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">…</svg>
-    </span>
-    <span class="tool-pill__label">Randomise</span>
-  </button>
-
-  <!-- a toggle: add .is-on from your JS and keep aria-pressed in step -->
-  <button class="tool-pill is-on" id="p-reveal" type="button" aria-label="Reveal the control codes" aria-pressed="true">
-    <span class="tool-pill__icon">
-      <svg viewBox="0 0 24 24" …>…</svg>
-    </span>
-    <span class="tool-pill__label">Reveal</span>
+<nav class="rail" aria-label="Atlas view">
+  <button class="tool-pill" id="t-in" type="button" aria-label="Zoom in">
+    <span class="tool-pill__icon"><svg viewBox="0 0 24 24" …>…</svg></span>
+    <span class="tool-pill__label">In</span>
   </button>
 </nav>
 ```
 
+**The dock** takes the verbs — upload, export, shuffle, clear. They fire and
+they are done, so they keep their labels and sit where the hand already is. It
+centres on the space the drawer leaves, and takes the width back when the
+drawer folds to its disc, on the same 240ms curve.
+
+```html
+<nav class="dock" aria-label="Atlas actions">
+  <button class="tool-pill" id="t-export" type="button" aria-label="Download the list as JSON">
+    <span class="tool-pill__icon"><svg viewBox="0 0 24 24" …>…</svg></span>
+    <span class="tool-pill__label">Export</span>
+  </button>
+</nav>
+```
+
+A play with only verbs gets no rail at all — camouflage has one pill and it is
+in the dock.
+
 `.is-on` tints the text and icon `--accent` and swaps the hairline for an accent
-one. `[disabled]` and `.tool-pill--danger` are also supported.
+one; in the rail that accent is how a mode reads as active with its label
+hidden. `[disabled]` and `.tool-pill--danger` are also supported.
 
-Folded (≤900) the row scrolls sideways rather than shedding its labels, and
-**play.js already gives it pointer-drag scrolling** — delete the local
-`dragRow` IIFE from your page's script.
+**Put nothing in either bar but a `.tool-pill`.** Both boxes are
+`pointer-events: none` (the pills are `auto`) because the padding that keeps the
+scroller from clipping their shadow makes them bigger than the pills. A hidden
+`<input type="file">` does *not* belong in them — it is the dialog a pill opens,
+not a control in the bar. Atlas and melt both kept one inside the old tools row,
+and both threw on load the day the row was rebuilt.
 
-A page with a tools row gets its sheet at
-`calc(var(--chrome-tools) + 44px + var(--panel-gap))` rather than at
-`--chrome-tools`, so the two never sit on each other. play.css works that out
-from `body:has(.tools)`; there is nothing to add to the markup.
+A small always-on readout — camouflage's seed, chroma's composition and size —
+rides in the dock as a chip beside the pills, rather than floating separately at
+the bottom edge and fighting it at every width.
 
----
+Folded (≤900) the dock lifts to sit on top of the collapsed drawer, and drops
+back beside the disc when the drawer is minimised. The rail keeps its column.
+Anything else of yours anchored to the bottom edge has to clear the dock: 44px
+of pill on `--panel-gap`, plus a gap.
 
 ## 4. The sheet
 
@@ -373,7 +389,8 @@ like the pane does.
 | `[data-theme-toggle]` (any element, delegated click) | cycles day → night → system → circadian, writes `localStorage.theme` |
 | `<meta id="theme-color">` | repainted on every theme change, on OS scheme change, and each time circadian updates `--bg` |
 | `/assets/circadian.js` | injected once as `id="circadian-script"` when the theme is or becomes circadian |
-| `.tools` | pointer-drag sideways scrolling (touch pans natively) |
+| `.dock` | sideways scrolling when the verbs outgrow the space (touch pans natively) |
+| `.rail` | vertical scrolling when the modes outgrow the height |
 | `.sheet__body` | made `inert` while the sheet is folded and shut — and, with `.sheet__head`, while it is minimised — so the clipped controls leave the tab order and the a11y tree |
 | `.sheet`, `.sheet__head`, `.sheet__grab`, `.is-open` | the bottom-sheet behaviour above |
 | `.sheet__min`, `.sheet__icon` | injected if absent; the two halves of minimise |
@@ -417,9 +434,9 @@ second `opacity` on top of it; that is what dropped `.sheet__section` to
 
 Geometry: `--chrome-top --chrome-rule --chrome-tools --chrome-pad`,
 `--panel-w --panel-gap --sheet-min` (64 / 56, the minimised disc) and
-`--sheet-top` (the sheet's own top edge, dropped below the tools row on a page
-that has one). **`--sheet-inset` is gone** — nothing reserves room for the
-sheet, so there is nothing to inset.
+`--sheet-top` (the drawer's own top edge — the first line below the chrome, and
+where the rail starts too). **`--sheet-inset` is gone** — nothing reserves room
+for the drawer, so there is nothing to inset.
 
 Stacking: `--z-sheet` 450 < `--z-rule` 499 < `--z-chrome` 500. Keep your page's
 own content below 450.
@@ -446,7 +463,7 @@ throughout; any page-local token block must be too.
       `<style>` reduced to page-specific rules only.
 - [ ] Deleted from the page's CSS: the Labil Grotesk `@font-face`, the `:root`
       / `:root[data-theme="night"]` / `prefers-color-scheme` token blocks, the
-      reset, `.chrome*`, `.header-pill*`, `.icon-pill*`, `.tools`,
+      reset, `.chrome*`, `.header-pill*`, `.icon-pill*`, `.rail`, `.dock`,
       `.tool-pill*`, and the generic control styles now covered by `.field`,
       `.dial`, `.input`, `.select`, `.textarea`, `.switch`, `.btn`, `.swatch`.
 - [ ] No reference to `LabilGrotesk-Regular.woff` remains — the file is gone,
@@ -462,7 +479,11 @@ throughout; any page-local token block must be too.
 - [ ] `#panel` converted to `.sheet` + `.sheet__head` + `.sheet__body`; the
       `#panel::before` divider and the `grid-template-columns: … var(--panel-w)`
       body grid removed.
-- [ ] Nothing reserves room for the sheet: no `--sheet-inset` anywhere in the
+- [ ] The experiment's buttons are split between `.rail` (what changes the
+      view) and `.dock` (the verbs), and neither holds anything that is not a
+      `.tool-pill` — a hidden file input goes outside both.
+- [ ] Anything of the page's own anchored to the bottom edge clears the dock.
+- [ ] Nothing reserves room for the drawer: no `--sheet-inset` anywhere in the
       CSS or the script, no `bottom: 76px` at ≤900, no `tools--sheet` class.
       The stage is the full viewport and its artwork is centred on the
       viewport's centre.
@@ -473,3 +494,50 @@ throughout; any page-local token block must be too.
       Rewrap the markup, never rename the hooks.
 - [ ] `assets/img/favicon.svg` and `assets/img/apple-touch-icon.png` referenced.
 - [ ] Checked at 1440 and 390, day and night, with no console errors.
+
+---
+
+## 8. The dials are DialKit
+
+Every play's drawer is a DialKit panel, rendered `mode="inline"` into a
+`#dial-mount` the page's own markup provides. The engine stays plain JavaScript
+— canvas, WebGL, whatever it already was — and a small React root does nothing
+but own the controls.
+
+```jsx
+createPortal(<DialRoot mode="inline" theme="dark" productionEnabled />, mount)
+```
+
+`theme="dark"` pins DialKit to one of its own palettes: the skin in
+`poc/shared/dialkit-skin.css` repaints nearly all of it from the site's tokens,
+but not quite all, and the default ("system") would make whatever is left follow
+the OS — so the panel could go light while the page stayed in night.
+
+Each play is its own Vite project under `poc/<slug>/`, building straight into
+its dated folder, and takes its Geist-Mono dropper and chunk split from
+`poc/shared/vite-dialkit.js`. The engine ships as a plain file in `public/` and
+loads as a classic `defer` script.
+
+**Mounting order is the thing that bites.** Vite hoists the module into
+`<head>`, so in document order it runs *before* the engine's defer script
+further down the body. Both finish before `DOMContentLoaded`, so that is when to
+mount — unless the engine is itself a `DOMContentLoaded` handler (melt), in
+which case its listener is registered *second* and the panel has to wait for an
+event the engine dispatches.
+
+**The engine keeps the state.** The panel reads it once, to open on it, and
+writes back on change; when the engine moves a value itself — a randomise, a
+reset, a recipe in the hash, a snap to 15° — it tells the panel, and the panel
+echoes that into its dials behind a flag so the echo is not posted straight back
+as if the reader had done it.
+
+**What DialKit has no control for stays in the drawer beside it.** There is no
+multi-line text, no custom control and no per-dial lock, so teletext's copy,
+melt's per-point list, chroma's palette swatches and chroma's padlocks are
+ordinary markup under a `.sheet__section`, below the panel. That is the expected
+shape, not a workaround — the panel is for the dials.
+
+**DialKit titles a dial from its key.** `everywhere: [0, 0, 40, 1]` renders
+"Everywhere"; there is no label option on the range shorthand. Name the key what
+the play calls the thing, and map it to the engine's own name on the way
+through.
