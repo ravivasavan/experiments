@@ -92,12 +92,28 @@ function mutate(parent, strength, rand, seedOnly = false) {
   return child
 }
 
-function makeBrood(base, strength) {
+// Not a mutation of what is on screen — every growth dial thrown to somewhere
+// new in its own range, ink and symmetry left where they are. Mutate walks; this
+// jumps. The ranges are the same ones the panel draws, so nothing it produces is
+// out of bounds.
+function randomGrowth(base) {
   const rand = makeRng(nextSeed())
-  return Array.from({ length: 9 }, (_, i) => {
-    if (i === 4) return { ...base, growth: { ...base.growth }, ink: { ...base.ink } }
-    return mutate(base, strength, rand, i === 0 || i === 8)
-  })
+  const growth = { ...base.growth }
+  for (const k of Object.keys(growth)) {
+    if (typeof growth[k] !== 'number') continue
+    const [min, max] = RANGES[k]
+    growth[k] = min + rand() * (max - min)
+  }
+  growth.depth = Math.round(growth.depth)
+  growth.envelope = ENVELOPES[(rand() * ENVELOPES.length) | 0]
+  const [dmin, dmax] = RANGES.dislocation
+  return {
+    seed: nextSeed(),
+    dislocation: dmin + rand() * (dmax - dmin),
+    symmetry: base.symmetry,
+    growth,
+    ink: { ...base.ink },
+  }
 }
 
 function genomesMatch(g, variant, ink, symmetry) {
@@ -129,12 +145,12 @@ function readThemeColors() {
 
 const DEFAULT_STOP = 'Breaking point'
 const WORLD_W = 1180
-const CELL_H = ((WORLD_W - 20) / 3) * (800 / 1400)
-const GRID_H = CELL_H * 3 + 20
 const SINGLE_H = WORLD_W * (800 / 1400)
+// How long the art takes to grow out of its middle, and the curve it grows on.
+const GROW_MS = 900
+const easeOut = (t) => 1 - Math.pow(1 - t, 3)
 
 export default function App() {
-  const cellRefs = useRef([])
   const singleRef = useRef(null)
   const viewportRef = useRef(null)
   const worldRef = useRef(null)
@@ -143,29 +159,24 @@ export default function App() {
   const zoomBlitTimer = useRef(null)
   const squintRef = useRef(null)
   const fileRef = useRef(null)
-  const artRefs = useRef({}) // idx -> vector art object
+  const artRef = useRef(null) // the one vector art object on screen
+  const growRaf = useRef(0)
   const maskCache = useRef(new Map())
   const lfCache = useRef(new WeakMap())
   const historyRef = useRef([])
   const renderToken = useRef(0)
-  const lastCellKey = useRef({})
+  const lastKey = useRef(null)
   const colorsRef = useRef({ bg: '#0d1b1e', fg: '#fff5f5' })
 
-  const [brood, setBrood] = useState(() => makeBrood(genomeFromStop(DEFAULT_STOP, nextSeed()), 0.45))
-  const [sel, setSel] = useState(4)
-  const [mode, setMode] = useState('grid') // 'grid' | 'single'
+  const [genome, setGenome] = useState(() => genomeFromStop(DEFAULT_STOP, nextSeed()))
   const [svg, setSvg] = useState(null)
   const [loadedFont, setLoadedFont] = useState(null)
   const [dragging, setDragging] = useState(false)
   const [svgDump, setSvgDump] = useState(null)
 
   // refs mirror state so DialKit / chrome callbacks never act on stale closures
-  const broodRef = useRef(brood)
-  broodRef.current = brood
-  const selRef = useRef(sel)
-  selRef.current = sel
-  const modeRef = useRef(mode)
-  modeRef.current = mode
+  const genomeRef = useRef(genome)
+  genomeRef.current = genome
   const svgRef = useRef(svg)
   svgRef.current = svg
   const pendingSync = useRef(false)
@@ -203,6 +214,9 @@ export default function App() {
       },
       symmetry: false,
       transparentBg: true,
+      // Grow the logo out of its middle when it changes, rather than cutting to
+      // it. Off is the old behaviour, and what reduced-motion gets.
+      growOut: true,
     },
     {
       onAction: (action) => {
@@ -224,26 +238,42 @@ export default function App() {
   }
 
   function reblitAll() {
-    const ratio = blitRatio()
+    const art = artRef.current
+    if (!art) return
     const colors = colorsRef.current
-    for (let i = 0; i < 9; i++) {
-      const art = artRefs.current[i]
-      const canvas = cellRefs.current[i]
-      if (art && canvas) blit(canvas, art, colors, ratio)
-    }
-    const selArt = artRefs.current[selRef.current]
-    if (selArt && singleRef.current) blit(singleRef.current, selArt, colors, ratio)
-    if (selArt && squintRef.current) blit(squintRef.current, selArt, colors)
+    if (singleRef.current) blit(singleRef.current, art, colors, blitRatio())
+    if (squintRef.current) blit(squintRef.current, art, colors)
+  }
+
+  // Grow the art out of its middle over GROW_MS. Any new art cancels the frame
+  // in flight, so a fast run of mutations never leaves two animations fighting
+  // over the same canvas.
+  function growOut(art) {
+    cancelAnimationFrame(growRaf.current)
+    const canvas = singleRef.current
+    if (!canvas) return
+    const colors = colorsRef.current
+    const ratio = blitRatio()
+    const still = !pRef.current.growOut ||
+      matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (still) { blit(canvas, art, colors, ratio); return }
+    const started = performance.now()
+    growRaf.current = requestAnimationFrame(function step(now) {
+      if (artRef.current !== art) return
+      const t = Math.min(1, (now - started) / GROW_MS)
+      blit(canvas, art, colors, ratio, easeOut(t))
+      if (t < 1) growRaf.current = requestAnimationFrame(step)
+    })
   }
 
   // The world is full-bleed and pans under the glass, and it centres on the
   // viewport's own centre: the sheet is an overlay, not a column cut out of
   // the page, and minimising it uncovers whatever it was lying on.
-  function centerView(forMode) {
+  function centerView() {
     const vp = viewportRef.current
     if (!vp) return
     const rect = vp.getBoundingClientRect()
-    const contentH = forMode === 'single' ? SINGLE_H : GRID_H
+    const contentH = SINGLE_H
     view.current = {
       x: (rect.width - WORLD_W) / 2,
       y: Math.max(200, (rect.height - contentH) / 2 + 60),
@@ -252,8 +282,8 @@ export default function App() {
     applyView()
   }
 
-  function pushHistory(b, s) {
-    historyRef.current.push({ brood: b, sel: s })
+  function pushHistory(g) {
+    historyRef.current.push(g)
     if (historyRef.current.length > 50) historyRef.current.shift()
   }
 
@@ -266,41 +296,39 @@ export default function App() {
     })
   }
 
-  function select(idx) {
-    setSel(idx)
-    syncPanel(broodRef.current[idx])
+  // Mutate walks from where you are, at the strength the panel is set to.
+  function mutateOne() {
+    pushHistory(genomeRef.current)
+    const next = mutate(genomeRef.current, pRef.current.mutation, makeRng(nextSeed()))
+    setGenome(next)
+    syncPanel(next)
   }
 
-  function spawnFrom(idx) {
-    const prev = broodRef.current
-    pushHistory(prev, idx)
-    const next = makeBrood(prev[idx], pRef.current.mutation)
-    setBrood(next)
-    setSel(4)
-    setMode('grid') // a fresh brood is a grid moment
-    syncPanel(next[4])
+  // Grow jumps: every growth dial re-rolled, ink and symmetry left alone.
+  function growRandom() {
+    pushHistory(genomeRef.current)
+    const next = randomGrowth(genomeRef.current)
+    setGenome(next)
+    syncPanel(next)
   }
 
-  function freshBrood(stop = pRef.current.legibility) {
-    pushHistory(broodRef.current, selRef.current)
-    const next = makeBrood(genomeFromStop(stop, nextSeed()), 0.45)
-    setBrood(next)
-    setSel(4)
-    setMode('grid')
-    syncPanel(next[4])
+  function freshOne(stop = pRef.current.legibility) {
+    pushHistory(genomeRef.current)
+    const next = genomeFromStop(stop, nextSeed())
+    setGenome(next)
+    syncPanel(next)
   }
 
   function goBack() {
     const last = historyRef.current.pop()
     if (!last) return
-    setBrood(last.brood)
-    setSel(last.sel)
-    syncPanel(last.brood[last.sel])
+    setGenome(last)
+    syncPanel(last)
   }
 
   async function doExport() {
     const pv = pRef.current
-    const art = await buildArt(broodRef.current[selRef.current])
+    const art = await buildArt(genomeRef.current)
     if (!art) return
     // transparent export is the deliverable: a solid dark mark on nothing.
     // With a background, export what you see — the current theme's colours.
@@ -331,16 +359,9 @@ export default function App() {
 
     colorsRef.current = readThemeColors()
 
-    // dev-only: #singletest switches to the single view once cells exist
-    if (location.hash.includes('singletest')) {
-      setTimeout(() => setMode('single'), 3500)
-    }
-    // dev-only: #spawntest selects a corner cell then spawns a brood from it
-    if (location.hash.includes('spawntest')) {
-      setTimeout(() => {
-        select(0)
-        setTimeout(() => spawnFrom(0), 600)
-      }, 2200)
+    // dev-only: #mutatetest walks one step once the first art has landed
+    if (location.hash.includes('mutatetest')) {
+      setTimeout(() => mutateOne(), 2200)
     }
     if (location.hash.includes('testsvg')) {
       const img = new Image()
@@ -366,9 +387,9 @@ export default function App() {
       return () => el && el.removeEventListener('click', fn)
     }
     const offs = [
-      on('p-view', () => setMode((m) => (m === 'grid' ? 'single' : 'grid'))),
-      on('p-spawn', () => spawnFrom(selRef.current)),
-      on('p-fresh', () => freshBrood()),
+      on('p-mutate', () => mutateOne()),
+      on('p-grow', () => growRandom()),
+      on('p-fresh', () => freshOne()),
       on('p-back', () => goBack()),
       on('p-export', () => doExport()),
     ]
@@ -400,14 +421,14 @@ export default function App() {
     const vp = viewportRef.current
     if (!vp) return
 
-    centerView('grid')
+    centerView()
     // dev-only: #zoomtest starts zoomed into the centre cell
     if (location.hash.includes('zoomtest')) {
       const rect = vp.getBoundingClientRect()
       const z = 2.4
       view.current = {
         x: rect.width / 2 - (WORLD_W / 2) * z,
-        y: rect.height / 2 - (GRID_H / 2) * z,
+        y: rect.height / 2 - (SINGLE_H / 2) * z,
         z,
       }
       setTimeout(reblitAll, 3000)
@@ -470,48 +491,41 @@ export default function App() {
     }
   }, [])
 
-  // the sheet's head reads back what the tools row is looking at
+  // The drawer's head reads back the legibility stop and how deep the walk is.
   useEffect(() => {
     const summary = document.getElementById('p-summary')
-    if (summary) summary.textContent = `${mode === 'grid' ? 'Grid' : 'Single'} · ${sel + 1}/9`
-  }, [mode, sel])
-
-  // mode switch: recentre, sync the chrome pill, re-blit once layout settles
-  useEffect(() => {
-    const pill = document.getElementById('p-view')
-    const label = document.getElementById('p-view-label')
-    if (pill) {
-      pill.classList.toggle('is-on', mode === 'single')
-      pill.setAttribute('aria-pressed', mode === 'single' ? 'true' : 'false')
+    if (summary) {
+      const n = historyRef.current.length
+      summary.textContent = n ? `${p.legibility} · ${n} back` : p.legibility
     }
-    if (label) label.textContent = mode === 'grid' ? 'Single' : 'Grid'
-    centerView(mode)
+  }, [genome, p.legibility])
+
+  // one logo, so the world only ever needs centring once the viewport settles
+  useEffect(() => {
+    centerView()
     const raf = requestAnimationFrame(reblitAll)
     return () => cancelAnimationFrame(raf)
-  }, [mode])
+  }, [])
 
-  // legibility stop change → new brood at that stop (skip first mount)
+  // legibility stop change → a new logo at that stop (skip first mount)
   const firstStop = useRef(true)
   useEffect(() => {
     if (firstStop.current) { firstStop.current = false; return }
-    freshBrood(p.legibility)
+    freshOne(p.legibility)
   }, [p.legibility])
 
-  // dial edits write into the selected genome. A syncPanel call echoes back
-  // through this effect exactly once — the pendingSync flag swallows it.
+  // dial edits write into the genome. A syncPanel call echoes back through this
+  // effect exactly once — the pendingSync flag swallows it.
   const variantKey = JSON.stringify({ v: p.variant, ink: p.ink, sym: p.symmetry })
   useEffect(() => {
     if (pendingSync.current) {
       pendingSync.current = false
       return
     }
-    setBrood((prev) => {
-      const g = prev[selRef.current]
-      if (!g || genomesMatch(g, p.variant, p.ink, p.symmetry)) return prev
+    setGenome((g) => {
+      if (!g || genomesMatch(g, p.variant, p.ink, p.symmetry)) return g
       const { dislocation, ...growth } = p.variant
-      const arr = prev.slice()
-      arr[selRef.current] = { ...g, dislocation, symmetry: p.symmetry, growth: { ...growth }, ink: { ...p.ink } }
-      return arr
+      return { ...g, dislocation, symmetry: p.symmetry, growth: { ...growth }, ink: { ...p.ink } }
     })
   }, [variantKey])
 
@@ -576,19 +590,17 @@ export default function App() {
   // answers a tap in a frame while the grid fills in behind it. The mask
   // still comes from here — it needs a canvas — and it is the cheap half.
   const poolRef = useRef(null)
-  const jobRef = useRef({ token: -1, brood: null, items: [] })
+  const jobRef = useRef({ token: -1, genome: null, items: [] })
   const onCell = useRef(() => {})
 
-  function paintCell(idx, key, art) {
-    const canvas = cellRefs.current[idx]
-    if (!art || !canvas) return
-    artRefs.current[idx] = art
-    blit(canvas, art, colorsRef.current, blitRatio())
-    lastCellKey.current[idx] = key
-    if (idx === selRef.current) {
-      if (singleRef.current) blit(singleRef.current, art, colorsRef.current, blitRatio())
-      if (squintRef.current) blit(squintRef.current, art, colorsRef.current)
-    }
+  function paintArt(key, art) {
+    if (!art) return
+    artRef.current = art
+    lastKey.current = key
+    // The patch test is a thumbnail of the finished thing, not of the growing
+    // one — it is there to be squinted at, and a growing squint is no use.
+    if (squintRef.current) blit(squintRef.current, art, colorsRef.current)
+    growOut(art)
   }
 
   // Hand one *idle* worker the next stale cell, mask and all. Cells can carry
@@ -606,7 +618,7 @@ export default function App() {
     const job = jobRef.current
     while (job.items.length) {
       const [idx, key] = job.items.shift()
-      const genome = job.brood[idx]
+      const genome = job.genome
       const geom = getGeometry(genome)
       if (!geom || !geom.mask.coverage) continue
       w.postMessage({
@@ -628,17 +640,18 @@ export default function App() {
   function drawOnMainThread(job) {
     let raf = requestAnimationFrame(async function step() {
       if (renderToken.current !== job.token || !job.items.length) return
-      const [idx, key] = job.items.shift()
-      const art = await buildArt(job.brood[idx])
+      const [, key] = job.items.shift()
+      const art = await buildArt(job.genome)
       if (renderToken.current !== job.token) return
-      paintCell(idx, key, art)
+      paintArt(key, art)
       raf = requestAnimationFrame(step)
     })
     return () => cancelAnimationFrame(raf)
   }
 
-  // one core left over for the page itself
-  const POOL_MAX = Math.max(1, Math.min(3, (navigator.hardwareConcurrency || 4) - 1))
+  // One logo means one job in flight, so one worker is the whole pool. The
+  // three that used to be here existed to fill nine cells at once.
+  const POOL_MAX = 1
 
   function spawn(n) {
     const made = []
@@ -681,14 +694,15 @@ export default function App() {
   onCell.current = (w, msg) => {
     w.busy = false
     if (msg.token === renderToken.current && msg.art) {
-      paintCell(msg.idx, msg.key, { ...msg.art, path2d: new Path2D(msg.art.pathString) })
+      paintArt(msg.key, { ...msg.art, path2d: new Path2D(msg.art.pathString) })
     }
     dispatchCell(w)
     growPool()
   }
 
   useEffect(() => () => {
-    (poolRef.current || []).forEach((w) => w.terminate())
+    cancelAnimationFrame(growRaf.current)
+    ;(poolRef.current || []).forEach((w) => w.terminate())
     poolRef.current = null
   }, [])
 
@@ -698,44 +712,28 @@ export default function App() {
   })
   useEffect(() => {
     if (!fontsReady) return
+    const key = globalKey + JSON.stringify(genome)
+    if (lastKey.current === key) return
     const token = ++renderToken.current
-    const items = []
-    for (let i = 0; i < 9; i++) {
-      const key = globalKey + JSON.stringify(brood[i])
-      if (lastCellKey.current[i] !== key) items.push([i, key])
-    }
-    if (!items.length) return
-    // the cell being looked at is the one worth having first
-    const s = selRef.current
-    items.sort((a, b) => (b[0] === s) - (a[0] === s))
-
-    const job = { token, brood, items }
+    const job = { token, genome, items: [[0, key]] }
     jobRef.current = job
     const list = pool()
     if (!list.length) return drawOnMainThread(job)
     list.forEach(dispatchCell)
-  }, [brood, globalKey])
-
-  // selection change: refresh the single view + patch test
-  useEffect(() => {
-    const art = artRefs.current[sel]
-    if (!art) return
-    if (singleRef.current) blit(singleRef.current, art, colorsRef.current, blitRatio())
-    if (squintRef.current) blit(squintRef.current, art, colorsRef.current)
-  }, [sel])
+  }, [genome, globalKey])
 
   // dev-only: #svgdump overlays the traced vector of the selected variant
   useEffect(() => {
     if (!location.hash.includes('svgdump') || !fontsReady) return
     const raf = requestAnimationFrame(async () => {
-      const art = await buildArt(brood[sel])
+      const art = await buildArt(genome)
       if (!art) return
       const s = svgString(art, { fg: '#0a0a0a', bg: '#f2f0ec' }, p.transparentBg)
       document.title = `svgdump ${s.length}B ${(s.match(/M/g) || []).length} loops`
       setSvgDump(s.replace('<svg ', '<svg style="width:min(100%,1100px)" '))
     })
     return () => cancelAnimationFrame(raf)
-  }, [brood, sel, globalKey, fontsReady])
+  }, [genome, globalKey, fontsReady])
 
   function onFile(e) {
     loadSvgFile(e.target.files?.[0], setSvg)
@@ -747,30 +745,17 @@ export default function App() {
       <input ref={fileRef} type="file" accept=".svg,image/svg+xml" hidden onChange={onFile} />
       <div ref={viewportRef} style={styles.viewport}>
         <div ref={worldRef} style={styles.world}>
-          <div style={{ ...styles.grid, display: mode === 'grid' ? 'grid' : 'none' }}>
-            {Array.from({ length: 9 }, (_, i) => (
-              <div
-                key={i}
-                style={{ ...styles.cell, ...(i === sel ? styles.cellSelected : null) }}
-                onClick={() => { if (!suppressClick.current) select(i) }}
-                onDoubleClick={() => { if (!suppressClick.current) spawnFrom(i) }}
-                title="click to select · double-click to spawn 9 from this"
-              >
-                <canvas ref={(el) => (cellRefs.current[i] = el)} style={styles.cellCanvas} />
-              </div>
-            ))}
-          </div>
           <div
-            style={{ ...styles.cell, width: WORLD_W, display: mode === 'single' ? 'block' : 'none' }}
-            onDoubleClick={() => { if (!suppressClick.current) spawnFrom(selRef.current) }}
-            title="double-click to spawn 9 from this"
+            style={{ ...styles.cell, width: WORLD_W }}
+            onDoubleClick={() => { if (!suppressClick.current) mutateOne() }}
+            title="double-click to mutate"
           >
             <canvas ref={singleRef} style={styles.cellCanvas} />
           </div>
         </div>
       </div>
       <span className="metal-hint">
-        drag pans · pinch / ⌘+wheel zooms · click selects · double-click spawns 9
+        drag pans · pinch / ⌘+wheel zooms · double-click mutates
       </span>
       <div className="metal-squint">
         <span className="metal-squint__label">patch test</span>
@@ -803,19 +788,10 @@ const styles = {
     transformOrigin: '0 0',
     willChange: 'transform',
   },
-  grid: {
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: 10,
-    width: WORLD_W,
-  },
   cell: {
     background: 'var(--field)',
     cursor: 'pointer',
     borderRadius: 2,
-  },
-  cellSelected: {
-    outline: '2px solid var(--orange)',
-    outlineOffset: 2,
   },
   cellCanvas: {
     width: '100%',

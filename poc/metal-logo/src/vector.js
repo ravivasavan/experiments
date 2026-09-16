@@ -229,7 +229,12 @@ function chaikinClosed(pts, iters) {
 
 // colors: { bg, fg } — resolved from the page theme so the canvas follows
 // day / night / system / circadian like the rest of the family
-export function blit(targetCanvas, art, colors, pixelRatio) {
+// reveal 0..1 grows the art out of its own middle. The letterform sits as a
+// band across the centre and the tendrils are what leave it, so an ellipse
+// opening from there uncovers the word first and the growth after it — which
+// is the order it was generated in. 1 (the default) is the whole thing, and
+// costs nothing.
+export function blit(targetCanvas, art, colors, pixelRatio, reveal = 1) {
   const cssW = targetCanvas.clientWidth
   if (!cssW) return // hidden (other view mode) — skip, re-blit on show
   const ctx = targetCanvas.getContext('2d')
@@ -242,8 +247,23 @@ export function blit(targetCanvas, art, colors, pixelRatio) {
   ctx.fillStyle = colors.bg
   ctx.fillRect(0, 0, cssW, cssH)
   ctx.setTransform(dpr * s, 0, 0, dpr * s, dpr * (cssW - art.w * s) / 2, dpr * (cssH - art.h * s) / 2)
+  if (reveal < 1) {
+    ctx.save()
+    ctx.beginPath()
+    // Wide to begin with and barely tall, so the first thing on screen is the
+    // middle of the word rather than a dot in the middle of nothing. At 1 the
+    // ellipse clears the corners, so the last frame is the unclipped fill.
+    ctx.ellipse(
+      art.w / 2, art.h / 2,
+      art.w * (0.2 + 0.62 * reveal),
+      art.h * 0.78 * reveal,
+      0, 0, Math.PI * 2,
+    )
+    ctx.clip()
+  }
   ctx.fillStyle = colors.fg
   ctx.fill(art.path2d, 'nonzero')
+  if (reveal < 1) ctx.restore()
   ctx.setTransform(1, 0, 0, 1, 0, 0)
 }
 
