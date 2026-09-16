@@ -70,10 +70,66 @@ function Controls() {
   return null
 }
 
+/* The padlock belongs beside the dial it locks, which is where Chroma always
+   had it — but the dials are DialKit's now and its schema has no notion of a
+   lock. So the buttons are put onto its rendered rows instead, matched by the
+   label DialKit prints. They carry data-lock, which is the only thing app.js
+   has ever needed: its click handler is delegated at the document, and
+   markLocks paints whatever it finds.
+
+   A MutationObserver rather than a one-shot, because DialKit re-renders its
+   rows — collapsing a folder, loading a preset — and takes the buttons with it
+   when it does. */
+const LOCK_FOR = {
+  Diffusion: 'flow',
+  Scale: 'scale',
+  Angle: 'rotation',
+  Radiance: 'glow',
+  Grain: 'grain',
+  Seed: 'seed',
+}
+
+function useDialLocks() {
+  useEffect(() => {
+    const mount = document.getElementById('dial-mount')
+    const api = window.chroma
+    if (!mount || !api) return
+
+    function place() {
+      let added = false
+      mount.querySelectorAll('.dialkit-slider-wrapper').forEach((row) => {
+        if (row.querySelector('.prop-lock')) return
+        const label = row.querySelector('.dialkit-slider-label')
+        const key = LOCK_FOR[label && label.textContent.trim()]
+        if (!key) return
+        const b = document.createElement('button')
+        b.type = 'button'
+        b.className = 'prop-lock'
+        b.dataset.lock = key
+        b.innerHTML = api.lockIcon
+        row.classList.add('has-lock')
+        row.appendChild(b)
+        added = true
+      })
+      if (added) api.markLocks()
+    }
+
+    place()
+    const mo = new MutationObserver(place)
+    mo.observe(mount, { childList: true, subtree: true })
+    return () => mo.disconnect()
+  }, [])
+}
+
 function Settings() {
   const mount = document.getElementById('dial-mount')
   if (!mount) return null
   return createPortal(<DialRoot mode="inline" theme="dark" productionEnabled />, mount)
+}
+
+function DialLocks() {
+  useDialLocks()
+  return null
 }
 
 function mount() {
@@ -81,6 +137,7 @@ function mount() {
     <React.StrictMode>
       <Controls />
       <Settings />
+      <DialLocks />
     </React.StrictMode>
   )
 }

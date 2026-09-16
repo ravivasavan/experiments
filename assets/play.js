@@ -368,21 +368,83 @@
   });
   window.addEventListener('blur', function () { spaceHeld = false; });
 
+  /* A stage keeps one view — an offset and a zoom — and everything that moves
+     it goes through here, so the buttons, the wheel and the drag can never
+     disagree about where it is. */
+
+  var views = new WeakMap();
+  var Z_MIN = 0.25, Z_MAX = 6;
+
   function pannable(el) {
     var free = el.getAttribute('data-pan') === 'free';
-    var x = 0, y = 0, sx = 0, sy = 0, id = null, moved = false;
+    var v = { x: 0, y: 0, z: 1 };
+    var sx = 0, sy = 0, id = null, moved = false;
 
-    function clamp(v, limit) { return Math.max(-limit, Math.min(limit, v)); }
+    function clamp(n, lo, hi) { return Math.max(lo, Math.min(hi, n)); }
+
     function apply() {
-      el.style.transform = (x || y) ? 'translate(' + x + 'px, ' + y + 'px)' : '';
+      var t = '';
+      if (v.x || v.y) t += 'translate(' + v.x + 'px, ' + v.y + 'px) ';
+      if (v.z !== 1) t += 'scale(' + v.z + ')';
+      el.style.transform = t.trim();
+      el.classList.toggle('is-zoomed', v.z !== 1 || !!v.x || !!v.y);
+      announce();
+    }
+
+    // Panning further than this and the artwork is off somewhere you would
+    // have to guess your way back from.
+    function clampOffset() {
+      v.x = clamp(v.x, -innerWidth * 0.6, innerWidth * 0.6);
+      v.y = clamp(v.y, -innerHeight * 0.6, innerHeight * 0.6);
+    }
+
+    // Zoom about the middle of what is on screen, not the element's own
+    // origin, so the thing you are looking at stays roughly where it was.
+    function zoomTo(z) {
+      var next = clamp(z, Z_MIN, Z_MAX);
+      if (next === v.z) return;
+      var k = next / v.z;
+      v.x *= k;
+      v.y *= k;
+      v.z = next;
+      clampOffset();
+      apply();
+    }
+
+    /* There is no 1:1 here on purpose. Every one of these stages draws its
+       canvas at exactly the size it is displayed — buffer and CSS box are the
+       same number — so "actual size" and "fit" would be the same view, and the
+       button would do nothing. Chroma is the one place the phrase means
+       something, and there it would mean something false: the preview is capped
+       at 1920 on its longest edge, so it does not hold the export's pixels to
+       show you. Fit is the honest end of the range. */
+    var api = {
+      in: function () { zoomTo(v.z * 1.25); },
+      out: function () { zoomTo(v.z / 1.25); },
+      fit: function () { v.x = 0; v.y = 0; v.z = 1; apply(); },
+      get: function () { return { x: v.x, y: v.y, z: v.z }; }
+    };
+    views.set(el, api);
+
+    /* Say where the view is: the level, where a page has somewhere to print it,
+       and the Fit pill lights whenever there is something to go back from — so
+       "am I zoomed?" is answerable without a readout at all. */
+    function announce() {
+      var out = document.querySelector('[data-view-level]');
+      if (out) out.textContent = Math.round(v.z * 100) + '%';
+      var off = v.z !== 1 || !!v.x || !!v.y;
+      document.querySelectorAll('[data-view="fit"]').forEach(function (b) {
+        b.classList.toggle('is-on', off);
+        b.setAttribute('aria-pressed', String(off));
+      });
     }
 
     el.addEventListener('pointerdown', function (e) {
       var wants = e.button === 1 || spaceHeld || (free && e.button === 0);
       if (!wants) return;
       id = e.pointerId;
-      sx = e.clientX - x;
-      sy = e.clientY - y;
+      sx = e.clientX - v.x;
+      sy = e.clientY - v.y;
       moved = false;
       el.setPointerCapture(id);
       el.classList.add('is-panning');
@@ -390,9 +452,10 @@
     });
     el.addEventListener('pointermove', function (e) {
       if (id === null || e.pointerId !== id) return;
-      x = clamp(e.clientX - sx, innerWidth * 0.6);
-      y = clamp(e.clientY - sy, innerHeight * 0.6);
-      if (Math.abs(x) + Math.abs(y) > 4) moved = true;
+      v.x = e.clientX - sx;
+      v.y = e.clientY - sy;
+      clampOffset();
+      if (Math.abs(v.x) + Math.abs(v.y) > 4) moved = true;
       apply();
     });
     ['pointerup', 'pointercancel'].forEach(function (type) {
@@ -407,6 +470,31 @@
     el.addEventListener('click', function (e) {
       if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
     }, true);
+
+    // Ctrl/⌘ + wheel is the zoom every canvas tool uses, and it is also what a
+    // trackpad pinch arrives as.
+    el.addEventListener('wheel', function (e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      zoomTo(v.z * (e.deltaY < 0 ? 1.12 : 1 / 1.12));
+    }, { passive: false });
+
+    apply();
+  }
+
+  /* The zoom pills. Each names what it does and the stage it does it to is the
+     one [data-pan] on the page — these plays have exactly one. */
+
+  function wireViewButtons() {
+    var stage = document.querySelector('[data-pan]');
+    if (!stage) return;
+    document.querySelectorAll('[data-view]').forEach(function (btn) {
+      var action = btn.getAttribute('data-view');
+      btn.addEventListener('click', function () {
+        var api = views.get(stage);
+        if (api && api[action]) api[action]();
+      });
+    });
   }
 
   /* ------------------------------------------------------------------ go -- */
@@ -415,6 +503,7 @@
     paintDials(document);
     document.querySelectorAll('.rail, .dock').forEach(dragRow);
     document.querySelectorAll('[data-pan]').forEach(pannable);
+    wireViewButtons();
     document.querySelectorAll('.sheet').forEach(function (sheet) {
       prepareSheet(sheet);
       dragGrab(sheet);

@@ -574,5 +574,35 @@ can always drag back, and there is no way to throw the artwork somewhere you
 cannot reach. A drag that moved swallows the click it would otherwise have
 finished with.
 
+### Zoom
+
+A stage keeps one view — an offset and a zoom — and the buttons, the wheel and
+the drag all go through it, so they cannot disagree about where it is. The pills
+go in the rail as their own group:
+
+```html
+<div class="rail__group rail__group--zoom">
+  <button class="tool-pill" type="button" data-view="in"  …>
+  <button class="tool-pill" type="button" data-view="out" …>
+  <button class="tool-pill" type="button" data-view="fit" …>
+</div>
+```
+
+They act on the one `[data-pan]` stage on the page. Ctrl/⌘ + wheel zooms too,
+which is also what a trackpad pinch arrives as. Zoom runs 0.25× to 6× and scales
+about the middle of what is on screen, so what you are looking at stays roughly
+where it was. `data-view="fit"` goes back to 1× and no offset, and **lights up
+whenever there is something to go back from** — so "am I zoomed?" is answerable
+without a readout. A page with somewhere to print the number can add
+`data-view-level` to any element and it will be kept in step; chroma puts it in
+the dock beside the composition and the size.
+
+**There is no 1:1, on purpose.** Every one of these stages draws its canvas at
+exactly the size it is displayed — buffer and CSS box are the same number — so
+"actual size" and "fit" are the same view and the button would do nothing.
+Chroma is the one place the phrase means something and there it would mean
+something false: the preview is capped at 1920 on its longest edge, so it does
+not hold the export's pixels to show you.
+
 Camouflage has neither attribute on purpose — its pattern is full-bleed, so
 there is nothing behind the glass but more of the same pattern.

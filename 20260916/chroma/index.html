@@ -41,7 +41,7 @@
   <link rel="preload" href="/assets/fonts/LabilGrotesk-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/assets/play.css">
   <link rel="stylesheet" href="./chroma.css">
-  <script type="module" crossorigin src="/20260916/chroma/assets/index-DN7io5Cd.js"></script>
+  <script type="module" crossorigin src="/20260916/chroma/assets/index-D7EBisNC.js"></script>
   <link rel="modulepreload" crossorigin href="/20260916/chroma/assets/react-BLvkGNEA.js">
   <link rel="modulepreload" crossorigin href="/20260916/chroma/assets/dialkit-B6JcMb2L.js">
   <link rel="stylesheet" crossorigin href="/20260916/chroma/assets/dialkit-yOvin6q7.css">
@@ -100,6 +100,22 @@
       <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/></svg></span>
       <span class="tool-pill__label">Fullscreen</span>
     </button>
+    <!-- Zoom. The stage it acts on is the one [data-pan] on the page, and Fit
+         lights up whenever there is something to go back from. -->
+    <div class="rail__group rail__group--zoom">
+      <button class="tool-pill" type="button" data-view="in" aria-label="Zoom in">
+        <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></span>
+        <span class="tool-pill__label">Zoom in</span>
+      </button>
+      <button class="tool-pill" type="button" data-view="out" aria-label="Zoom out">
+        <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg></span>
+        <span class="tool-pill__label">Zoom out</span>
+      </button>
+      <button class="tool-pill" type="button" data-view="fit" aria-label="Fit to the screen">
+        <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg></span>
+        <span class="tool-pill__label">Fit</span>
+      </button>
+    </div>
   </nav>
 
   <!-- The viewport is the whole screen and the glass lies on top of it, so the
@@ -132,7 +148,7 @@
       <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>
       <span class="tool-pill__label">Reset</span>
     </button>
-    <p class="readout" aria-live="polite"><span id="composition-label">Aperture · 0042</span><span class="readout__sep">·</span><span id="size-label">7680 × 4320</span></p>
+    <p class="readout" aria-live="polite"><span id="composition-label">Aperture · 0042</span><span class="readout__sep">·</span><span id="size-label">7680 × 4320</span><span class="readout__sep">·</span><span data-view-level>100%</span></p>
   </nav>
 
   <aside class="sheet" aria-label="Chroma settings">
@@ -194,23 +210,9 @@
         </select>
       </label>
 
-      <h2 class="sheet__section">Locked</h2>
-      <p class="sheet__note">Randomise only moves what isn't locked. The four colours
-        lock individually, on their own swatches above.</p>
-      <div class="locks" id="locks">
-        <button type="button" class="lock-chip" data-lock="mode" aria-pressed="false">Composition</button>
-        <button type="button" class="lock-chip" data-lock="palette" aria-pressed="false">Palette</button>
-        <button type="button" class="lock-chip" data-lock="flow" aria-pressed="false">Diffusion</button>
-        <button type="button" class="lock-chip" data-lock="scale" aria-pressed="false">Scale</button>
-        <button type="button" class="lock-chip" data-lock="rotation" aria-pressed="false">Angle</button>
-        <button type="button" class="lock-chip" data-lock="glow" aria-pressed="false">Radiance</button>
-        <button type="button" class="lock-chip" data-lock="grain" aria-pressed="false">Grain</button>
-        <button type="button" class="lock-chip" data-lock="seed" aria-pressed="false">Seed</button>
-      </div>
-
-      <p class="sheet__note">Every wallpaper is generated on the GPU from the numbers
-        above — nothing is bundled and nothing is downloaded. The preview is capped at
-        1920px on its longest edge; Export renders at the full size you pick.</p>
+      <p class="sheet__note">Every wallpaper is generated on the GPU from the
+        numbers above. The preview is capped at 1920px on its longest edge;
+        Export renders at the full size you pick.</p>
     </div>
   </aside>
 

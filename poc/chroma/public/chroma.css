@@ -96,10 +96,6 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
 }
 .readout__sep { opacity: 0.5; }
 
-/* The rail holds a radiogroup and then a pill of its own, so it stacks like
-   the rail itself rather than sitting as one block inside it. */
-.rail__group { display: flex; flex-direction: column; gap: 8px; }
-
 /* --------------------------------------------------------- the palettes -- */
 
 .palette-toolbar { display: flex; gap: 6px; align-items: center; }
@@ -212,6 +208,24 @@ input[type="color"] {
 input[type="color"]:hover { transform: scale(1.08); }
 input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
 input[type="color"]::-webkit-color-swatch { border: 0; }
+
+/* Every lock sits beside the thing it locks: the four colours on their own
+   swatch rows, and the rest on DialKit's dial rows, where React puts them.
+   The row makes space on its right and the value slides over to leave it. */
+/* Matched to the skin's own selector weight — it pins the value to right: 0
+   with three classes, and a shorter selector loses the tie whatever the source
+   order turns out to be. */
+.sheet .dialkit-root .dialkit-slider-wrapper.has-lock { position: relative; }
+.sheet .dialkit-root .dialkit-slider-wrapper.has-lock .dialkit-slider-value,
+.sheet .dialkit-root .dialkit-slider-wrapper.has-lock .dialkit-slider-input {
+  right: 26px;
+}
+.sheet .dialkit-root .dialkit-slider-wrapper.has-lock .prop-lock {
+  position: absolute;
+  top: -5px;
+  right: -6px;
+  z-index: 1;
+}
 
 /* A colour keeps its padlock beside it — it is the one lock that has to say
    which of the four it belongs to. The rest are collected under Locked. */

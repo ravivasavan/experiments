@@ -446,6 +446,13 @@ a { color: inherit; }
   touch-action: pan-y;
 }
 
+/* A rail can hold groups — a radiogroup of modes, the zoom cluster — and a
+   group stacks like the rail itself rather than sitting in it as one block. The
+   zoom cluster closes its own gaps so it reads as one control, and takes a
+   wider gap from whatever is above it. */
+.rail__group { display: flex; flex-direction: column; gap: 8px; }
+.rail__group--zoom { gap: 2px; margin-top: 8px; }
+
 /* Icon only, on the same 44px round-rect as every other tool pill. The label
    stays in the markup and stays in the a11y tree — it is just not drawn. */
 .rail .tool-pill {

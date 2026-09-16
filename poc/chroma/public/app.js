@@ -829,4 +829,10 @@
   new ResizeObserver(() => { schedule(); placeModeThumb(); }).observe($('stage'));
   new ResizeObserver(placeModeThumb).observe($('modes'));
   sync();
+
+  /* The padlocks live on DialKit's own dial rows now, and React injects them
+     there once the panel has rendered. Clicks are already caught by the
+     delegated handler above — all it needs from here is the glyph and a way to
+     ask for the pressed state to be refreshed once the buttons exist. */
+  window.chroma = { lockIcon: LOCK_ICON, markLocks: markLocks };
 })();

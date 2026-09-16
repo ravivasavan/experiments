@@ -198,6 +198,22 @@
       </span>
       <span class="tool-pill__label">Camera</span>
     </button>
+    <!-- Zoom. The stage it acts on is the one [data-pan] on the page, and Fit
+         lights up whenever there is something to go back from. -->
+    <div class="rail__group rail__group--zoom">
+      <button class="tool-pill" type="button" data-view="in" aria-label="Zoom in">
+        <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M11 8v6"/><path d="M8 11h6"/></svg></span>
+        <span class="tool-pill__label">Zoom in</span>
+      </button>
+      <button class="tool-pill" type="button" data-view="out" aria-label="Zoom out">
+        <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="M8 11h6"/></svg></span>
+        <span class="tool-pill__label">Zoom out</span>
+      </button>
+      <button class="tool-pill" type="button" data-view="fit" aria-label="Fit to the screen">
+        <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><rect x="8" y="8" width="8" height="8" rx="1"/></svg></span>
+        <span class="tool-pill__label">Fit</span>
+      </button>
+    </div>
   </nav>
 
   <nav class="dock" aria-label="Magnetic actions">
