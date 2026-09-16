@@ -5,26 +5,6 @@ import { dropGeistMonoImport } from '../shared/vite-dialkit.js'
 export default defineConfig({
   base: '/20260824/metal/',
   plugins: [react(), dropGeistMonoImport()],
-  /* render.worker.js is created with {type:'module'}, but Vite's default
-     worker format is iife, which inlines everything the worker imports — the
-     whole of clipper-lib welded into a 107KB worker entry that has to be
-     re-fetched whenever a line of the render loop moves.
-
-     Vite bundles a worker in its own rollup pass, so it cannot literally
-     share the main build's clipper chunk (the two passes hash and mangle
-     independently); what ES format plus the same split buys is a 7KB worker
-     entry beside a clipper chunk of its own, cached across all three pool
-     workers and across every edit to the render loop. */
-  worker: {
-    format: 'es',
-    rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules/clipper-lib')) return 'clipper'
-        },
-      },
-    },
-  },
   build: {
     outDir: '../../20260824/metal',
     emptyOutDir: true,

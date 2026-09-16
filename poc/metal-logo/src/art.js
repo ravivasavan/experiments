@@ -1,10 +1,9 @@
 // Art — the Clipper half of the engine, kept behind one dynamic import.
 //
-// Nothing on the boot path needs it. Every cell the visitor actually sees is
-// clipped in render.worker.js and comes back as a path string, so the 99KB of
-// clipper-lib is only reached by Export, the no-worker fallback and the
-// #svgdump probe. Importing it from here rather than from vector.js takes it
-// off the module graph the page has to evaluate before React mounts.
+// Nothing on the boot path needs it. What the visitor looks at is inked on the
+// GPU by raster.js, so the 99KB of clipper-lib is only reached by Export and
+// the #svgdump probe — both of which can afford it, because neither is on the
+// path between moving a dial and seeing the result.
 
 import { artGeometry } from './ink.js'
 

@@ -1,12 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDialKitController } from 'dialkit'
-import { extractLetterform, growTendrils, mirrorBranches, makeRng } from './generator.js'
+import {
+  extractLetterform,
+  growTendrils,
+  mirrorBranches,
+  makeRng,
+  LOGICAL_W,
+  LOGICAL_H,
+} from './generator.js'
+import { branchOutline } from './outline.js'
+import { renderInk } from './raster.js'
 import {
   loadFont,
   FONT_NAMES,
   textGeometry,
   imageGeometry,
-  blit,
   svgString,
   exportSvg,
   rasterizeForAnalysis,
@@ -159,13 +167,14 @@ export default function App() {
   const zoomBlitTimer = useRef(null)
   const squintRef = useRef(null)
   const fileRef = useRef(null)
-  const artRef = useRef(null) // the one vector art object on screen
+  const polysRef = useRef(null)  // letterform + tendrils, before any ink
+  const layerRef = useRef(null)  // the painted ink, tinted, at the current ratio
+  const artRef = useRef(null)    // what the grow-out animation is animating
   const growRaf = useRef(0)
+  const layerRatio = useRef(0)
   const maskCache = useRef(new Map())
   const lfCache = useRef(new WeakMap())
   const historyRef = useRef([])
-  const renderToken = useRef(0)
-  const lastKey = useRef(null)
   const colorsRef = useRef({ bg: '#0d1b1e', fg: '#fff5f5' })
 
   const [genome, setGenome] = useState(() => genomeFromStop(DEFAULT_STOP, nextSeed()))
@@ -237,31 +246,36 @@ export default function App() {
     if (worldRef.current) worldRef.current.style.transform = `translate(${x}px, ${y}px) scale(${z})`
   }
 
+  /* Re-ink and repaint. Zooming in and changing the theme both land here: the
+     layer carries the theme's colour and is rendered for a particular zoom, and
+     re-rendering it costs about as much as scaling it would. */
   function reblitAll() {
-    const art = artRef.current
-    if (!art) return
-    const colors = colorsRef.current
-    if (singleRef.current) blit(singleRef.current, art, colors, blitRatio())
-    if (squintRef.current) blit(squintRef.current, art, colors)
+    if (!polysRef.current) return
+    const ratio = blitRatio()
+    if (!layerRef.current || Math.abs(ratio - layerRatio.current) > 0.25) {
+      layerRef.current = makeLayer(genomeRef.current, ratio)
+      layerRatio.current = ratio
+    }
+    artRef.current = layerRef.current
+    paintLayer(singleRef.current, layerRef.current, 1)
+    paintLayer(squintRef.current, layerRef.current, 1)
   }
 
   // Grow the art out of its middle over GROW_MS. Any new art cancels the frame
   // in flight, so a fast run of mutations never leaves two animations fighting
   // over the same canvas.
-  function growOut(art) {
+  function growOut(layer) {
     cancelAnimationFrame(growRaf.current)
     const canvas = singleRef.current
-    if (!canvas) return
-    const colors = colorsRef.current
-    const ratio = blitRatio()
+    if (!canvas || !layer) return
     const still = !pRef.current.growOut ||
       matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (still) { blit(canvas, art, colors, ratio); return }
+    if (still) { paintLayer(canvas, layer, 1); return }
     const started = performance.now()
     growRaf.current = requestAnimationFrame(function step(now) {
-      if (artRef.current !== art) return
+      if (artRef.current !== layer) return
       const t = Math.min(1, (now - started) / GROW_MS)
-      blit(canvas, art, colors, ratio, easeOut(t))
+      paintLayer(canvas, layer, easeOut(t))
       if (t < 1) growRaf.current = requestAnimationFrame(step)
     })
   }
@@ -581,145 +595,87 @@ export default function App() {
     return makeArt(polys)
   }
 
-  // progressive render — only stale cells, and off the main thread
-  //
-  // Each cell is ~1.7s of polygon clipping; nine in a row used to hold the
-  // main thread for fifteen seconds after load, which is why a tap on the
-  // settings sheet could sit there for two of them. A small pool of workers
-  // does the clipping now and each cell is blitted as it lands, so the page
-  // answers a tap in a frame while the grid fills in behind it. The mask
-  // still comes from here — it needs a canvas — and it is the cheap half.
-  const poolRef = useRef(null)
-  const jobRef = useRef({ token: -1, genome: null, items: [] })
-  const onCell = useRef(() => {})
+  /* The render, which is now a handful of canvas ops rather than a job queue.
+     renderInk does the whole ink pipeline on the GPU, so there is nothing left
+     worth moving off the main thread — and nothing left that could block it.
+     The worker pool, the job tokens and the stale-cell bookkeeping all existed
+     to hide 1.7 seconds of clipping that no longer happens. */
 
-  function paintArt(key, art) {
-    if (!art) return
-    artRef.current = art
-    lastKey.current = key
-    // The patch test is a thumbnail of the finished thing, not of the growing
-    // one — it is there to be squinted at, and a growing squint is no use.
-    if (squintRef.current) blit(squintRef.current, art, colorsRef.current)
-    growOut(art)
-  }
-
-  // Hand one *idle* worker the next stale cell, mask and all. Cells can carry
-  // different geometry (dislocation reseeds the mask per variant), so the
-  // mask travels with the job rather than being shared once.
-  //
-  // The busy flag is load-bearing. A worker can't be interrupted mid-cell, and
-  // a dial drag fires a render a frame — post to a busy worker and fourteen
-  // superseded cells queue in front of the only one still wanted, which then
-  // lands twenty seconds later. Skipping busy workers leaves the newest job
-  // sitting in jobRef instead, and whichever worker reports back first takes
-  // it: at most one stale cell per worker is ever in flight.
-  function dispatchCell(w) {
-    if (w.busy) return
-    const job = jobRef.current
-    while (job.items.length) {
-      const [idx, key] = job.items.shift()
-      const genome = job.genome
-      const geom = getGeometry(genome)
-      if (!geom || !geom.mask.coverage) continue
-      w.postMessage({
-        token: job.token, idx, key, genome,
-        polys: geom.polys,
-        lf: getLetterform(geom.mask),
-        // the canvas on the mask can't cross a postMessage, and nothing
-        // downstream of here reads it
-        mask: { alpha: geom.mask.alpha, w: geom.mask.w, h: geom.mask.h, bbox: geom.mask.bbox },
-      })
-      // after the post, so a structured-clone throw can't wedge the worker
-      w.busy = true
-      return
+  function inkPolys(genome) {
+    const geom = getGeometry(genome)
+    if (!geom || !geom.mask.coverage) return null
+    const lf = getLetterform(geom.mask)
+    const rand = makeRng(genome.seed * 2654435761)
+    let branches = growTendrils(lf, geom.mask, { ...genome.growth }, rand)
+    if (genome.symmetry) {
+      const cx = (geom.mask.bbox.minX + geom.mask.bbox.maxX) / 2
+      branches = branches.concat(mirrorBranches(branches, cx, genome.growth.symBreak || 0, rand))
     }
+    const outlines = branches.map(branchOutline).filter(Boolean)
+    return [...geom.polys, ...outlines]
   }
 
-  // The original one-cell-per-frame loop, kept for anything that can't run a
-  // module worker — and as the landing place if one fails to boot.
-  function drawOnMainThread(job) {
-    let raf = requestAnimationFrame(async function step() {
-      if (renderToken.current !== job.token || !job.items.length) return
-      const [, key] = job.items.shift()
-      const art = await buildArt(job.genome)
-      if (renderToken.current !== job.token) return
-      paintArt(key, art)
-      raf = requestAnimationFrame(step)
-    })
-    return () => cancelAnimationFrame(raf)
+  // The ink layer is rendered at whatever the view currently needs; zooming in
+  // re-renders rather than scaling a layer up, because re-rendering is cheap now.
+  function makeLayer(genome, ratio) {
+    const polys = polysRef.current
+    if (!polys) return null
+    return renderInk(
+      polys,
+      genome.ink,
+      genome.seed * 31 + 7,
+      Math.min(2.5, Math.max(1, ratio)),
+      colorsRef.current.fg,
+    )
   }
 
-  // One logo means one job in flight, so one worker is the whole pool. The
-  // three that used to be here existed to fill nine cells at once.
-  const POOL_MAX = 1
-
-  function spawn(n) {
-    const made = []
-    try {
-      for (let i = 0; i < n; i++) {
-        const w = new Worker(new URL('./render.worker.js', import.meta.url), { type: 'module' })
-        w.onmessage = (e) => onCell.current(w, e.data)
-        w.onerror = () => onPoolFailure()
-        made.push(w)
-      }
-    } catch (e) {
-      // no module workers here — the caller draws on the main thread instead
+  function paintLayer(canvas, layer, reveal) {
+    if (!canvas || !layer) return
+    const cssW = canvas.clientWidth
+    if (!cssW) return
+    const dpr = blitRatio()
+    const cssH = canvas.clientHeight || (cssW * LOGICAL_H) / LOGICAL_W
+    canvas.width = Math.round(cssW * dpr)
+    canvas.height = Math.round(cssH * dpr)
+    const ctx = canvas.getContext('2d')
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    ctx.fillStyle = colorsRef.current.bg
+    ctx.fillRect(0, 0, cssW, cssH)
+    const s = Math.min(cssW / LOGICAL_W, cssH / LOGICAL_H)
+    const w = LOGICAL_W * s
+    const h = LOGICAL_H * s
+    const ox = (cssW - w) / 2
+    const oy = (cssH - h) / 2
+    if (reveal < 1) {
+      ctx.save()
+      ctx.beginPath()
+      ctx.ellipse(
+        ox + w / 2, oy + h / 2,
+        w * (0.2 + 0.62 * reveal),
+        h * 0.78 * reveal,
+        0, 0, Math.PI * 2,
+      )
+      ctx.clip()
     }
-    return made
+    ctx.drawImage(layer, ox, oy, w, h)
+    if (reveal < 1) ctx.restore()
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
   }
-
-  // The pool starts as one worker and grows once that one has answered: three
-  // of them started together would each fetch the worker bundle before any
-  // copy of it reached the cache.
-  function pool() {
-    if (!poolRef.current) poolRef.current = spawn(1)
-    return poolRef.current
-  }
-
-  function growPool() {
-    const list = poolRef.current
-    if (!list || !list.length || list.length >= POOL_MAX) return
-    const extra = spawn(POOL_MAX - list.length)
-    list.push(...extra)
-    extra.forEach(dispatchCell)
-  }
-
-  function onPoolFailure() {
-    if (!poolRef.current || !poolRef.current.length) return
-    poolRef.current.forEach((w) => w.terminate())
-    poolRef.current = []
-    drawOnMainThread(jobRef.current)
-  }
-
-  onCell.current = (w, msg) => {
-    w.busy = false
-    if (msg.token === renderToken.current && msg.art) {
-      paintArt(msg.key, { ...msg.art, path2d: new Path2D(msg.art.pathString) })
-    }
-    dispatchCell(w)
-    growPool()
-  }
-
-  useEffect(() => () => {
-    cancelAnimationFrame(growRaf.current)
-    ;(poolRef.current || []).forEach((w) => w.terminate())
-    poolRef.current = null
-  }, [])
 
   const globalKey = JSON.stringify({
     text: p.text, font: p.font, size: p.size,
     svg: svg ? svg.stamp : null, fontsReady,
   })
+
+  // Geometry only changes with the letterform or the growth; the ink dials
+  // repaint from the same polygons, which is why dragging bleed is free.
   useEffect(() => {
     if (!fontsReady) return
-    const key = globalKey + JSON.stringify(genome)
-    if (lastKey.current === key) return
-    const token = ++renderToken.current
-    const job = { token, genome, items: [[0, key]] }
-    jobRef.current = job
-    const list = pool()
-    if (!list.length) return drawOnMainThread(job)
-    list.forEach(dispatchCell)
+    polysRef.current = inkPolys(genome)
+    layerRef.current = makeLayer(genome, blitRatio())
+    artRef.current = layerRef.current
+    if (squintRef.current && layerRef.current) paintLayer(squintRef.current, layerRef.current, 1)
+    growOut(layerRef.current)
   }, [genome, globalKey])
 
   // dev-only: #svgdump overlays the traced vector of the selected variant
