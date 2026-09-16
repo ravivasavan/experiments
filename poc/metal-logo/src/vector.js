@@ -57,7 +57,7 @@ export function loadFont(name) {
 
 // ── glyph geometry ─────────────────────────────────────────────────────
 
-function flattenCommands(commands) {
+export function flattenCommands(commands) {
   const polys = []
   let poly = null
   let sx = 0, sy = 0, cx = 0, cy = 0
@@ -102,6 +102,12 @@ function flattenCommands(commands) {
   }
   if (poly && poly.length > 2) polys.push(poly)
   return polys
+}
+
+/* The typesetter needs the face itself — advances, per-glyph paths and the
+   metrics — not just a rendered string. */
+export function getFont(name) {
+  return fonts[name] || fonts[FONT_NAMES[0]] || null
 }
 
 export function textGeometry(text, fontName, fontSize, dislocation = 0, rand = null) {

@@ -48,34 +48,7 @@
 
     /* The world is full-bleed and pans under the glass: that is the point of a
        translucent sheet. App.jsx centres the world on the viewport's centre,
-       and the sheet lies over the right of it — minimise is the way back. */
-    .metal-hint {
-      position: fixed;
-      left: 20px;
-      /* Clear of the dock: --panel-gap + the 44px pill + a gap. */
-      bottom: 68px;
-      color: var(--muted);
-      font-size: 13px;
-      letter-spacing: 0.04em;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* Squint at this and a logo either holds together or doesn't — so it has
-       to stay readable while the dials are open. The whole right-hand column
-       is the sheet's now, so the patch test sits above the hint on the left. */
-    .metal-squint {
-      position: fixed;
-      left: 20px;
-      bottom: 96px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 1;
-    }
-    .metal-squint__label { color: var(--muted); font-size: 11px; letter-spacing: 0.08em; }
-    .metal-squint__canvas {
-      width: 110px;
+       and the sheet lies over the right of it — minimise is the way back. */      width: 110px;
       aspect-ratio: 1400 / 800;
       border: 1px solid var(--separator);
     }
@@ -85,13 +58,10 @@
          the bottom-right corner: the dock lifts to sit on that bar, and
          the patch test lifts clear of the dock in turn — still on the left
          edge, which the disc never reaches. */
-      .metal-hint { display: none; }
-      .metal-squint { left: var(--panel-gap); bottom: 136px; }
-    }
   </style>
   <!-- Before the app bundle, which Vite injects at the end of this head. -->
   <script src="/assets/play.js" defer></script>
-  <script type="module" crossorigin src="/20260824/metal/assets/index-r5zsRESq.js"></script>
+  <script type="module" crossorigin src="/20260824/metal/assets/index-GXdqrhfq.js"></script>
   <link rel="modulepreload" crossorigin href="/20260824/metal/assets/react-9mpQ3zXo.js">
   <link rel="modulepreload" crossorigin href="/20260824/metal/assets/dialkit-DdCtcJY5.js">
   <link rel="modulepreload" crossorigin href="/20260824/metal/assets/opentype-CnJa8trK.js">

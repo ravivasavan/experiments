@@ -1,24 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDialKitController } from 'dialkit'
-import {
-  extractLetterform,
-  growTendrils,
-  mirrorBranches,
-  makeRng,
-  LOGICAL_W,
-  LOGICAL_H,
-} from './generator.js'
-import { branchOutline } from './outline.js'
+import { makeRng, LOGICAL_W, LOGICAL_H } from './generator.js'
 import { renderInk } from './raster.js'
-import { fixturePolys } from './engine/fixture.js'
+import { makeEnvelope } from './engine/envelope.js'
+import { typeset, fitToEnvelope, bboxOf } from './engine/typeset.js'
+import { findAnchors } from './engine/anchors.js'
+import { compose, toPolygons } from './engine/compose.js'
+import { sigilPolys } from './engine/sigil.js'
 import {
   loadFont,
   FONT_NAMES,
-  textGeometry,
+  getFont,
   imageGeometry,
   svgString,
   exportSvg,
-  rasterizeForAnalysis,
 } from './vector.js'
 
 const FONTS = FONT_NAMES
@@ -27,115 +22,89 @@ const BASE = import.meta.env.BASE_URL || '/'
 
 // The legibility dial has four named stops, each a whole parameter mix —
 // the genre's own spectrum, with its exemplars.
+/* Four named points on the legibility spectrum, each a whole composition
+   rather than a growth setting. They set the silhouette first, because that is
+   the order the design happens in. */
 const STOPS = {
   'Readable but cold': { // Darkthrone
-    growth: { length: 0.45, wings: 0.3, depth: 2, splitChance: 0.25, chaos: 0.3, flare: 0.4, curl: 0.15, taper: 0.9, sprouts: 0.05, counters: 0.05, crownRoot: 0.5, symBreak: 0.2, envelope: 'free' },
-    ink: { bleed: 1.2, threshold: 0.45, grit: 0.2 },
-    dislocation: 0.05, symmetry: false,
+    silhouette: { shape: 'block', aspect: 4.4, crown: 0.15, sag: 0.1 },
+    letters: { outerBias: 0.12, tracking: -0.01, arc: 0.08, dislocation: 0.05, prune: 2.2 },
+    ornament: { ornaments: 8, majors: 2, reach: 0.8, barbs: 0.11, angle: 0.2, curvature: 0.08, contrast: 6 },
+    composition: { symmetry: 0.9, crownRoot: 0.5, sigil: 'none' },
+    ink: { swell: 1.0, grit: 0.18 },
   },
   'Unstable': { // Mayhem
-    growth: { length: 0.8, wings: 0.4, depth: 3, splitChance: 0.45, chaos: 0.8, flare: 0.35, curl: 0.5, taper: 0.8, sprouts: 0.2, counters: 0.2, crownRoot: 0.4, symBreak: 0.5, envelope: 'free' },
-    ink: { bleed: 2.0, threshold: 0.4, grit: 0.45 },
-    dislocation: 0.8, symmetry: false,
+    silhouette: { shape: 'arch', aspect: 3.8, crown: 0.45, sag: 0.3 },
+    letters: { outerBias: 0.3, tracking: -0.03, arc: 0.22, dislocation: 0.55, prune: 1.6 },
+    ornament: { ornaments: 14, majors: 4, reach: 1.25, barbs: 0.17, angle: 0.5, curvature: 0.3, contrast: 8 },
+    composition: { symmetry: 0.55, crownRoot: 0.45, sigil: 'none' },
+    ink: { swell: 1.6, grit: 0.4 },
   },
   'Breaking point': { // early Immortal
-    growth: { length: 1.1, wings: 0.6, depth: 4, splitChance: 0.55, chaos: 0.55, flare: 0.5, curl: 0.35, taper: 0.85, sprouts: 0.15, counters: 0.3, crownRoot: 0.6, symBreak: 0.35, envelope: 'bat-wing' },
-    ink: { bleed: 2.4, threshold: 0.42, grit: 0.3 },
-    dislocation: 0.25, symmetry: false,
+    silhouette: { shape: 'wing', aspect: 3.5, crown: 0.55, sag: 0.3 },
+    letters: { outerBias: 0.35, tracking: -0.02, arc: 0.25, dislocation: 0.25, prune: 1.6 },
+    ornament: { ornaments: 18, majors: 5, reach: 1.45, barbs: 0.18, angle: 0.45, curvature: 0.32, contrast: 8 },
+    composition: { symmetry: 0.8, crownRoot: 0.6, sigil: 'inverted cross' },
+    ink: { swell: 2.0, grit: 0.3 },
   },
   'Total sigil': { // Xasthur / Leviathan
-    growth: { length: 1.7, wings: 0.8, depth: 5, splitChance: 0.7, chaos: 0.7, flare: 0.6, curl: 0.5, taper: 0.8, sprouts: 0.45, counters: 0.7, crownRoot: 0.7, symBreak: 0.25, envelope: 'arch' },
-    ink: { bleed: 3.4, threshold: 0.38, grit: 0.35 },
-    dislocation: 0.35, symmetry: true,
+    silhouette: { shape: 'lozenge', aspect: 2.4, crown: 0.8, sag: 0.4 },
+    letters: { outerBias: 0.5, tracking: -0.06, arc: 0.45, dislocation: 0.4, prune: 1.2 },
+    ornament: { ornaments: 26, majors: 7, reach: 2.0, barbs: 0.24, angle: 0.75, curvature: 0.6, contrast: 11 },
+    composition: { symmetry: 0.95, crownRoot: 0.7, sigil: 'pentagram' },
+    ink: { swell: 2.8, grit: 0.35 },
   },
 }
 
-const RANGES = {
-  length: [0.1, 3], wings: [0, 1], depth: [0, 6], splitChance: [0, 1],
-  chaos: [0, 1], flare: [0, 1], curl: [0, 1], taper: [0, 1],
-  sprouts: [0, 1], counters: [0, 1], crownRoot: [0, 1], symBreak: [0, 1], dislocation: [0, 1],
-  bleed: [0, 10], threshold: [0.05, 0.95], grit: [0, 1],
+/* What Mutate is allowed to nudge, and how far. The seed is the dice; these are
+   the design, and a mutation walks them rather than re-rolling them. */
+const WALK = {
+  'letters.outerBias': [0, 1], 'letters.arc': [0, 1], 'letters.dislocation': [0, 1],
+  'letters.tracking': [-0.08, 0.02],
+  'ornament.ornaments': [4, 28], 'ornament.majors': [0, 8], 'ornament.reach': [0.3, 2.5],
+  'ornament.barbs': [0.05, 0.3], 'ornament.angle': [0, 1], 'ornament.curvature': [0, 1],
+  'composition.symmetry': [0, 1], 'composition.crownRoot': [0, 1],
+  'silhouette.crown': [0, 1], 'silhouette.sag': [0, 1], 'silhouette.aspect': [1, 6],
 }
 
 let seedCounter = (Math.random() * 1e9) | 0
 const nextSeed = () => (seedCounter = (seedCounter + 0x9e3779b9) >>> 0)
 
-function genomeFromStop(stop, seed) {
-  const s = STOPS[stop] || STOPS['Breaking point']
+/* The genome is the seed. Everything else about the logo is on the panel, which
+   is where the design lives now — so Mutate walks the dials and Grow re-rolls
+   them, rather than there being a second hidden copy of the design to keep in
+   step with the one you can see. */
+const nudge = (v, [lo, hi], strength, rand) =>
+  Math.min(hi, Math.max(lo, v + (rand() * 2 - 1) * strength * (hi - lo) * 0.3))
+
+function walkValues(values, strength, rand) {
+  const out = {}
+  for (const path of Object.keys(WALK)) {
+    const [folder, key] = path.split('.')
+    const cur = values[folder] && values[folder][key]
+    if (typeof cur !== 'number') continue
+    out[folder] = out[folder] || {}
+    let v = nudge(cur, WALK[path], strength, rand)
+    if (key === 'ornaments' || key === 'majors') v = Math.round(v)
+    out[folder][key] = v
+  }
+  return out
+}
+
+function rollOrnament(rand) {
+  const r = (lo, hi) => lo + rand() * (hi - lo)
   return {
-    seed,
-    dislocation: s.dislocation,
-    symmetry: s.symmetry,
-    growth: { ...s.growth },
-    ink: { ...s.ink },
+    ornament: {
+      ornaments: Math.round(r(6, 26)),
+      majors: Math.round(r(1, 7)),
+      reach: r(0.6, 2.2),
+      barbs: r(0.08, 0.28),
+      angle: r(0.1, 0.9),
+      curvature: r(0, 0.8),
+      contrast: r(4, 13),
+    },
+    composition: { symmetry: r(0.4, 1), crownRoot: r(0.2, 0.9) },
   }
-}
-
-function mutateNum(v, [min, max], strength, rand) {
-  const span = max - min
-  const nv = v + (rand() * 2 - 1) * strength * span * 0.35
-  return Math.min(max, Math.max(min, nv))
-}
-
-// seedOnly: same recipe, different dice — two of the eight children
-function mutate(parent, strength, rand, seedOnly = false) {
-  const child = {
-    seed: nextSeed(),
-    dislocation: parent.dislocation,
-    symmetry: parent.symmetry,
-    growth: { ...parent.growth },
-    ink: { ...parent.ink },
-  }
-  if (seedOnly) return child
-  for (const k of Object.keys(child.growth)) {
-    if (typeof child.growth[k] !== 'number') continue
-    child.growth[k] = mutateNum(child.growth[k], RANGES[k], strength, rand)
-  }
-  child.growth.depth = Math.round(child.growth.depth)
-  if (rand() < strength * 0.3) child.growth.envelope = ENVELOPES[(rand() * ENVELOPES.length) | 0]
-  for (const k of Object.keys(child.ink)) {
-    child.ink[k] = mutateNum(child.ink[k], RANGES[k], strength, rand)
-  }
-  child.dislocation = mutateNum(child.dislocation, RANGES.dislocation, strength * 0.7, rand)
-  if (rand() < strength * 0.15) child.symmetry = !child.symmetry
-  return child
-}
-
-// Not a mutation of what is on screen — every growth dial thrown to somewhere
-// new in its own range, ink and symmetry left where they are. Mutate walks; this
-// jumps. The ranges are the same ones the panel draws, so nothing it produces is
-// out of bounds.
-function randomGrowth(base) {
-  const rand = makeRng(nextSeed())
-  const growth = { ...base.growth }
-  for (const k of Object.keys(growth)) {
-    if (typeof growth[k] !== 'number') continue
-    const [min, max] = RANGES[k]
-    growth[k] = min + rand() * (max - min)
-  }
-  growth.depth = Math.round(growth.depth)
-  growth.envelope = ENVELOPES[(rand() * ENVELOPES.length) | 0]
-  const [dmin, dmax] = RANGES.dislocation
-  return {
-    seed: nextSeed(),
-    dislocation: dmin + rand() * (dmax - dmin),
-    symmetry: base.symmetry,
-    growth,
-    ink: { ...base.ink },
-  }
-}
-
-function genomesMatch(g, variant, ink, symmetry) {
-  for (const k of Object.keys(g.growth)) {
-    if (typeof g.growth[k] === 'string') {
-      if (g.growth[k] !== variant[k]) return false
-    } else if (Math.abs(g.growth[k] - variant[k]) > 1e-6) return false
-  }
-  if (Math.abs(g.dislocation - variant.dislocation) > 1e-6) return false
-  for (const k of Object.keys(g.ink)) {
-    if (Math.abs(g.ink[k] - ink[k]) > 1e-6) return false
-  }
-  return g.symmetry === symmetry
 }
 
 function loadSvgFile(file, done) {
@@ -166,19 +135,16 @@ export default function App() {
   const view = useRef({ x: 0, y: 0, z: 1 })
   const suppressClick = useRef(false)
   const zoomBlitTimer = useRef(null)
-  const squintRef = useRef(null)
   const fileRef = useRef(null)
   const polysRef = useRef(null)  // letterform + tendrils, before any ink
   const layerRef = useRef(null)  // the painted ink, tinted, at the current ratio
   const artRef = useRef(null)    // what the grow-out animation is animating
   const growRaf = useRef(0)
   const layerRatio = useRef(0)
-  const maskCache = useRef(new Map())
-  const lfCache = useRef(new WeakMap())
   const historyRef = useRef([])
   const colorsRef = useRef({ bg: '#0d1b1e', fg: '#fff5f5' })
 
-  const [genome, setGenome] = useState(() => genomeFromStop(DEFAULT_STOP, nextSeed()))
+  const [genome, setGenome] = useState(() => ({ seed: nextSeed() }))
   const [svg, setSvg] = useState(null)
   const [loadedFont, setLoadedFont] = useState(null)
   const [dragging, setDragging] = useState(false)
@@ -201,31 +167,48 @@ export default function App() {
       clearSvg: { type: 'action', label: 'Back to text' },
       legibility: { type: 'select', options: Object.keys(STOPS), default: DEFAULT_STOP },
       mutation: [0.35, 0.05, 1],
-      variant: {
-        length: [1.1, 0.1, 3],
-        wings: [0.6, 0, 1],
-        depth: [4, 0, 6, 1],
-        splitChance: [0.55, 0, 1],
-        chaos: [0.55, 0, 1],
-        flare: [0.5, 0, 1],
-        curl: [0.35, 0, 1],
-        taper: [0.85, 0, 1],
-        sprouts: [0.15, 0, 1],
-        counters: [0.3, 0, 1],
-        crownRoot: [0.6, 0, 1],
-        symBreak: [0.35, 0, 1],
-        envelope: { type: 'select', options: ENVELOPES, default: 'bat-wing' },
-        dislocation: [0.25, 0, 1],
+
+      // The silhouette is chosen FIRST. Everything else is designed into it.
+      silhouette: {
+        shape: { type: 'select', options: ['wing', 'arch', 'lozenge', 'block'], default: 'wing' },
+        aspect: [3.5, 1, 6],
+        crown: [0.55, 0, 1],
+        sag: [0.3, 0, 1],
+        showGuide: false,
       },
+
+      letters: {
+        outerBias: [0.25, 0, 1],
+        tracking: [-0.02, -0.08, 0.02],
+        arc: [0.12, 0, 1],
+        dislocation: [0.25, 0, 1],
+        prune: [1.6, 0.8, 3],
+      },
+
+      // A budget, not a growth rate. This is the whole difference.
+      ornament: {
+        ornaments: [12, 4, 28, 1],
+        majors: [4, 0, 8, 1],
+        reach: [1.0, 0.3, 2.5],
+        barbs: [0.18, 0.05, 0.3],
+        angle: [0.35, 0, 1],
+        curvature: [0.25, 0, 1],
+        contrast: [8, 3, 14],
+      },
+
+      composition: {
+        symmetry: [0.8, 0, 1],
+        crownRoot: [0.6, 0, 1],
+        sigil: { type: 'select', options: ['none', 'inverted cross', 'pentagram', 'horns'], default: 'inverted cross' },
+      },
+
       ink: {
-        bleed: [2.4, 0, 10],
+        swell: [2.0, 0, 6],
         threshold: [0.42, 0.05, 0.95],
         grit: [0.3, 0, 1],
       },
-      symmetry: false,
+
       transparentBg: true,
-      // Grow the logo out of its middle when it changes, rather than cutting to
-      // it. Off is the old behaviour, and what reduced-motion gets.
       growOut: true,
     },
     {
@@ -259,7 +242,6 @@ export default function App() {
     }
     artRef.current = layerRef.current
     paintLayer(singleRef.current, layerRef.current, 1)
-    paintLayer(squintRef.current, layerRef.current, 1)
   }
 
   // Grow the art out of its middle over GROW_MS. Any new art cancels the frame
@@ -302,43 +284,68 @@ export default function App() {
     if (historyRef.current.length > 50) historyRef.current.shift()
   }
 
-  function syncPanel(genome) {
-    pendingSync.current = true
-    controller.setValues({
-      variant: { ...genome.growth, dislocation: genome.dislocation },
-      ink: { ...genome.ink },
-      symmetry: genome.symmetry,
-    })
+  /* Mutate walks the design: a new seed, and every dial in WALK nudged by the
+     mutation strength. Grow re-rolls the ornament budget outright. Both go
+     through the panel, because the panel is where the design lives. */
+  function snapshot() {
+    return { seed: genomeRef.current.seed, values: JSON.parse(JSON.stringify(pRef.current)) }
   }
 
-  // Mutate walks from where you are, at the strength the panel is set to.
   function mutateOne() {
-    pushHistory(genomeRef.current)
-    const next = mutate(genomeRef.current, pRef.current.mutation, makeRng(nextSeed()))
-    setGenome(next)
-    syncPanel(next)
+    historyRef.current.push(snapshot())
+    if (historyRef.current.length > 50) historyRef.current.shift()
+    const rand = makeRng(nextSeed())
+    pendingSync.current = true
+    controller.setValues(walkValues(pRef.current, pRef.current.mutation, rand))
+    setGenome({ seed: nextSeed() })
   }
 
-  // Grow jumps: every growth dial re-rolled, ink and symmetry left alone.
   function growRandom() {
-    pushHistory(genomeRef.current)
-    const next = randomGrowth(genomeRef.current)
-    setGenome(next)
-    syncPanel(next)
+    historyRef.current.push(snapshot())
+    const rand = makeRng(nextSeed())
+    pendingSync.current = true
+    controller.setValues(rollOrnament(rand))
+    setGenome({ seed: nextSeed() })
   }
 
   function freshOne(stop = pRef.current.legibility) {
-    pushHistory(genomeRef.current)
-    const next = genomeFromStop(stop, nextSeed())
-    setGenome(next)
-    syncPanel(next)
+    historyRef.current.push(snapshot())
+    const s = STOPS[stop] || STOPS[DEFAULT_STOP]
+    pendingSync.current = true
+    controller.setValues({
+      silhouette: { ...s.silhouette },
+      letters: { ...s.letters },
+      ornament: { ...s.ornament },
+      composition: { ...s.composition },
+      ink: { ...s.ink },
+    })
+    setGenome({ seed: nextSeed() })
   }
 
   function goBack() {
     const last = historyRef.current.pop()
     if (!last) return
-    setGenome(last)
-    syncPanel(last)
+    pendingSync.current = true
+    controller.setValues(last.values)
+    setGenome({ seed: last.seed })
+  }
+
+  /* Export is the one place Clipper still runs: the screen gets the GPU ink,
+     but an SVG needs real outlines, so the same composition is unioned,
+     offset once and gritted for the file. It costs a second and it happens
+     once, on a click. */
+  async function buildArt(genome) {
+    const polys = inkPolys(genome)
+    if (!polys || !polys.length) return null
+    const pv = pRef.current
+    const { inkVector, makeArt } = await import('./art.js')
+    const inked = inkVector(polys, {
+      bleed: pv.ink.swell,
+      threshold: pv.ink.threshold,
+      grit: pv.ink.grit,
+      gritSeed: genome.seed * 31 + 7,
+    })
+    return makeArt(inked)
   }
 
   async function doExport() {
@@ -529,98 +536,45 @@ export default function App() {
     freshOne(p.legibility)
   }, [p.legibility])
 
-  // dial edits write into the genome. A syncPanel call echoes back through this
-  // effect exactly once — the pendingSync flag swallows it.
-  const variantKey = JSON.stringify({ v: p.variant, ink: p.ink, sym: p.symmetry })
+  /* The dials are the design, so there is nothing to write back into — a dial
+     change simply repaints, which the render effect already keys on. The flag
+     swallows the echo from a Mutate/Grow/Back that set the dials itself. */
   useEffect(() => {
-    if (pendingSync.current) {
-      pendingSync.current = false
-      return
-    }
-    setGenome((g) => {
-      if (!g || genomesMatch(g, p.variant, p.ink, p.symmetry)) return g
-      const { dislocation, ...growth } = p.variant
-      return { ...g, dislocation, symmetry: p.symmetry, growth: { ...growth }, ink: { ...p.ink } }
-    })
-  }, [variantKey])
+    if (pendingSync.current) pendingSync.current = false
+  }, [JSON.stringify([p.silhouette, p.letters, p.ornament, p.composition])])
 
-  function getGeometry(genome) {
-    const src = svgRef.current
+  /* The composition, start to finish. Envelope, then letters into it, then a
+     budget of ornament placed at extremities and solved against the boundary.
+     Nothing grows and nothing recurses. */
+  function buildComposition(genome) {
     const pv = pRef.current
-    const key = src
-      ? `svg|${src.stamp}`
-      : `t|${pv.text}|${pv.font}|${pv.size}|${genome.dislocation.toFixed(3)}|${genome.dislocation > 0.01 ? genome.seed : 0}`
-    const cached = maskCache.current.get(key)
-    if (cached) return cached
-    const polys = src
-      ? imageGeometry(src.img)
-      : textGeometry(pv.text || 'METAL', pv.font, pv.size, genome.dislocation, makeRng(genome.seed ^ 0x51ab))
-    if (!polys || !polys.length) return null
-    const geom = { polys, mask: rasterizeForAnalysis(polys) }
-    maskCache.current.set(key, geom)
-    if (maskCache.current.size > 30) {
-      maskCache.current.delete(maskCache.current.keys().next().value)
-    }
-    return geom
-  }
+    const src = svgRef.current
+    const rand = makeRng(genome.seed ^ 0x51ab)
 
-  function getLetterform(mask) {
-    let lf = lfCache.current.get(mask)
-    if (!lf) {
-      lf = extractLetterform(mask)
-      lfCache.current.set(mask, lf)
+    let set
+    if (src) {
+      const polys = imageGeometry(src.img)
+      if (!polys || !polys.length) return null
+      set = { glyphs: [{ ch: '*', index: 0, claim: 1, polys, bbox: bboxOf(polys) }], polys, bbox: bboxOf(polys), capH: pv.size }
+    } else {
+      const font = getFont(pv.font)
+      if (!font) return null
+      set = typeset(font, pv.text || 'METAL', pv.size, pv.letters, rand)
     }
-    return lf
-  }
+    if (!set) return null
 
-  // Async because Clipper arrives with it: every cell on screen is built in a
-  // worker, so the main thread only ever needs art.js for Export, the
-  // no-worker fallback and #svgdump — three things nobody is waiting on at
-  // load. import() is cached, so only the first call pays for the fetch.
-  async function buildArt(genome) {
-    const geom = getGeometry(genome)
-    if (!geom || !geom.mask.coverage) return null
-    const lf = getLetterform(geom.mask)
-    const { branchOutline, inkVector, makeArt } = await import('./art.js')
-    const rand = makeRng(genome.seed * 2654435761)
-    let branches = growTendrils(lf, geom.mask, { ...genome.growth }, rand)
-    if (genome.symmetry) {
-      const cx = (geom.mask.bbox.minX + geom.mask.bbox.maxX) / 2
-      branches = branches.concat(mirrorBranches(branches, cx, genome.growth.symBreak || 0, rand))
-    }
-    const outlines = branches.map(branchOutline).filter(Boolean)
-    const polys = inkVector(
-      [...geom.polys, ...outlines],
-      { ...genome.ink, gritSeed: genome.seed * 31 + 7 }
-    )
-    return makeArt(polys)
+    const env = makeEnvelope(pv.silhouette, { A: 0, H: pv.size })
+    const fitted = fitToEnvelope(set, env)
+    const anchors = findAnchors(fitted, pv.letters)
+    const { prims } = compose(anchors, env, { ...pv.ornament, ...pv.composition }, genome.seed)
+    const ornament = toPolygons(prims)
+    const sig = sigilPolys(pv.composition.sigil, env, fitted)
+    return { env, fitted, anchors, prims, polys: [...fitted.polys, ...ornament, ...sig] }
   }
-
-  /* The render, which is now a handful of canvas ops rather than a job queue.
-     renderInk does the whole ink pipeline on the GPU, so there is nothing left
-     worth moving off the main thread — and nothing left that could block it.
-     The worker pool, the job tokens and the stale-cell bookkeeping all existed
-     to hide 1.7 seconds of clipping that no longer happens. */
 
   function inkPolys(genome) {
-    const geom = getGeometry(genome)
-    if (!geom || !geom.mask.coverage) return null
-    /* #fixture — the aesthetic probe. Letterform plus sixteen hand-placed
-       ornaments and nothing else: no growth, no recursion, no seeds on the
-       boundary. It exists to answer one question before the engine that would
-       place these automatically gets built. */
-    if (location.hash.includes('fixture')) {
-      return [...geom.polys, ...fixturePolys(geom.polys)]
-    }
-    const lf = getLetterform(geom.mask)
-    const rand = makeRng(genome.seed * 2654435761)
-    let branches = growTendrils(lf, geom.mask, { ...genome.growth }, rand)
-    if (genome.symmetry) {
-      const cx = (geom.mask.bbox.minX + geom.mask.bbox.maxX) / 2
-      branches = branches.concat(mirrorBranches(branches, cx, genome.growth.symBreak || 0, rand))
-    }
-    const outlines = branches.map(branchOutline).filter(Boolean)
-    return [...geom.polys, ...outlines]
+    const built = buildComposition(genome)
+    return built ? built.polys : null
   }
 
   // The ink layer is rendered at whatever the view currently needs; zooming in
@@ -628,9 +582,12 @@ export default function App() {
   function makeLayer(genome, ratio) {
     const polys = polysRef.current
     if (!polys) return null
+    const ink = pRef.current.ink
     return renderInk(
       polys,
-      genome.ink,
+      // swell is the dial's name for it: how far the ink spreads before it is
+      // thresholded back to a hard edge.
+      { bleed: ink.swell, threshold: ink.threshold, grit: ink.grit },
       genome.seed * 31 + 7,
       Math.min(2.5, Math.max(1, ratio)),
       colorsRef.current.fg,
@@ -682,7 +639,6 @@ export default function App() {
     polysRef.current = inkPolys(genome)
     layerRef.current = makeLayer(genome, blitRatio())
     artRef.current = layerRef.current
-    if (squintRef.current && layerRef.current) paintLayer(squintRef.current, layerRef.current, 1)
     growOut(layerRef.current)
   }, [genome, globalKey])
 
@@ -717,13 +673,6 @@ export default function App() {
             <canvas ref={singleRef} style={styles.cellCanvas} />
           </div>
         </div>
-      </div>
-      <span className="metal-hint">
-        drag pans · pinch / ⌘+wheel zooms · double-click mutates
-      </span>
-      <div className="metal-squint">
-        <span className="metal-squint__label">patch test</span>
-        <canvas ref={squintRef} className="metal-squint__canvas" />
       </div>
       {dragging && <div style={styles.dropVeil}>drop .svg</div>}
       {svgDump && <div style={styles.svgDump} dangerouslySetInnerHTML={{ __html: svgDump }} />}
