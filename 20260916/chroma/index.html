@@ -79,10 +79,6 @@
   <!-- What you are looking at. The composition is not here: Field, Aperture and
        Horizon are styles rather than tools, so they are a dial. -->
   <nav class="rail" aria-label="Chroma view">
-    <button class="tool-pill" type="button" id="fullscreen" aria-label="View wallpaper fullscreen">
-      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/></svg></span>
-      <span class="tool-pill__label">Fullscreen</span>
-    </button>
     <!-- Zoom. The stage it acts on is the one [data-pan] on the page, and Fit
          lights up whenever there is something to go back from. -->
     <div class="rail__group rail__group--zoom">
@@ -187,7 +183,6 @@
       <div class="palette-toolbar">
         <label class="sr-only" for="palette-search">Search palettes</label>
         <input class="input" id="palette-search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
-        <button type="button" id="import-palette" class="btn" title="Import an Omarchy colors.toml">+</button>
       </div>
       <div id="palettes" class="palettes" role="listbox" aria-label="Colour stories"></div>
       <div id="swatches" class="dial-colors" aria-label="Edit palette colours"></div>
@@ -207,10 +202,6 @@
           <option value="2160x2160">Square · 2160 × 2160</option>
         </select>
       </label>
-
-      <p class="sheet__note">Every wallpaper is generated on the GPU from the
-        numbers above. The preview is capped at 1920px on its longest edge;
-        Export renders at the full size you pick.</p>
     </div>
   </aside>
 

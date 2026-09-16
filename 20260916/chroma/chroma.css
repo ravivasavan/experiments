@@ -98,9 +98,11 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 28px;
-  padding: 0 12px;
-  border-radius: 14px;
+  /* The same 44px as every pill in the dock — it is part of that bar, not a
+     caption floating next to it. */
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 22px;
   font-size: 13px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
@@ -116,14 +118,13 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 .palette-toolbar { display: flex; gap: 6px; align-items: center; }
 .palette-toolbar .input { flex: 1; min-width: 0; }
-.palette-toolbar .btn { width: 40px; flex: none; padding: 0; }
 
 .palettes {
   /* .sheet__body is a flex column, so a box with only a max-height gets
      squashed to nothing by its siblings. It sizes itself and scrolls. */
   flex: none;
   min-height: 180px;
-  max-height: 248px;
+  max-height: 320px;
   overflow: auto;
   display: flex;
   flex-direction: column;
@@ -154,7 +155,10 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
   align-items: center;
   gap: 12px;
   width: 100%;
-  height: var(--chroma-row);
+  /* flex: none, or the column squashes every row back to its content height
+     the moment the list outgrows its max-height — which is always. */
+  flex: none;
+  height: 52px;
   padding: 0 12px;
   border: 0;
   background: none;
@@ -169,10 +173,10 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
 .palette:hover { background: var(--chroma-surface-hover); color: var(--ink); }
 .palette[aria-pressed="true"] { background: var(--chroma-surface-active); color: var(--ink); }
 
-.palette-dots { display: flex; gap: 4px; flex: none; }
+.palette-dots { display: flex; gap: 5px; flex: none; }
 .palette-dots i {
-  width: 10px;
-  height: 10px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   display: block;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 14%, transparent);

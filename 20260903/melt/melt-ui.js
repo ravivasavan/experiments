@@ -225,63 +225,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const X = '<svg viewBox="4 4 16 16" fill="none" stroke="currentColor" stroke-width="1.6667" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
 
-  function buildList() {
-    const box = $('ptlist');
-    if (!points.length) {
-      box.innerHTML = '<p class="empty">' + (mask ? 'Click the artwork to place a melt point.' : 'Load an SVG first.') + '</p>';
-      return;
-    }
-    box.innerHTML = points.map((p, i) => `<div class="pt${i === sel ? ' sel' : ''}" data-i="${i}">
-      <span class="pt__n">${i + 1}</span>
-      <div class="pt__dials">
-        <label class="field">
-          <span class="field__top"><span class="field__label">Heat</span><b class="field__value" data-v="heat">${Math.round(p.heat)}</b></span>
-          <input class="dial" type="range" data-k="heat" min="0" max="120" step="1" value="${Math.round(p.heat)}" aria-label="Heat of point ${i + 1}">
-        </label>
-        <label class="field">
-          <span class="field__top"><span class="field__label">Reach</span><b class="field__value" data-v="r">${Math.round(p.r)}</b></span>
-          <input class="dial" type="range" data-k="r" min="20" max="600" step="1" value="${Math.round(p.r)}" aria-label="Reach of point ${i + 1}">
-        </label>
-      </div>
-      <button class="pt__x" type="button" data-x="${i}" aria-label="Remove point ${i + 1}">${X}</button>
-    </div>`).join('');
-    dials(box);
+  /* The point list is DialKit's now — a folder per point, built from this
+     array. buildList means "the shape changed, rebuild the panel"; syncList
+     means "the numbers moved, echo them". */
+  let onPoints = null;
+  function pointValues() {
+    return points.map(p => ({ heat: Math.round(p.heat), r: Math.round(p.r) }));
   }
-
-  // Update values in place so dragging a slider never rebuilds it underfoot.
-  function syncList() {
-    const rows = $('ptlist').querySelectorAll('.pt');
-    rows.forEach(row => {
-      const i = +row.dataset.i, p = points[i];
-      if (!p) return;
-      row.classList.toggle('sel', i === sel);
-      row.querySelectorAll('input[data-k]').forEach(inp => {
-        const val = String(Math.round(p[inp.dataset.k]));
-        if (inp.value !== val && document.activeElement !== inp) inp.value = val;
-      });
-      row.querySelectorAll('b[data-v]').forEach(b => { b.textContent = Math.round(p[b.dataset.v]); });
-    });
-    dials($('ptlist'));
-  }
-
-  $('ptlist').addEventListener('input', e => {
-    const inp = e.target.closest('input[data-k]'); if (!inp) return;
-    const row = inp.closest('.pt'), i = +row.dataset.i, p = points[i];
-    if (!p) return;
-    if (!inp.dataset.dirty) { push(); inp.dataset.dirty = '1'; }
-    p[inp.dataset.k] = +inp.value;
-    sel = i;
-    syncList(); queue(); save();
-  });
-  $('ptlist').addEventListener('change', e => {
-    const inp = e.target.closest('input[data-k]'); if (inp) delete inp.dataset.dirty;
-  });
-  $('ptlist').addEventListener('click', e => {
-    const x = e.target.closest('button[data-x]');
-    if (x) { removePoint(+x.dataset.x); return; }
-    const row = e.target.closest('.pt');
-    if (row) { sel = +row.dataset.i; syncList(); paint(); }
-  });
+  function buildList() { if (onPoints) onPoints(pointValues(), sel, true); }
+  function syncList() { if (onPoints) onPoints(pointValues(), sel, false); }
 
   function removePoint(i) {
     if (!points[i]) return;
@@ -296,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
      moves it — loading a file, or restoring last session from local storage. */
   let onGlobals = null;
   function syncGlobal() {
-    if (onGlobals) onGlobals({ passes: opts.passes, threshold: opts.threshold, base: opts.base });
+    if (onGlobals) onGlobals({ passes: opts.passes, threshold: opts.threshold, base: opts.base, before: before });
   }
 
   function setDisabled(d) {
@@ -439,6 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
     before = !before;
     $('t-before').classList.toggle('is-on', before);
     $('t-before').setAttribute('aria-pressed', String(before));
+    syncGlobal();
     paint();
   });
   $('t-clear').addEventListener('click', () => {
@@ -614,10 +567,29 @@ document.addEventListener('DOMContentLoaded', () => {
   /* What the DialKit panel talks to. Announced rather than just assigned: this
      file is a DOMContentLoaded handler and so is the panel's mount, and the
      module registers its listener first, so the panel cannot simply look. */
+  /* One history entry per gesture, not per frame: a drag is a run of edits to
+     the same dial, so the undo push happens when the target changes. */
+  let lastEdit = '';
   window.melt = {
-    getGlobals: () => ({ passes: opts.passes, threshold: opts.threshold, base: opts.base }),
+    getPoints: pointValues,
+    setPoint(i, key, value) {
+      const p = points[i];
+      if (!p) return;
+      const tag = i + '.' + key;
+      if (tag !== lastEdit) { push(); lastEdit = tag; }
+      p[key] = +value;
+      sel = i;
+      syncCount();
+      queue();
+      save();
+    },
+    endEdit() { lastEdit = ''; },
+    removePoint: (i) => removePoint(i),
+    onPointsChange(fn) { onPoints = fn; },
+    getGlobals: () => ({ passes: opts.passes, threshold: opts.threshold, base: opts.base, before: before }),
     setGlobals(v) {
       if (!v) return;
+      if (v.before != null && !!v.before !== before) { $('t-before').click(); }
       if (v.passes != null) opts.passes = Number(v.passes);
       if (v.threshold != null) opts.threshold = Number(v.threshold);
       if (v.base != null) opts.base = Number(v.base);

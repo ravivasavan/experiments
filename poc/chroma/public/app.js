@@ -3,12 +3,6 @@
   const $ = id => document.getElementById(id);
   const ANGLE_LOCK = 15;
   const palettes = [
-    { name: 'Rose room', group: 'Chroma', colors: ['#332176', '#9268c9', '#f498b7', '#ffd0a4'] },
-    { name: 'Ember room', group: 'Chroma', colors: ['#350b65', '#b43d88', '#ff7253', '#ffd8a0'] },
-    { name: 'Blue hour', group: 'Chroma', colors: ['#151a79', '#426bc8', '#93d8eb', '#e9e5c6'] },
-    { name: 'Violet silence', group: 'Chroma', colors: ['#25114c', '#6b32bc', '#b87eed', '#f2adc8'] },
-    { name: 'Celadon', group: 'Chroma', colors: ['#234e60', '#629d99', '#bad0aa', '#f4e4b5'] },
-    { name: 'Porcelain', group: 'Chroma', colors: ['#696280', '#b5b0dd', '#f0cbd5', '#ffefd6'] },
     { name: 'Catppuccin', group: 'Omarchy', slug: 'catppuccin', colors: ['#101019', '#89b4fa', '#f5c2e7', '#f9e2af'] },
     { name: 'Catppuccin Latte', group: 'Omarchy', slug: 'catppuccin-latte', colors: ['#d7d8dc', '#1e66f5', '#ea76cb', '#df8e1d'] },
     { name: 'Ethereal', group: 'Omarchy', slug: 'ethereal', colors: ['#030610', '#7d82d9', '#ed5b5a', '#ffcead'] },
@@ -367,17 +361,20 @@
     const query = paletteQuery.trim().toLowerCase();
     const root = $('palettes');
     root.replaceChildren();
-    const groups = ['Chroma', 'Omarchy'];
+    const groups = ['Omarchy'];
     let shown = 0;
     for (const group of groups) {
       const items = palettes
         .map((palette, index) => ({ palette, index }))
         .filter(({ palette }) => palette.group === group && (!query || palette.name.toLowerCase().includes(query)));
       if (!items.length) continue;
-      const heading = document.createElement('div');
-      heading.className = 'palette-group';
-      heading.textContent = group;
-      root.append(heading);
+      // One group, so its name would only repeat the section label above it.
+      if (groups.length > 1) {
+        const heading = document.createElement('div');
+        heading.className = 'palette-group';
+        heading.textContent = group;
+        root.append(heading);
+      }
       for (const { palette, index } of items) {
         const button = document.createElement('button');
         button.className = 'palette';
@@ -669,7 +666,7 @@
     try { await navigator.clipboard.writeText(url.href); toast('Copied.'); }
     catch { history.replaceState(null, '', url); toast('Recipe saved in the address bar.'); }
   });
-  $('fullscreen').addEventListener('click', async () => {
+  $('fullscreen')?.addEventListener('click', async () => {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else await $('stage').requestFullscreen();
@@ -704,7 +701,7 @@
   $('palette-search').addEventListener('keydown', event => {
     if (event.key === 'Escape') { $('palette-search').blur(); event.stopPropagation(); }
   });
-  $('import-palette').addEventListener('click', () => $('toml-file').click());
+  $('import-palette')?.addEventListener('click', () => $('toml-file').click());
   $('toml-file').addEventListener('change', event => {
     importTomlFile(event.target.files[0]);
     event.target.value = '';

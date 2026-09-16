@@ -80,45 +80,10 @@
     #nlabel { color: var(--muted); }
     #status { min-width: 0; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    #ptlist .empty { font-size: 13px; color: var(--muted); }
 
     /* One melt point: its number, its two dials, and the way out. */
-    .pt {
-      display: grid; grid-template-columns: 22px 1fr 24px; gap: 0 12px; align-items: start;
-      padding: 10px; border-radius: 14px; cursor: pointer;
-      box-shadow: inset 0 0 0 1px transparent;
-      transition: background-color 160ms ease, box-shadow 160ms ease;
-    }
-    .pt + .pt { margin-top: 6px; }
-    .pt:hover { background: var(--field); }
-    .pt.sel { background: var(--field); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
-    .pt__n {
-      width: 22px; height: 22px; border-radius: 22px; display: grid; place-items: center;
-      font-size: 11px; background: var(--separator); color: var(--muted); font-variant-numeric: tabular-nums;
-      box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
-    }
-    .pt.sel .pt__n { background: var(--accent); color: var(--white); box-shadow: none; }
-    .pt__dials { display: grid; gap: 12px; }
-    /* The value is a <b> because the point list's JS reads b[data-v]; Labil
-       Grotesk ships 400 only, so synthetic bold is the one thing to undo. */
-    .pt b { font-weight: 400; }
-    /* A bare glyph inside the point row, the same weight as chroma's padlocks:
-       a panel is already dense, and a chip on every row is another box to read. */
-    .pt__x {
-      width: 22px; height: 22px; flex: none; padding: 0; border: 0;
-      background: none; cursor: pointer; display: grid; place-items: center;
-      color: color-mix(in srgb, var(--fg) 40%, transparent);
-      transition: color 240ms ease;
-    }
-    .pt__x svg { width: 14px; height: 14px; display: block; }
-    .pt__x:hover { color: var(--accent); }
-    .pt__x:focus-visible { outline: none; color: var(--accent); box-shadow: var(--focus-ring); border-radius: 6px; }
-
-    .about { border-top: 1px solid var(--separator); padding-top: 16px; margin-top: auto; }
+    .bridge { display: none; }
     /* Labil Grotesk ships 400 only, so emphasis is colour, not weight. */
-    .about b { font-weight: 400; color: var(--ink); }
-    .about p + p { margin-top: 8px; }
-    .about code { font-size: 12px; }
 
     /* Folded: the sheet swings to the bottom of the screen, so the empty
        state's copy sits clear of the tools row instead of centring on it. */
@@ -126,7 +91,7 @@
       #empty { padding-top: 180px; }
     }
   </style>
-  <script type="module" crossorigin src="/20260903/melt/assets/index-C1IJOwpA.js"></script>
+  <script type="module" crossorigin src="/20260903/melt/assets/index-DT-grQhT.js"></script>
   <link rel="modulepreload" crossorigin href="/20260903/melt/assets/react-BLvkGNEA.js">
   <link rel="modulepreload" crossorigin href="/20260903/melt/assets/dialkit-B6JcMb2L.js">
   <link rel="stylesheet" crossorigin href="/20260903/melt/assets/dialkit-yOvin6q7.css">
@@ -162,10 +127,6 @@
   <div class="chrome-rule" aria-hidden="true"></div>
 
   <nav class="rail" aria-label="Melt view">
-    <button class="tool-pill" id="t-before" type="button" aria-pressed="false" disabled aria-label="Show the unmelted source">
-      <span class="tool-pill__icon"><svg viewBox="-1.3333 -1.3333 26.6667 26.6667" fill="none" stroke="currentColor" stroke-width="2.2222" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
-      <span class="tool-pill__label">Before</span>
-    </button>
     <!-- Zoom. The stage it acts on is the one [data-pan] on the page, and Fit
          lights up whenever there is something to go back from. -->
     <div class="rail__group rail__group--zoom">
@@ -203,6 +164,17 @@
        control in either of them, it is the file dialog they reach for. -->
   <input type="file" id="file" accept=".svg,image/svg+xml" hidden>
 
+  <!-- Before is a way of looking, not a verb, so it is a toggle in the panel.
+       The button stays on the page because it is what every binding already
+       talks to — the click handler, the is-on class, and the B key you can hold
+       down to peek. The panel clicks it. -->
+  <div class="bridge" hidden aria-hidden="true">
+    <button class="tool-pill" id="t-before" type="button" aria-pressed="false" disabled aria-label="Show the unmelted source">
+      <span class="tool-pill__icon"><svg viewBox="-1.3333 -1.3333 26.6667 26.6667" fill="none" stroke="currentColor" stroke-width="2.2222" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
+      <span class="tool-pill__label">Before</span>
+    </button>
+  </div>
+
   <main id="stage" aria-label="Melt stage" data-pan>
     <canvas id="ink"></canvas>
     <img id="dump" alt="" decoding="async" hidden>
@@ -224,19 +196,10 @@
     </div>
     <div class="sheet__body">
 
-      <!-- The three global dials are DialKit's. The points below are not: they
-           come and go as you click the canvas, one pair of dials each, which a
-           fixed schema has no way to describe. They keep their own list. -->
+      <!-- All of it is DialKit's: the global dials, the Before toggle, and a
+           folder per melt point rebuilt as points come and go. -->
       <div id="dial-mount"></div>
 
-      <h2 class="sheet__section">Points</h2>
-      <div id="ptlist"><p class="empty">Load an SVG first.</p></div>
-
-      <div class="about sheet__note">
-        <p>Each melt point blurs the ink around it and re-thresholds it, so strokes swell, corners round off and letters bleed into each other. <b>Passes</b> is how many blur-and-rethreshold rounds; <b>threshold</b> is the ink level — low bleeds, high erodes.</p>
-        <p>Your file never leaves this browser. Nothing is uploaded; the melt runs on a canvas here, and your points are kept in local storage.</p>
-        <p>Export traces the melted mask at twice the working resolution and writes it as one <code>evenodd</code> path in the original SVG's coordinate space.</p>
-      </div>
     </div>
   </aside>
 
