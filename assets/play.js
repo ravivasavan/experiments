@@ -294,10 +294,10 @@
       var open = document.querySelectorAll('.sheet.is-open');
       for (var i = 0; i < open.length; i++) {
         closeSheet(open[i]);
-        // gateBody catches the usual case. A page with its own Escape (atlas
-        // blurs its search box) can have dropped focus on <body> before this
-        // runs, and a keyboard user should not land back at the top of the
-        // document because they shut a sheet.
+        // gateBody catches the usual case. A page with an Escape handler of
+        // its own can have dropped focus on <body> before this runs, and a
+        // keyboard user should not land back at the top of the document
+        // because they shut a sheet.
         var head = open[i].querySelector('.sheet__head');
         if (folded.matches && !minimised() && head &&
             (!document.activeElement || document.activeElement === document.body)) head.focus();

@@ -73,21 +73,6 @@
       ]
     },
     {
-      "slug": "atlas",
-      "name": "Atlas",
-      "date": "20260826",
-      "description": "Every country you've been to, filled in on an Equal Earth map",
-      "status": "tinkering",
-      "hidden": true,
-      "tech": "vanilla JS, canvas, Natural Earth 1:50m",
-      "glyph": "globe",
-      "shots": [
-        "night.webp",
-        "day.webp",
-        "europe.webp"
-      ]
-    },
-    {
       "slug": "melt",
       "name": "Melt",
       "date": "20260903",
