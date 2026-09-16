@@ -10,6 +10,7 @@ import {
 } from './generator.js'
 import { branchOutline } from './outline.js'
 import { renderInk } from './raster.js'
+import { fixturePolys } from './engine/fixture.js'
 import {
   loadFont,
   FONT_NAMES,
@@ -604,6 +605,13 @@ export default function App() {
   function inkPolys(genome) {
     const geom = getGeometry(genome)
     if (!geom || !geom.mask.coverage) return null
+    /* #fixture — the aesthetic probe. Letterform plus sixteen hand-placed
+       ornaments and nothing else: no growth, no recursion, no seeds on the
+       boundary. It exists to answer one question before the engine that would
+       place these automatically gets built. */
+    if (location.hash.includes('fixture')) {
+      return [...geom.polys, ...fixturePolys(geom.polys)]
+    }
     const lf = getLetterform(geom.mask)
     const rand = makeRng(genome.seed * 2654435761)
     let branches = growTendrils(lf, geom.mask, { ...genome.growth }, rand)
