@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import { DialRoot } from 'dialkit'
 import 'dialkit/styles.css'
-import './dialkit-skin.css'
+import '../../shared/dialkit-skin.css'
 import App from './App.jsx'
 
 // DialKit renders inline, inside the shared settings sheet index.html already

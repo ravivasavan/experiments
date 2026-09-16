@@ -427,14 +427,118 @@ body:has(.sheet) .tools { right: var(--panel-gap); }
 .tool-pill[disabled] { opacity: 0.4; cursor: default; }
 .tool-pill[disabled]:hover { transform: none; color: var(--ink); box-shadow: var(--glass-edge), var(--glass-specular), var(--glass-shadow-sm); }
 
+
+/* --------------------------------------------- level 2: rail and dock --- */
+/* The experiment's own buttons, split by what they do rather than piled into
+   one row above the artwork.
+
+   The rail, down the left, holds the things that change *what you are looking
+   at* — zoom, view mode, step back. They are modes, they persist, and they
+   read as a column of state. Icon only: a vertical strip of words is a menu,
+   not a rail, and the label still reaches a screen reader.
+
+   The dock, floating at the bottom edge, holds the verbs — upload, export,
+   shuffle, clear. They fire and they are done, so they get labels and they sit
+   where the hand already is.
+
+   Both are glass over the artwork, like everything else at this level. Neither
+   reserves any room. */
+
+.rail,
+.dock {
+  position: fixed;
+  z-index: var(--z-chrome);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  /* A scroller clips at its padding edge and these boxes are exactly one pill
+     thick, so the pills' ambient shadow would be sliced off. The padding gives
+     it room and the negative margin hands the room straight back, so the pills
+     stay on the line the tokens put them on. */
+  pointer-events: none;
+}
+.rail::-webkit-scrollbar,
+.dock::-webkit-scrollbar { display: none; }
+.rail > *,
+.dock > * { pointer-events: auto; }
+
+/* --- the rail --- */
+.rail {
+  top: var(--chrome-tools);
+  left: var(--panel-gap);
+  flex-direction: column;
+  max-height: calc(100% - var(--chrome-tools) - var(--panel-gap));
+  overflow-y: auto;
+  touch-action: pan-y;
+  padding-inline: 32px;
+  margin-inline: -32px;
+}
+
+/* Icon only, on the same 44px round-rect as every other tool pill. The label
+   stays in the markup and stays in the a11y tree — it is just not drawn. */
+.rail .tool-pill {
+  width: 44px;
+  padding: 0;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.rail .tool-pill__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- the dock --- */
+/* Centred on the space it actually has, not on the viewport: with the drawer
+   open the dock centres on what is left of the screen, and when the drawer
+   folds to its disc the dock takes the width back. Both edges are animated on
+   the same curve as the fold, so the two move as one gesture. */
+.dock {
+  left: var(--panel-gap);
+  right: var(--panel-gap);
+  bottom: var(--panel-gap);
+  justify-content: center;
+  overflow-x: auto;
+  touch-action: pan-x;
+  padding-block: 32px;
+  margin-block: -32px;
+  transition: right 240ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+body:has(.sheet) .dock { right: calc(var(--panel-w) + var(--panel-gap) * 2); }
+:root[data-play-sheet="min"] body:has(.sheet) .dock { right: var(--panel-gap); }
+
+/* A dock too wide for its box scrolls instead of spilling: centring collapses
+   to a start-aligned row the moment the pills stop fitting, the same reason
+   the rail's auto margin would. */
+.dock > :first-child { margin-left: auto; }
+.dock > :last-child { margin-right: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dock { transition: none; }
+}
+
 /* ------------------------------------------------------------- the sheet -- */
 /* Settings float over the content on their own pane of glass, inset from the
    viewport rather than butted against it. It is a pure overlay: the artwork
    underneath runs the full width and is centred on the viewport, and the glass
    lies on top of it. Covering some of the artwork is what minimise is for. */
 
-/* A page with a tools row drops the sheet below the row — both would otherwise
-   start at --chrome-tools and the glass would sit on the pills. */
+/* Nothing sits between the rule and the drawer any more — the experiment's own
+   buttons went to the rail and the dock — so the glass starts on the first line
+   below the chrome and runs to the bottom of the screen.
+
+   TRANSITIONAL: a play still carrying the old top tools row keeps the old
+   push-down, so it reads correctly until it is migrated. Delete this rule, and
+   the whole `.tools` block above, once the last play has moved to the rail and
+   the dock. */
 body:has(.tools) { --sheet-top: calc(var(--chrome-tools) + 44px + var(--panel-gap)); }
 
 .sheet {
@@ -792,6 +896,37 @@ input[type="range"].dial {
      the left edge rather than hanging off the right. */
   .tools > :first-child { margin-left: 0; }
 
+  /* --- rail and dock, folded --- */
+  /* The drawer swings down to the bottom of the screen here, so the dock can no
+     longer live there: it lifts to sit on top of the collapsed glass. Minimised,
+     the drawer is only a disc in the corner and the dock drops back down beside
+     it. */
+  .dock,
+  body:has(.sheet) .dock {
+    left: 0;
+    right: 0;
+    bottom: var(--panel-gap);
+    padding-inline: var(--chrome-pad);
+    justify-content: flex-start;
+  }
+  body:has(.sheet) .dock { bottom: calc(var(--panel-gap) + 60px + 8px); }
+  :root[data-play-sheet="min"] body:has(.sheet) .dock {
+    bottom: var(--panel-gap);
+    padding-right: calc(var(--sheet-min) + var(--chrome-pad) + 8px);
+  }
+  /* Start-aligned once folded: a centred row has nothing to centre against when
+     it is already wider than the screen. */
+  .dock > :first-child { margin-left: 0; }
+  .dock > :last-child { margin-right: 0; }
+
+  /* The rail keeps its column — 44px of glass over the artwork is the same
+     bargain the drawer makes — but stops short of whatever the dock is doing
+     underneath it. */
+  .rail {
+    left: var(--chrome-pad);
+    max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) * 2 - 60px - 44px);
+  }
+
   /* --- bottom sheet --- */
   /* The material is the same as the pane's; only the geometry swings down. */
   .sheet {
@@ -819,7 +954,7 @@ input[type="range"].dial {
     height: min(
       72vh,
       var(--sheet-full, 72vh),
-      max(60px, calc(100vh - var(--chrome-tools) - 44px - var(--panel-gap) * 2))
+      max(60px, calc(100vh - var(--chrome-tools) - var(--panel-gap) * 2))
     );
   }
   .sheet__grab { display: block; }
