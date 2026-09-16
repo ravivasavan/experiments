@@ -821,7 +821,7 @@
   function panelValues() {
     return {
       spec: state.spec, number: state.number, service: state.service,
-      layout: state.layout, scheme: state.scheme, seed: state.seed,
+      layout: state.layout, scheme: state.scheme, seed: state.seed, links: state.links,
       scale: state.scale, dither: state.dither, changes: state.changes,
       double: state.double, separated: state.separated,
       hold: state.hold, flash: state.flash
@@ -880,6 +880,10 @@
     if (v.number !== state.number) { state.number = Math.max(100, Math.min(899, +v.number || 100)); rebuild = true; }
     if (v.scheme !== state.scheme) { state.scheme = +v.scheme; paintSwatches(); rebuild = true; }
     if (v.seed !== state.seed) { state.seed = v.seed; rebuild = true; }
+    if (v.links != null) {
+      const next = String(v.links).split(',').map(x => x.trim()).filter(Boolean);
+      if (next.join('|') !== state.links.join('|')) { state.links = next; rebuild = true; }
+    }
     if (v.dither !== state.dither) { state.dither = v.dither; rebuild = true; }
     if (v.changes !== state.changes) { state.changes = +v.changes || 6; rebuild = true; }
     for (const k of ['double', 'separated', 'hold', 'flash']) {

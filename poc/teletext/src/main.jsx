@@ -56,10 +56,30 @@ function Controls() {
       seed: { type: 'text', default: o.seed ?? 'ceefax', placeholder: 'Seed' },
       scale: { type: 'select', options: SCALES, default: String(o.scale ?? 2) },
     },
+    fastext: { type: 'text', default: o.links ?? 'INDEX, MAGNETIC, BLOCK, A-Z', placeholder: 'Fastext links' },
+    /* The buttons are DialKit's actions now. Each one clicks the button the
+       script already binds, so nothing about teletext's own wiring changes. */
+    clearPicture: { type: 'action', label: 'Clear picture' },
+    exportPng: { type: 'action', label: 'PNG' },
+    exportTti: { type: 'action', label: 'TTI' },
+    openEditTf: { type: 'action', label: 'Open in edit.tf' },
+    copyUnicode: { type: 'action', label: 'Copy as Unicode' },
+  }, {
+    onAction: (action) => {
+      const id = {
+        clearPicture: 'c-clearimg',
+        exportPng: 'x-png',
+        exportTti: 'x-tti',
+        openEditTf: 'x-edittf',
+        copyUnicode: 'x-unicode',
+      }[String(action)]
+      if (id) document.getElementById(id)?.click()
+    },
   })
 
   const v = controller.values
   const flat = {
+    links: v.fastext,
     spec: v.page.spec, number: v.page.number, service: v.page.service,
     layout: v.page.layout, scheme: Number(v.scheme), seed: v.generate.seed,
     scale: Number(v.generate.scale), dither: v.picture.dither,
@@ -82,6 +102,7 @@ function Controls() {
         attributes: { double: s.double, separated: s.separated, hold: s.hold, flash: s.flash },
         picture: { dither: s.dither, changes: s.changes },
         generate: { seed: s.seed, scale: String(s.scale) },
+        fastext: Array.isArray(s.links) ? s.links.join(', ') : s.links,
       })
     })
   }, [])

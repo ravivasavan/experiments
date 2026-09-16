@@ -115,8 +115,9 @@
         padding: 168px var(--chrome-pad) 24px;
       }
     }
+    .bridge { display: none; }
   </style>
-  <script type="module" crossorigin src="/20260804/teletext/assets/index-B8zq0K_E.js"></script>
+  <script type="module" crossorigin src="/20260804/teletext/assets/index-B6J6I90L.js"></script>
   <link rel="modulepreload" crossorigin href="/20260804/teletext/assets/react-BLvkGNEA.js">
   <link rel="modulepreload" crossorigin href="/20260804/teletext/assets/dialkit-B6JcMb2L.js">
   <link rel="stylesheet" crossorigin href="/20260804/teletext/assets/dialkit-yOvin6q7.css">
@@ -225,51 +226,34 @@
     </div>
     <div class="sheet__body">
 
-      <!-- Everything that is a dial. -->
+      <!-- Everything DialKit has a control for is DialKit's, the buttons
+           included. What is left below it is what it has none for. -->
       <div id="dial-mount"></div>
-
-      <!-- And everything that isn't. A body of copy is not a dial and DialKit
-           has no control for one; nor for a row of palette swatches, a drop
-           target, or the notes that say what the format costs you. -->
 
       <h2 class="sheet__section">Copy</h2>
       <label class="field">
         <span class="field__top"><span class="field__label">Text</span></span>
         <textarea class="textarea" id="c-copy" spellcheck="false"></textarea>
       </label>
-      <p class="sheet__note">First line is the heading. On <em>Index</em>, each line after
-        it is an entry — end a line with a page number to right-align it.</p>
-      <label class="field">
-        <span class="field__top"><span class="field__label">Fastext links</span></span>
-        <input class="input" id="c-links" type="text" value="INDEX, MAGNETIC, BLOCK, A-Z">
-      </label>
 
       <h2 class="sheet__section">Palette</h2>
       <div class="swatches" id="swatches"></div>
-      <p class="sheet__note">Level 1 has eight colours at full intensity, and no more.
-        Every attribute is <em>spacing</em> — it occupies a cell of its own, and Reveal,
-        on the rail, shows what the layout is paying.</p>
 
       <h2 class="sheet__section">Picture</h2>
       <div id="drop" tabindex="0" role="button">Drop an image, or click to choose</div>
-      <input id="file" type="file" accept="image/*">
-      <button class="btn" id="c-clearimg" type="button">Clear picture</button>
-      <p class="sheet__note">Sampled at sixel resolution: 80 × 69 blocks. A cell can only
-        light one colour against the background, so each change of colour along a
-        row costs a cell.</p>
 
-      <h2 class="sheet__section">Export</h2>
-      <div class="field__row">
+      <!-- The buttons DialKit now fires. They stay on the page because they are
+           what the script already binds; nothing looks at them. -->
+      <div class="bridge" hidden aria-hidden="true">
+        <input class="input" id="c-links" type="text" value="INDEX, MAGNETIC, BLOCK, A-Z">
+        <input id="file" type="file" accept="image/*">
+        <button class="btn" id="c-clearimg" type="button">Clear picture</button>
         <button class="btn" id="x-png" type="button">PNG</button>
         <button class="btn" id="x-tti" type="button">TTI</button>
-      </div>
-      <div class="field__row">
         <button class="btn" id="x-edittf" type="button">Open in edit.tf</button>
+        <button class="btn" id="x-unicode" type="button">Copy as Unicode</button>
+        <span id="x-note"></span>
       </div>
-      <button class="btn btn--primary" id="x-unicode" type="button">Copy as Unicode</button>
-      <p class="sheet__note" id="x-note">Randomise, on the dock, draws a whole new page —
-        seed, layout, palette and copy together. Type is Bedstead, generated from the
-        SAA5050 character ROM by Ben Harris — public domain.</p>
     </div>
   </aside>
 
