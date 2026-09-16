@@ -1,0 +1,323 @@
+/* Chroma — page-specific only.
+
+   The tokens, the reset, the chrome, the rail and dock pills, the drawer and
+   every generic control (.field, .select, .input, .btn) come from play.css.
+   The panel's dials come from DialKit. What is left here is the preview, the
+   palette list, the swatch rows, the angle chips, the locks and the toast —
+   the parts of Chroma that have no equivalent anywhere else.
+
+   Chroma's own token set is gone with its chrome, so anything that referenced
+   --faint, --line, --dial-surface or --mono now reads the site's. The surface
+   mixes are the ones the DialKit skin uses, so a palette row and a dial row
+   are the same grey. */
+
+:root {
+  --chroma-surface: color-mix(in srgb, var(--fg) 6%, transparent);
+  --chroma-surface-hover: color-mix(in srgb, var(--fg) 12%, transparent);
+  --chroma-surface-active: color-mix(in srgb, var(--fg) 16%, transparent);
+  --chroma-radius: 10px;
+  --chroma-row: 40px;
+  --chroma-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --chroma-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ---------------------------------------------------------- the preview -- */
+
+.viewport {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--chrome-tools) var(--chrome-pad) calc(var(--panel-gap) + 60px);
+  z-index: 1;
+}
+
+.stage {
+  /* Fit the export's aspect into whatever the chrome leaves: take the height
+     and let the ratio give the width, clamped when the ratio is wider than the
+     screen is. height:auto would collapse — the flex line has the height, the
+     preview has no content of its own to stand it up. */
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  flex: 0 1 auto;
+  aspect-ratio: var(--preview-aspect, 16 / 9);
+  background: #111;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow: var(--glass-shadow-sm);
+}
+
+canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+.stage:fullscreen {
+  width: 100%;
+  max-width: none;
+  max-height: none;
+  height: 100vh;
+  aspect-ratio: auto;
+  border-radius: 0;
+  margin: 0;
+}
+.stage:fullscreen canvas { object-fit: contain; }
+
+#render-error {
+  color: #fff;
+  position: absolute;
+  padding: 28px;
+  max-width: 480px;
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+/* The composition and the export size, riding in the dock beside the verbs —
+   the bottom edge is one bar, the same bargain camouflage's seed makes. */
+.readout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 14px;
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-edge), var(--glass-specular), var(--glass-shadow-sm);
+}
+.readout__sep { opacity: 0.5; }
+
+/* The rail holds a radiogroup and then a pill of its own, so it stacks like
+   the rail itself rather than sitting as one block inside it. */
+.rail__group { display: flex; flex-direction: column; gap: 8px; }
+
+/* --------------------------------------------------------- the palettes -- */
+
+.palette-toolbar { display: flex; gap: 6px; align-items: center; }
+.palette-toolbar .input { flex: 1; min-width: 0; }
+.palette-toolbar .btn { width: 40px; flex: none; padding: 0; }
+
+.palettes {
+  /* .sheet__body is a flex column, so a box with only a max-height gets
+     squashed to nothing by its siblings. It sizes itself and scrolls. */
+  flex: none;
+  min-height: 180px;
+  max-height: 248px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  scrollbar-width: thin;
+  padding: 2px 2px 6px 0;
+}
+.palettes::-webkit-scrollbar { width: 8px; }
+.palettes::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--fg) 12%, transparent);
+  border-radius: 99px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.palette-group {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 14px 12px 4px;
+}
+.palette-group:first-child { padding-top: 4px; }
+
+.palette {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  height: var(--chroma-row);
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: var(--chroma-radius);
+  text-align: left;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  transition: background 0.15s, color 0.15s;
+}
+.palette:hover { background: var(--chroma-surface-hover); color: var(--ink); }
+.palette[aria-pressed="true"] { background: var(--chroma-surface-active); color: var(--ink); }
+
+.palette-dots { display: flex; gap: 4px; flex: none; }
+.palette-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: block;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 14%, transparent);
+}
+.palette-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.palettes-empty { font-size: 13px; color: var(--muted); padding: 20px 12px; }
+
+/* ----------------------------------------------------- the swatch rows -- */
+
+.dial-colors { display: flex; flex: none; flex-direction: column; gap: 8px; margin-top: 10px; }
+
+.dk-color {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--chroma-row);
+  padding: 0 12px;
+  background: var(--chroma-surface);
+  border-radius: var(--chroma-radius);
+  font-size: 13px;
+  color: var(--muted);
+}
+.dk-color-right { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.dk-hex {
+  width: 8.2ch;
+  border: 0;
+  background: none;
+  text-align: right;
+  font-family: var(--chroma-mono);
+  font-size: 12px;
+  color: var(--muted);
+  padding: 0;
+}
+.dk-hex:focus { color: var(--ink); outline: none; }
+
+input[type="color"] {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--separator);
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.15s var(--chroma-spring);
+}
+input[type="color"]:hover { transform: scale(1.08); }
+input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+input[type="color"]::-webkit-color-swatch { border: 0; }
+
+/* A colour keeps its padlock beside it — it is the one lock that has to say
+   which of the four it belongs to. The rest are collected under Locked. */
+.lock-row { display: flex; align-items: center; gap: 6px; }
+.lock-row > :first-child { flex: 1; min-width: 0; }
+
+.prop-lock {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  opacity: 0.45;
+  transition: background 0.15s, color 0.15s, opacity 0.15s, transform 0.15s var(--chroma-spring);
+}
+.prop-lock svg { width: 14px; height: 14px; }
+.prop-lock .shackle-shut { opacity: 0; }
+.prop-lock[aria-pressed="true"] .shackle-open { opacity: 0; }
+.prop-lock[aria-pressed="true"] .shackle-shut { opacity: 1; }
+.prop-lock:hover { opacity: 1; color: var(--ink); background: var(--chroma-surface); }
+.prop-lock[aria-pressed="true"] { opacity: 1; color: var(--accent); }
+.prop-lock:active { transform: scale(0.92); }
+
+/* ------------------------------------------------- angle chips + locks -- */
+
+.angle-locks { display: grid; flex: none; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
+.angle-locks[hidden] { display: none; }
+.angle-locks button {
+  height: 28px;
+  border: 0;
+  cursor: pointer;
+  border-radius: 6px;
+  background: var(--chroma-surface);
+  font: inherit;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  transition: background 0.15s, color 0.15s, transform 0.15s var(--chroma-spring);
+}
+.angle-locks button:hover { color: var(--ink); }
+.angle-locks button[aria-pressed="true"] { background: var(--accent); color: var(--white, #fff); }
+.angle-locks button:active { transform: scale(0.96); }
+
+.locks { display: flex; flex: none; flex-wrap: wrap; gap: 6px; }
+.lock-chip {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  cursor: pointer;
+  border-radius: 15px;
+  background: var(--chroma-surface);
+  font: inherit;
+  font-size: 12px;
+  color: var(--muted);
+  transition: background 0.15s, color 0.15s, transform 0.15s var(--chroma-spring);
+}
+.lock-chip:hover { color: var(--ink); background: var(--chroma-surface-hover); }
+.lock-chip[aria-pressed="true"] {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.lock-chip:active { transform: scale(0.96); }
+
+/* ------------------------------------------------------------- the rest -- */
+
+.bridge { display: none; }
+
+#toast {
+  position: fixed;
+  bottom: calc(var(--panel-gap) + 60px);
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  opacity: 0;
+  background: var(--ink);
+  color: var(--bg);
+  padding: 10px 16px;
+  border-radius: 999px;
+  transition: opacity 0.28s ease, transform 0.28s ease;
+  z-index: 600;
+  font-size: 12px;
+  max-width: 90vw;
+  pointer-events: none;
+}
+#toast.show { transform: translateX(-50%); opacity: 1; }
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 900px) {
+  .viewport { padding: var(--chrome-tools) var(--chrome-pad) calc(var(--panel-gap) + 60px + 52px); }
+  /* Collapsed, the drawer is 60px of head — nothing inside it may insist on
+     being taller than that. */
+  .palettes { min-height: 0; max-height: 220px; }
+}

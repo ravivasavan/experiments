@@ -100,6 +100,20 @@
         "day.webp",
         "fleck.webp"
       ]
+    },
+    {
+      "slug": "chroma",
+      "name": "Chroma",
+      "date": "20260916",
+      "description": "A wallpaper studio for soft gradients, colour fields and light-filled apertures",
+      "status": "live",
+      "tech": "WebGL, DialKit, vanilla JS",
+      "glyph": "aperture",
+      "shots": [
+        "field.webp",
+        "horizon.webp",
+        "aperture.webp"
+      ]
     }
   ]
 }

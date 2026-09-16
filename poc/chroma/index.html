@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>camouflage — play</title>
+  <meta name="description" content="A wallpaper studio for soft gradients, colour fields and light-filled apertures.">
+  <link rel="canonical" href="https://play.ravivasavan.com/20260916/chroma/">
+  <meta property="og:title" content="camouflage — play">
+  <meta property="og:description" content="A wallpaper studio for soft gradients, colour fields and light-filled apertures.">
+  <meta property="og:url" content="https://play.ravivasavan.com/20260916/chroma/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="theme-color" id="theme-color" content="#fff5f5">
+  <script>
+    /* Set data-theme and the address-bar colour before paint, to avoid a
+       flash. Cycles: day → night → system → circadian. Circadian colours are
+       computed by circadian.js, which play.js only loads when it's wanted, so
+       its last cached tokens are re-applied here to keep first paint right. */
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('theme'); } catch (e) {}
+      if (t !== 'day' && t !== 'night' && t !== 'system' && t !== 'circadian') t = 'system';
+      document.documentElement.dataset.theme = t;
+      var c = '#fff5f5';
+      if (t === 'night') c = '#0d1b1e';
+      else if (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches) c = '#0d1b1e';
+      else if (t === 'circadian') {
+        try {
+          var cache = JSON.parse(localStorage.getItem('circadian-cache'));
+          for (var k in cache) document.documentElement.style.setProperty(k, cache[k]);
+          if (cache && cache['--bg']) c = cache['--bg'];
+        } catch (e) {}
+      }
+      var m = document.getElementById('theme-color');
+      if (m) m.setAttribute('content', c);
+    })();
+  </script>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+  <link rel="preload" href="/assets/fonts/LabilGrotesk-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="/assets/play.css">
+  <link rel="stylesheet" href="./chroma.css">
+</head>
+<body>
+  <div class="chrome">
+    <a class="icon-pill chrome__back" href="/" aria-label="Back to play index">
+      <span class="icon-pill__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+      </span>
+    </a>
+    <header class="header-pill chrome__id">
+      <div class="header-pill__inner">
+        <div class="header-pill__avatar">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect width="2.00001" height="2.00001" transform="matrix(-1 0 0 1 32 13)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 20 13)" fill="currentColor"/> <path d="M34.0098 34.9766V48H36V34.9766H34.0098ZM13.9902 34.9766H12V48H13.9902V35.0293H15.9805V32.9814H13.9902V34.9766ZM32 13H16V9H14V17H16V15H32V25H30V27H18V31H16V33H18V35H30V33H32V35H34V33H32V31H34V15H40V13H34V9H32V13ZM12 22H14V17H12V22ZM28 21H30V19H28V21ZM20 21H22V19H20V21ZM30 9H32V7H30V9ZM16 9H18V7H16V9ZM18 7H30V5H18V7Z" fill="currentColor"/> <rect width="4" height="6" transform="matrix(-1 0 0 1 18 27)" fill="currentColor"/> <rect width="2.00001" height="4.00001" transform="matrix(-1 0 0 1 16 21)" fill="currentColor"/> <path d="M16 25H18V21H16V25Z" fill="currentColor"/> <rect width="16.0001" height="2.00001" transform="matrix(-1 0 0 1 30 25)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 32 23)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 24 23)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 28 21)" fill="currentColor"/> </svg>
+        </div>
+        <div class="header-pill__label">
+          <span class="header-pill__name">Ravi Vasavan</span>
+          <span class="header-pill__role">Chroma</span>
+        </div>
+      </div>
+    </header>
+    <button class="icon-pill icon-pill--theme chrome__theme" type="button" aria-label="Toggle theme" data-theme-toggle>
+      <span class="icon-pill__icon">
+        <svg data-tstate="day" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        <svg data-tstate="night" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        <svg data-tstate="system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg>
+        <svg data-tstate="circadian" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      </span>
+    </button>
+  </div>
+  <div class="chrome-rule" aria-hidden="true"></div>
+
+  <!-- What you are looking at: the three compositions, and the way to see one
+       without the glass on top of it. #modes stays the radiogroup app.js binds
+       its arrow keys and its resize observer to; the sliding thumb it used to
+       draw is hidden, because a rail says which pill is on the family's way. -->
+  <nav class="rail" aria-label="Chroma view">
+    <div id="modes" class="rail__group" role="radiogroup" aria-label="Composition">
+      <span class="segmented-thumb" id="mode-thumb" hidden></span>
+      <button class="tool-pill" type="button" data-mode="0" role="radio" aria-pressed="false" aria-label="Field">
+        <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></span>
+        <span class="tool-pill__label">Field</span>
+      </button>
+      <button class="tool-pill" type="button" data-mode="1" role="radio" aria-pressed="true" aria-label="Aperture">
+        <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg></span>
+        <span class="tool-pill__label">Aperture</span>
+      </button>
+      <button class="tool-pill" type="button" data-mode="2" role="radio" aria-pressed="false" aria-label="Horizon">
+        <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18"/><path d="M3 17h18"/><path d="M3 7h18" opacity=".45"/></svg></span>
+        <span class="tool-pill__label">Horizon</span>
+      </button>
+    </div>
+    <button class="tool-pill" type="button" id="fullscreen" aria-label="View wallpaper fullscreen">
+      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M21 16v3a2 2 0 0 1-2 2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/></svg></span>
+      <span class="tool-pill__label">Fullscreen</span>
+    </button>
+  </nav>
+
+  <!-- The viewport is the whole screen and the glass lies on top of it, so the
+       preview centres on the screen's centre rather than on what is left beside
+       the drawer. #stage stays the preview box itself: app.js measures it to
+       size the render buffer, and asks it to go fullscreen. -->
+  <main class="viewport" aria-label="Wallpaper preview">
+    <div id="stage" class="stage">
+      <canvas id="art" aria-label="Generated abstract wallpaper"></canvas>
+      <div id="render-error" hidden></div>
+    </div>
+  </main>
+
+  <!-- What you do to it. The readout rides in the dock, the way camouflage's
+       seed does: the bottom edge is one bar. -->
+  <nav class="dock" aria-label="Chroma actions">
+    <button class="tool-pill" type="button" id="shuffle" aria-label="Randomise unlocked properties">
+      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="m18 2 4 4-4 4"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/><path d="m18 14 4 4-4 4"/></svg></span>
+      <span class="tool-pill__label">Randomise</span>
+    </button>
+    <button class="tool-pill" type="button" id="download" aria-label="Export a full-resolution PNG">
+      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
+      <span class="tool-pill__label">Export</span>
+    </button>
+    <button class="tool-pill" type="button" id="copy-link" aria-label="Copy a link containing these settings">
+      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></span>
+      <span class="tool-pill__label">Copy</span>
+    </button>
+    <button class="tool-pill" type="button" id="reset" aria-label="Reset to the default composition">
+      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>
+      <span class="tool-pill__label">Reset</span>
+    </button>
+    <p class="readout" aria-live="polite"><span id="composition-label">Aperture · 0042</span><span class="readout__sep">·</span><span id="size-label">7680 × 4320</span></p>
+  </nav>
+
+  <aside class="sheet" aria-label="Chroma settings">
+    <div class="sheet__head">
+      <span class="sheet__title">Chroma</span>
+      <span class="sheet__summary" id="palette-name">Rose room</span>
+    </div>
+    <div class="sheet__body">
+
+      <!-- Everything that is a dial. -->
+      <div id="dial-mount"></div>
+
+      <!-- The real controls app.js has always read. DialKit drives these and
+           the app cannot tell the difference: it still hears an input event on
+           the same range it always listened to, and every lock, the horizon's
+           15-degree snap and the recipe in the hash go on working untouched. -->
+      <div class="bridge" hidden aria-hidden="true">
+        <input id="flow" type="range" min="0" max="100" value="60" tabindex="-1">
+        <input id="scale" type="range" min="0" max="100" value="55" tabindex="-1">
+        <input id="rotation" type="range" min="-180" max="180" value="0" tabindex="-1">
+        <input id="glow" type="range" min="0" max="100" value="65" tabindex="-1">
+        <input id="grain" type="range" min="0" max="100" value="8" tabindex="-1">
+        <input id="seed" type="number" min="0" max="999999" step="1" value="42" tabindex="-1">
+      </div>
+
+      <!-- Horizon locks to 15-degree steps, and these are the useful ones. -->
+      <div class="angle-locks" id="angle-locks" hidden>
+        <button type="button" data-angle="-90">−90</button>
+        <button type="button" data-angle="-45">−45</button>
+        <button type="button" data-angle="-15">−15</button>
+        <button type="button" data-angle="0">0</button>
+        <button type="button" data-angle="15">15</button>
+        <button type="button" data-angle="45">45</button>
+        <button type="button" data-angle="90">90</button>
+      </div>
+
+      <h2 class="sheet__section">Palette</h2>
+      <div class="palette-toolbar">
+        <label class="sr-only" for="palette-search">Search palettes</label>
+        <input class="input" id="palette-search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
+        <button type="button" id="import-palette" class="btn" title="Import an Omarchy colors.toml">+</button>
+      </div>
+      <div id="palettes" class="palettes" role="listbox" aria-label="Colour stories"></div>
+      <div id="swatches" class="dial-colors" aria-label="Edit palette colours"></div>
+
+      <h2 class="sheet__section">Size</h2>
+      <label class="field">
+        <span class="field__top"><span class="field__label">Export</span></span>
+        <select class="select" id="resolution">
+          <option value="7680x4320">8K · 7680 × 4320</option>
+          <option value="5120x2880">5K · 5120 × 2880</option>
+          <option value="3840x2160">4K · 3840 × 2160</option>
+          <option value="2560x1440">QHD · 2560 × 1440</option>
+          <option value="1920x1080">HD · 1920 × 1080</option>
+          <option value="3440x1440">Ultrawide · 3440 × 1440</option>
+          <option value="2560x1600">Laptop · 2560 × 1600</option>
+          <option value="1440x3200">Phone · 1440 × 3200</option>
+          <option value="2160x2160">Square · 2160 × 2160</option>
+        </select>
+      </label>
+
+      <h2 class="sheet__section">Locked</h2>
+      <p class="sheet__note">Randomise only moves what isn't locked. The four colours
+        lock individually, on their own swatches above.</p>
+      <div class="locks" id="locks">
+        <button type="button" class="lock-chip" data-lock="mode" aria-pressed="false">Composition</button>
+        <button type="button" class="lock-chip" data-lock="palette" aria-pressed="false">Palette</button>
+        <button type="button" class="lock-chip" data-lock="flow" aria-pressed="false">Diffusion</button>
+        <button type="button" class="lock-chip" data-lock="scale" aria-pressed="false">Scale</button>
+        <button type="button" class="lock-chip" data-lock="rotation" aria-pressed="false">Angle</button>
+        <button type="button" class="lock-chip" data-lock="glow" aria-pressed="false">Radiance</button>
+        <button type="button" class="lock-chip" data-lock="grain" aria-pressed="false">Grain</button>
+        <button type="button" class="lock-chip" data-lock="seed" aria-pressed="false">Seed</button>
+      </div>
+
+      <p class="sheet__note">Every wallpaper is generated on the GPU from the numbers
+        above — nothing is bundled and nothing is downloaded. The preview is capped at
+        1920px on its longest edge; Export renders at the full size you pick.</p>
+    </div>
+  </aside>
+
+  <div id="root"></div>
+  <input id="toml-file" type="file" accept=".toml,text/plain" hidden>
+  <div id="toast" role="status" aria-live="polite"></div>
+
+<script src="/assets/play.js" defer></script>
+<script src="./app.js" defer></script>
+<script type="module" src="/src/main.jsx"></script>
+</body>
+</html>
