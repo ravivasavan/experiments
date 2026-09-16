@@ -126,7 +126,9 @@
 
     #hint {
       position: fixed;
-      bottom: 24px;
+      /* Clear of the dock, which centres on the same bottom edge: --panel-gap
+         plus the 44px pill plus a gap. */
+      bottom: 76px;
       left: 0;
       right: 0;
       text-align: center;
@@ -184,15 +186,7 @@
 
   <!-- Second row: magnetic's own buttons, labelled. No sheet — these four
        pills are all the control this experiment needs. -->
-  <nav class="tools" aria-label="Magnetic controls">
-    <button class="tool-pill" id="btn-upload" type="button" aria-label="Upload image">
-      <span class="tool-pill__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
-        </svg>
-      </span>
-      <span class="tool-pill__label">Upload</span>
-    </button>
+  <nav class="rail" aria-label="Magnetic source">
     <button class="tool-pill" id="btn-camera" type="button" aria-label="Use camera">
       <span class="tool-pill__icon">
         <svg data-state="on" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -203,6 +197,17 @@
         </svg>
       </span>
       <span class="tool-pill__label">Camera</span>
+    </button>
+  </nav>
+
+  <nav class="dock" aria-label="Magnetic actions">
+    <button class="tool-pill" id="btn-upload" type="button" aria-label="Upload image">
+      <span class="tool-pill__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/>
+        </svg>
+      </span>
+      <span class="tool-pill__label">Upload</span>
     </button>
     <button class="tool-pill" id="btn-snap" type="button" hidden aria-label="Snap photo">
       <span class="tool-pill__icon">

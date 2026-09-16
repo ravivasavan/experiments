@@ -151,14 +151,17 @@
   </div>
   <div class="chrome-rule" aria-hidden="true"></div>
 
-  <nav class="tools" aria-label="Melt controls">
-    <button class="tool-pill" id="t-upload" type="button" aria-label="Upload an SVG">
-      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg></span>
-      <span class="tool-pill__label">Upload</span>
-    </button>
+  <nav class="rail" aria-label="Melt view">
     <button class="tool-pill" id="t-before" type="button" aria-pressed="false" disabled aria-label="Show the unmelted source">
       <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></span>
       <span class="tool-pill__label">Before</span>
+    </button>
+  </nav>
+
+  <nav class="dock" aria-label="Melt actions">
+    <button class="tool-pill" id="t-upload" type="button" aria-label="Upload an SVG">
+      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg></span>
+      <span class="tool-pill__label">Upload</span>
     </button>
     <button class="tool-pill tool-pill--danger" id="t-clear" type="button" disabled aria-label="Remove all melt points">
       <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg></span>
@@ -168,8 +171,11 @@
       <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
       <span class="tool-pill__label">Export</span>
     </button>
-    <input type="file" id="file" accept=".svg,image/svg+xml" hidden>
   </nav>
+
+  <!-- The picker the Upload pills open. It lives outside both bars: it is not a
+       control in either of them, it is the file dialog they reach for. -->
+  <input type="file" id="file" accept=".svg,image/svg+xml" hidden>
 
   <main id="stage" aria-label="Melt stage">
     <canvas id="ink"></canvas>

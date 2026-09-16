@@ -337,46 +337,9 @@ a { color: inherit; }
   box-shadow: var(--glass-edge), var(--glass-specular), var(--glass-shadow);
 }
 
-/* ---------------------------------------------- level 2: the tools row --- */
-/* The experiment's own buttons, one word each. Right-aligned under the rule,
-   running the full width: the sheet is an overlay that starts below this row,
-   so there is nothing here to stop short of. */
-
-.tools {
-  position: fixed;
-  top: var(--chrome-tools);
-  left: var(--chrome-pad);
-  right: var(--chrome-pad);
-  z-index: var(--z-chrome);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  /* Right-aligned by an auto margin on the first pill rather than
-     justify-content: flex-end. A flex-end row that outgrows its box spills
-     past the *start* of the line — off the left of the screen, before the
-     scroll origin, where nothing can reach it. An auto margin collapses to
-     zero the moment the pills stop fitting, so the same row just scrolls. */
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  scrollbar-width: none;
-  /* A scroller clips at its padding edge, and the row's box is exactly one
-     pill tall, so the pills' ambient shadow would be sliced off. The padding
-     gives it room and the negative margin gives the room straight back, so
-     the pills still sit on --chrome-tools. */
-  padding-block: 32px;
-  margin-block: -32px;
-  /* The taller, wider box must not swallow clicks meant for the page beneath
-     or for the sheet's head — same trick the level-1 chrome already uses. */
-  pointer-events: none;
-}
-.tools::-webkit-scrollbar { display: none; }
-.tools > :first-child { margin-left: auto; }
-/* On a page with a sheet the row hangs off the same edge the glass does, so
-   the pills and the pane below them share a right margin. It no longer stops
-   short of anything: the sheet starts below the row, not beside it. */
-body:has(.sheet) .tools { right: var(--panel-gap); }
+/* --------------------------------------------- the pill, in both bars --- */
+/* One shape for an experiment's own buttons wherever they sit: 44px of glass,
+   an icon and a word. The dock keeps the word; the rail hides it. */
 
 .tool-pill {
   display: inline-flex;
@@ -426,7 +389,6 @@ body:has(.sheet) .tools { right: var(--panel-gap); }
 .tool-pill--danger:hover { color: var(--accent); }
 .tool-pill[disabled] { opacity: 0.4; cursor: default; }
 .tool-pill[disabled]:hover { transform: none; color: var(--ink); box-shadow: var(--glass-edge), var(--glass-specular), var(--glass-shadow-sm); }
-
 
 /* --------------------------------------------- level 2: rail and dock --- */
 /* The experiment's own buttons, split by what they do rather than piled into
@@ -534,12 +496,7 @@ body:has(.sheet) .dock { right: calc(var(--panel-w) + var(--panel-gap) * 2); }
 /* Nothing sits between the rule and the drawer any more — the experiment's own
    buttons went to the rail and the dock — so the glass starts on the first line
    below the chrome and runs to the bottom of the screen.
-
-   TRANSITIONAL: a play still carrying the old top tools row keeps the old
-   push-down, so it reads correctly until it is migrated. Delete this rule, and
-   the whole `.tools` block above, once the last play has moved to the rail and
-   the dock. */
-body:has(.tools) { --sheet-top: calc(var(--chrome-tools) + 44px + var(--panel-gap)); }
+ */
 
 .sheet {
   position: fixed;
@@ -883,18 +840,6 @@ input[type="range"].dial {
      it again; on the landing page it is the tagline and nothing else does, so
      that copy only goes at 640. */
   .chrome .header-pill__role { display: none; }
-
-  /* Both selectors, because the sheet-page rule above is the more specific
-     one and would otherwise keep its desktop inset here. */
-  .tools,
-  body:has(.sheet) .tools {
-    left: 0;
-    right: 0;
-    padding-inline: var(--chrome-pad);
-  }
-  /* Folded there's no sheet beside the row to align against, so it sits at
-     the left edge rather than hanging off the right. */
-  .tools > :first-child { margin-left: 0; }
 
   /* --- rail and dock, folded --- */
   /* The drawer swings down to the bottom of the screen here, so the dock can no
