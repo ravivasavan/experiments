@@ -107,7 +107,7 @@
        the drawer. #stage stays the preview box itself: app.js measures it to
        size the render buffer, and asks it to go fullscreen. -->
   <main class="viewport" aria-label="Wallpaper preview">
-    <div id="stage" class="stage">
+    <div id="stage" class="stage" data-pan="free">
       <canvas id="art" aria-label="Generated abstract wallpaper"></canvas>
       <div id="render-error" hidden></div>
     </div>

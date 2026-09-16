@@ -20,6 +20,10 @@
 /* ---------------------------------------------------------------- tokens -- */
 
 :root {
+  /* Lets the drawer's height: auto animate down to the minimised disc rather
+     than snapping. Ignored where it isn't supported; nothing depends on it. */
+  interpolate-size: allow-keywords;
+
   /* Brand colours — inherited from ravivasavan.com */
   --night: #0d1b1e;
   --orange: #ff795c;
@@ -79,7 +83,10 @@
      inset, and how big the disc is once it is minimised. */
   --panel-w: 360px;
   --panel-gap: 16px;
-  --sheet-min: 64px;
+  /* The minimised drawer is a tool pill's disc: the same 44px box and the same
+     16px glyph as everything else at this level, so the chrome has one icon
+     size and one container size throughout. */
+  --sheet-min: 44px;
   /* Where the sheet's top edge sits. Overridden below on a page that has a
      tools row, because the two would otherwise start on the same line. */
   --sheet-top: var(--chrome-tools);
@@ -415,10 +422,13 @@ a { color: inherit; }
   gap: 8px;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  /* A scroller clips at its padding edge and these boxes are exactly one pill
-     thick, so the pills' ambient shadow would be sliced off. The padding gives
-     it room and the negative margin hands the room straight back, so the pills
-     stay on the line the tokens put them on. */
+  /* A scroller clips at its padding edge, and these boxes are exactly one pill
+     thick — so the pills' ambient shadow gets sliced off and what you see is a
+     straight edge across the glow. Both axes need the room, not just the one
+     the bar scrolls on: the padding gives it and the negative margin hands it
+     straight back, so the pills stay on the line the tokens put them on. */
+  padding: 32px;
+  margin: -32px;
   pointer-events: none;
 }
 .rail::-webkit-scrollbar,
@@ -431,11 +441,9 @@ a { color: inherit; }
   top: var(--chrome-tools);
   left: var(--panel-gap);
   flex-direction: column;
-  max-height: calc(100% - var(--chrome-tools) - var(--panel-gap));
+  max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) + 64px);
   overflow-y: auto;
   touch-action: pan-y;
-  padding-inline: 32px;
-  margin-inline: -32px;
 }
 
 /* Icon only, on the same 44px round-rect as every other tool pill. The label
@@ -470,12 +478,11 @@ a { color: inherit; }
   justify-content: center;
   overflow-x: auto;
   touch-action: pan-x;
-  padding-block: 32px;
-  margin-block: -32px;
-  transition: right 240ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-body:has(.sheet) .dock { right: calc(var(--panel-w) + var(--panel-gap) * 2); }
-:root[data-play-sheet="min"] body:has(.sheet) .dock { right: var(--panel-gap); }
+
+/* The dock centres on the page, not on the gap beside the drawer. The drawer is
+   an overlay and it moves; the verbs should not shuffle sideways every time it
+   folds. If the glass covers the artwork, pan it or minimise the glass. */
 
 /* A dock too wide for its box scrolls instead of spilling: centring collapses
    to a start-aligned row the moment the pills stop fitting, the same reason
@@ -483,9 +490,7 @@ body:has(.sheet) .dock { right: calc(var(--panel-w) + var(--panel-gap) * 2); }
 .dock > :first-child { margin-left: auto; }
 .dock > :last-child { margin-right: auto; }
 
-@media (prefers-reduced-motion: reduce) {
-  .dock { transition: none; }
-}
+
 
 /* ------------------------------------------------------------- the sheet -- */
 /* Settings float over the content on their own pane of glass, inset from the
@@ -503,17 +508,22 @@ body:has(.sheet) .dock { right: calc(var(--panel-w) + var(--panel-gap) * 2); }
   top: var(--sheet-top);
   right: var(--panel-gap);
   width: var(--panel-w);
-  /* Sized rather than bottom-anchored, so width and height can both
-     interpolate when the pane folds into the minimised disc. A percentage on
-     a fixed element measures the viewport, scrollbar already deducted. */
-  height: calc(100% - var(--sheet-top) - var(--panel-gap));
+  /* As tall as its contents and no taller — melt's four dials should not lay a
+     full-height pane of glass over the artwork. Past the viewport it stops and
+     scrolls. interpolate-size on :root is what keeps auto → the disc an
+     animation rather than a jump, where the browser supports it. */
+  height: auto;
+  max-height: calc(100% - var(--sheet-top) - var(--panel-gap));
   z-index: var(--z-sheet);
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
-  scrollbar-width: none;
+  /* A visible thumb when it does overflow: the drawer is the one surface here
+     long enough to hide something below its own fold. */
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--fg) 22%, transparent) transparent;
   overscroll-behavior: contain;
   /* Secondary type inside the sheet, redefined once for everything in it —
      the shared labels, DialKit's, and each experiment's own. :root's --muted
@@ -603,7 +613,7 @@ body:has(.sheet) .dock { right: calc(var(--panel-w) + var(--panel-gap) * 2); }
   cursor: pointer;
   transition: background-color 160ms ease;
 }
-.sheet__icon svg { width: 20px; height: 20px; display: block; }
+.sheet__icon svg { width: 16px; height: 16px; display: block; }
 .sheet__icon:hover { background: color-mix(in srgb, var(--fg) 8%, transparent); }
 .sheet__icon:focus-visible {
   outline: none;
@@ -833,7 +843,7 @@ input[type="range"].dial {
     --chrome-tools: 112px;
     --chrome-pad: 16px;
     /* A thumb's disc rather than a pointer's. */
-    --sheet-min: 56px;
+    --sheet-min: 44px;
   }
 
   /* On an experiment the role is the experiment's name and the tool row says
@@ -851,13 +861,15 @@ input[type="range"].dial {
     left: 0;
     right: 0;
     bottom: var(--panel-gap);
-    padding-inline: var(--chrome-pad);
+    /* The 32px is the shadow room the negative margin hands back; the gutter
+       has to be added on top of it, or the first pill starts 16px off-screen. */
+    padding-inline: calc(32px + var(--chrome-pad));
     justify-content: flex-start;
   }
   body:has(.sheet) .dock { bottom: calc(var(--panel-gap) + 60px + 8px); }
   :root[data-play-sheet="min"] body:has(.sheet) .dock {
     bottom: var(--panel-gap);
-    padding-right: calc(var(--sheet-min) + var(--chrome-pad) + 8px);
+    padding-right: calc(32px + var(--sheet-min) + var(--chrome-pad) + 8px);
   }
   /* Start-aligned once folded: a centred row has nothing to centre against when
      it is already wider than the screen. */
@@ -947,6 +959,13 @@ input[type="range"].dial {
   .header-pill__name { font-size: 14px; }
 }
 
+/* --------------------------------------------------------------- panning -- */
+/* Free-pointer stages advertise the drag; the ones that pan on space or the
+   middle button say nothing until you are actually doing it. */
+[data-pan="free"] { cursor: grab; }
+[data-pan].is-panning { cursor: grabbing; }
+[data-pan] { will-change: transform; }
+
 /* ------------------------------------------------------------ minimised -- */
 /* The whole sheet folds into one disc of the same glass, anchored where its
    top-right corner was — 64px on a pointer, 56px on a thumb — and the disc's
@@ -965,6 +984,12 @@ input[type="range"].dial {
   padding: 0;
   gap: 0;
   overflow: hidden;
+  /* Pill-sized now, so it casts a pill's shadow — the panel's larger one reads
+     as a much bigger object than the disc actually is. */
+  box-shadow:
+    var(--glass-edge),
+    inset 0 1px 0 color-mix(in srgb, white var(--sheet-spec), transparent),
+    var(--glass-shadow-sm);
 }
 :root[data-play-sheet="min"] .sheet > :not(.sheet__icon) { display: none; }
 :root[data-play-sheet="min"] .sheet__icon { display: grid; }

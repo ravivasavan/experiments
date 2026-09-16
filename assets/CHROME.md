@@ -18,9 +18,10 @@ out of the page.**
   clear. Labels kept.
 - The dials drawer — one pane of glass, `--panel-w` wide, inset `--panel-gap`
   from the viewport, floating over the content and starting on the first line
-  below the chrome. On a phone it swings down to the bottom of the screen and
-  collapses to its head. Either way it minimises into a single round glass
-  button.
+  below the chrome. **It is as tall as its contents and no taller**, and past
+  the viewport it stops and scrolls. On a phone it swings down to the bottom of
+  the screen and collapses to its head. Either way it minimises into a disc the
+  size of a tool pill.
 
 Inside the drawer, the dials themselves are **DialKit**, rendered inline. A
 play keeps its own engine in plain JS and mounts a small React root whose only
@@ -207,8 +208,9 @@ menu, not a rail. The label stays in the markup and stays in the a11y tree.
 
 **The dock** takes the verbs — upload, export, shuffle, clear. They fire and
 they are done, so they keep their labels and sit where the hand already is. It
-centres on the space the drawer leaves, and takes the width back when the
-drawer folds to its disc, on the same 240ms curve.
+centres on **the page**, not on the space beside the drawer: the drawer is an
+overlay and it moves, and the verbs should not shuffle sideways every time it
+folds.
 
 ```html
 <nav class="dock" aria-label="Atlas actions">
@@ -413,6 +415,11 @@ both, so use whichever your page already says.
 
 Pills: `--pill-bg --pill-filter --pill-edge`.
 
+**One icon size, one container size.** Level 2 is 44px of glass around a 16px
+glyph, everywhere: a rail pill, a dock pill, and the minimised drawer disc
+(`--sheet-min`) are all the same object. Level 1's identity row is 64px around
+16px, and is the only thing that differs.
+
 Glass: `--glass-bg --glass-blur --glass-edge --glass-specular --glass-shadow
 --glass-shadow-sm --glass-radius`. Apply them with the `.glass` class rather
 than by hand; the only two that move between day and night are `--glass-mix`
@@ -541,3 +548,31 @@ shape, not a workaround — the panel is for the dials.
 "Everywhere"; there is no label option on the range shorthand. Name the key what
 the play calls the thing, and map it to the engine's own name on the way
 through.
+
+---
+
+## 9. Panning
+
+The drawer is an overlay, so it will sometimes lie on the part of the artwork
+you wanted. Minimising it is one answer; moving the artwork out from under it is
+the other, and play.js gives every stage the second one.
+
+```html
+<main id="stage" data-pan="free">   <!-- pointer is free: plain drag pans -->
+<main id="stage" data-pan>          <!-- pointer is spoken for: space or middle-drag -->
+```
+
+`data-pan="free"` is for a stage that does nothing with the pointer — teletext,
+chroma — and it pans on an ordinary drag, with a `grab` cursor to say so.
+`data-pan` alone is for a stage that uses the pointer for its own work — melt
+places points, magnetic throws windows — and pans only on the middle button or
+with space held, which is the idiom every canvas tool already uses. Metal has
+had a pan of its own since it had a world to move, and takes neither.
+
+The offset is clamped to 60% of the viewport rather than being resettable: you
+can always drag back, and there is no way to throw the artwork somewhere you
+cannot reach. A drag that moved swallows the click it would otherwise have
+finished with.
+
+Camouflage has neither attribute on purpose — its pattern is full-bleed, so
+there is nothing behind the glass but more of the same pattern.

@@ -94,10 +94,10 @@
     if (t && t.matches && t.matches('input[type="range"].dial')) paintDial(t);
   });
 
-  /* ------------------------------------------------------------ tools row -- */
-  /* Folded, the row scrolls sideways rather than dropping its labels. Touch
-     pans it natively; this gives a pointer the same, and swallows the click
-     that would otherwise fire on whichever pill the drag ended over. */
+  /* --------------------------------------------------------- rail + dock -- */
+  /* Too many pills for the space and the bar scrolls rather than dropping its
+     labels. Touch pans it natively; this gives a pointer the same, and swallows
+     the click that would otherwise fire on whichever pill the drag ended over. */
 
   function dragRow(row) {
     var down = false, moved = false, sx = 0, sl = 0;
@@ -339,11 +339,82 @@
     });
   });
 
+  /* -------------------------------------------------------------- panning -- */
+  /* The drawer is an overlay, so it can end up lying on the part of the artwork
+     you wanted to look at. Minimising it is one answer; moving the artwork out
+     from under it is the other.
+
+     A stage whose pointer is free — teletext, chroma — takes data-pan="free"
+     and pans on a plain drag. One that uses the pointer for its own work — melt
+     places points, magnetic throws windows — takes data-pan on its own and pans
+     on the middle button or with space held, which is the idiom every canvas
+     tool already uses. Metal has had its own pan since it had a world to move.
+
+     The offset is clamped rather than resettable: you can always drag back, and
+     there is no way to throw the artwork somewhere you can't reach. */
+
+  function typingIn(t) {
+    if (!t) return false;
+    return t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' ||
+           t.tagName === 'SELECT' || t.isContentEditable;
+  }
+
+  var spaceHeld = false;
+  window.addEventListener('keydown', function (e) {
+    if (e.code === 'Space' && !typingIn(e.target)) spaceHeld = true;
+  });
+  window.addEventListener('keyup', function (e) {
+    if (e.code === 'Space') spaceHeld = false;
+  });
+  window.addEventListener('blur', function () { spaceHeld = false; });
+
+  function pannable(el) {
+    var free = el.getAttribute('data-pan') === 'free';
+    var x = 0, y = 0, sx = 0, sy = 0, id = null, moved = false;
+
+    function clamp(v, limit) { return Math.max(-limit, Math.min(limit, v)); }
+    function apply() {
+      el.style.transform = (x || y) ? 'translate(' + x + 'px, ' + y + 'px)' : '';
+    }
+
+    el.addEventListener('pointerdown', function (e) {
+      var wants = e.button === 1 || spaceHeld || (free && e.button === 0);
+      if (!wants) return;
+      id = e.pointerId;
+      sx = e.clientX - x;
+      sy = e.clientY - y;
+      moved = false;
+      el.setPointerCapture(id);
+      el.classList.add('is-panning');
+      e.preventDefault();
+    });
+    el.addEventListener('pointermove', function (e) {
+      if (id === null || e.pointerId !== id) return;
+      x = clamp(e.clientX - sx, innerWidth * 0.6);
+      y = clamp(e.clientY - sy, innerHeight * 0.6);
+      if (Math.abs(x) + Math.abs(y) > 4) moved = true;
+      apply();
+    });
+    ['pointerup', 'pointercancel'].forEach(function (type) {
+      el.addEventListener(type, function (e) {
+        if (id === null || e.pointerId !== id) return;
+        try { el.releasePointerCapture(id); } catch (err) {}
+        id = null;
+        el.classList.remove('is-panning');
+      });
+    });
+    // A drag that moved is not also a click on whatever it finished over.
+    el.addEventListener('click', function (e) {
+      if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+    }, true);
+  }
+
   /* ------------------------------------------------------------------ go -- */
 
   function start() {
     paintDials(document);
-    document.querySelectorAll('.tools').forEach(dragRow);
+    document.querySelectorAll('.rail, .dock').forEach(dragRow);
+    document.querySelectorAll('[data-pan]').forEach(pannable);
     document.querySelectorAll('.sheet').forEach(function (sheet) {
       prepareSheet(sheet);
       dragGrab(sheet);
