@@ -1,19 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-
-/* DialKit's stylesheet opens with a Google Fonts @import for Geist Mono, used
-   for the numbers on its sliders. The skin puts those back in Labil Grotesk,
-   so the import is a render-blocking request for a face nothing draws. */
-function dropGeistMonoImport() {
-  return {
-    name: 'drop-geist-mono-import',
-    enforce: 'pre',
-    transform(code, id) {
-      if (!id.includes('dialkit') || !id.endsWith('.css')) return null
-      return code.replace(/@import url\(['"]https:\/\/fonts\.googleapis\.com[^)]*\);?/g, '')
-    },
-  }
-}
+import { dropGeistMonoImport } from '../shared/vite-dialkit.js'
 
 export default defineConfig({
   base: '/20260824/metal/',
@@ -39,6 +26,8 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: '../../20260824/metal',
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         /* Four vendors that move at four speeds: React never changes, the

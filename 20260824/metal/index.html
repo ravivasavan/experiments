@@ -52,7 +52,8 @@
     .metal-hint {
       position: fixed;
       left: 20px;
-      bottom: 16px;
+      /* Clear of the dock: --panel-gap + the 44px pill + a gap. */
+      bottom: 68px;
       color: var(--muted);
       font-size: 13px;
       letter-spacing: 0.04em;
@@ -66,7 +67,7 @@
     .metal-squint {
       position: fixed;
       left: 20px;
-      bottom: 44px;
+      bottom: 96px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -81,10 +82,11 @@
 
     @media (max-width: 900px) {
       /* Folded, the sheet is a bar across the bottom and, minimised, a disc in
-         the bottom-right corner: the patch test lifts clear of the bar and
-         keeps the left edge, which the disc never reaches. */
+         the bottom-right corner: the dock lifts to sit on that bar, and
+         the patch test lifts clear of the dock in turn — still on the left
+         edge, which the disc never reaches. */
       .metal-hint { display: none; }
-      .metal-squint { left: var(--panel-gap); bottom: 84px; }
+      .metal-squint { left: var(--panel-gap); bottom: 136px; }
     }
   </style>
   <!-- Before the app bundle, which Vite injects at the end of this head. -->
@@ -141,7 +143,9 @@
   <!-- Second row: metal's own buttons. Single shows one variant large;
        Spawn breeds nine from the selected; Fresh starts over at the current
        legibility stop; Back walks the lineage; Export saves the vector. -->
-  <nav class="tools" aria-label="Metal controls">
+  <!-- What you are looking at: the view toggle and the step back through the
+       broods. Icon only in the rail; each keeps its label for a reader. -->
+  <nav class="rail" aria-label="Metal view">
     <button class="tool-pill" id="p-view" type="button" aria-label="Toggle between single variant and grid of nine" aria-pressed="false">
       <span class="tool-pill__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -150,6 +154,18 @@
       </span>
       <span class="tool-pill__label" id="p-view-label">Single</span>
     </button>
+    <button class="tool-pill" id="p-back" type="button" aria-label="Back to the previous brood">
+      <span class="tool-pill__icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/>
+        </svg>
+      </span>
+      <span class="tool-pill__label">Back</span>
+    </button>
+  </nav>
+
+  <!-- What you do to it. -->
+  <nav class="dock" aria-label="Metal actions">
     <button class="tool-pill" id="p-spawn" type="button" aria-label="Spawn nine variations of the selected logo">
       <span class="tool-pill__icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -165,14 +181,6 @@
         </svg>
       </span>
       <span class="tool-pill__label">Fresh</span>
-    </button>
-    <button class="tool-pill" id="p-back" type="button" aria-label="Back to the previous brood">
-      <span class="tool-pill__icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5a5.5 5.5 0 0 1-5.5 5.5H11"/>
-        </svg>
-      </span>
-      <span class="tool-pill__label">Back</span>
     </button>
     <button class="tool-pill" id="p-export" type="button" aria-label="Export the selected logo as SVG">
       <span class="tool-pill__icon">
