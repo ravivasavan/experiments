@@ -88,7 +88,10 @@ html[data-theme="night"] {
   --glass-bg: color-mix(in srgb, var(--bg) var(--glass-mix), transparent);
   --glass-blur: blur(24px) saturate(160%);
   --glass-edge: inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
-  --glass-specular: inset 0 1px 0 color-mix(in srgb, white var(--glass-spec), transparent);
+  /* Flat, by decision (2026-09-18): no specular edge, no drop shadow. The glass
+     is the tint and the blur, and a hairline says where it ends. Kept as a
+     no-op token so every shorthand that lists it still parses. */
+  --glass-specular: 0 0 rgba(0, 0, 0, 0);
   /* Flat. Play's overlays are glass and a hairline, and nothing casts.
      A drop shadow on a bar that has to scroll gets clipped by the scroller at
      its padding edge, which is a straight cut across the glow — and the padding
@@ -502,13 +505,10 @@ a { color: inherit; }
   backdrop-filter: var(--sheet-blur);
   -webkit-backdrop-filter: var(--sheet-blur);
   border-radius: var(--glass-radius);
-  box-shadow:
-    var(--glass-edge),
-    inset 0 1px 0 color-mix(in srgb, white var(--sheet-spec), transparent),
-    /* the scroll hint: content darkens as it passes under either edge */
-    inset 0 -18px 14px -14px color-mix(in srgb, var(--fg) 20%, transparent),
-    inset 0 18px 14px -14px color-mix(in srgb, var(--fg) 14%, transparent),
-    var(--glass-shadow);
+  /* Flat pane: the hairline alone. No specular, no scroll-hint shading, no
+     shadow — a "shadow" here would only ever be a glow, since the pane sits
+     on the artwork it is tinted from. */
+  box-shadow: var(--glass-edge);
   transition:
     width         240ms cubic-bezier(0.4, 0, 0.2, 1),
     height        240ms cubic-bezier(0.4, 0, 0.2, 1),
