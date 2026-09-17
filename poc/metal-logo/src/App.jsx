@@ -254,10 +254,15 @@ export default function App() {
     const still = !pRef.current.growOut ||
       matchMedia('(prefers-reduced-motion: reduce)').matches
     if (still) { paintLayer(canvas, layer, 1); return }
-    const started = performance.now()
+    /* The clock is the FIRST FRAME's own timestamp, not performance.now() taken
+       here. Mixing the two is what put `now` behind `started`, and t behind
+       zero, and a negative radius into ctx.ellipse. Started from a frame, the
+       animation is self-consistent whatever the page's clocks are doing. */
+    let started = 0
     growRaf.current = requestAnimationFrame(function step(now) {
       if (artRef.current !== layer) return
-      const t = Math.min(1, (now - started) / GROW_MS)
+      if (!started) started = now
+      const t = Math.max(0, Math.min(1, (now - started) / GROW_MS))
       paintLayer(canvas, layer, easeOut(t))
       if (t < 1) growRaf.current = requestAnimationFrame(step)
     })
@@ -269,26 +274,44 @@ export default function App() {
   /* Dead centre, and nothing else. The old version floored y at 200 and then
      added 60 on top, which put the mark low and off the bottom as soon as the
      ornament reached — and left no way of knowing which way to drag back. */
-  function centerView() {
+  /* Fit, properly — which means fitting into the space the DRAWER LEAVES.
+     Everywhere else in Play the sheet is an overlay and the world centres on
+     the window, because everywhere else the world is a field you pan through.
+     Here it is one 1180px-wide mark and the drawer is 380 of those pixels, so
+     centring on the window parks a quarter of the logo behind glass with no
+     way of knowing that is where it went. */
+  function freeBox() {
     const vp = viewportRef.current
-    if (!vp) return
+    if (!vp) return null
     const rect = vp.getBoundingClientRect()
+    const sheet = document.querySelector('.sheet')
+    const taken = sheet ? Math.max(0, rect.right - sheet.getBoundingClientRect().left) : 0
+    // Minimised, the sheet is a disc and takes almost nothing; open, it takes
+    // its width. Either way this reads what is actually on screen.
+    return { w: Math.max(320, rect.width - taken), h: rect.height }
+  }
+
+  function centerView() {
+    const box = freeBox()
+    if (!box) return
+    const pad = 80
+    const z = Math.min(1, (box.w - pad) / WORLD_W, (box.h - pad) / SINGLE_H)
     view.current = {
-      x: (rect.width - WORLD_W) / 2,
-      y: (rect.height - SINGLE_H) / 2,
-      z: 1,
+      x: (box.w - WORLD_W * z) / 2,
+      y: (box.h - SINGLE_H * z) / 2,
+      z: Math.max(0.25, z),
     }
     applyView()
   }
 
   function zoomBy(k) {
-    const vp = viewportRef.current
-    if (!vp) return
-    const rect = vp.getBoundingClientRect()
+    const box = freeBox()
+    if (!box) return
     const z = Math.min(6, Math.max(0.25, view.current.z * k))
-    // zoom about the middle of what is on screen, so the mark stays put
-    const cx = rect.width / 2
-    const cy = rect.height / 2
+    // zoom about the middle of what is VISIBLE, so the mark stays put rather
+    // than creeping under the drawer a step at a time
+    const cx = box.w / 2
+    const cy = box.h / 2
     const f = z / view.current.z
     view.current = {
       x: cx - (cx - view.current.x) * f,
@@ -546,11 +569,23 @@ export default function App() {
     }
   }, [genome, p.legibility])
 
-  // one logo, so the world only ever needs centring once the viewport settles
+  // One logo, so the world centres once the viewport settles — and again when
+  // the window changes size, because a fit computed against the old width is
+  // just another way of losing the mark off an edge.
   useEffect(() => {
     centerView()
     const raf = requestAnimationFrame(reblitAll)
-    return () => cancelAnimationFrame(raf)
+    let t = 0
+    const onResize = () => {
+      clearTimeout(t)
+      t = setTimeout(() => { centerView(); reblitAll() }, 150)
+    }
+    window.addEventListener('resize', onResize)
+    return () => {
+      cancelAnimationFrame(raf)
+      clearTimeout(t)
+      window.removeEventListener('resize', onResize)
+    }
   }, [])
 
   // legibility stop change → a new logo at that stop (skip first mount)
@@ -618,8 +653,14 @@ export default function App() {
     )
   }
 
-  function paintLayer(canvas, layer, reveal) {
+  function paintLayer(canvas, layer, r) {
     if (!canvas || !layer) return
+    /* Clamped, and not as a nicety. ctx.ellipse THROWS on a negative radius,
+       and the throw happened between the background fill and the drawImage —
+       so the canvas was left wiped, the rAF chain died with the exception and
+       nothing ever repainted it. That is the "logo vanished and I panned
+       around looking for it": there was nothing out there to find. */
+    const reveal = Math.max(0, Math.min(1, r))
     const cssW = canvas.clientWidth
     if (!cssW) return
     const dpr = blitRatio()
@@ -640,8 +681,8 @@ export default function App() {
       ctx.beginPath()
       ctx.ellipse(
         ox + w / 2, oy + h / 2,
-        w * (0.2 + 0.62 * reveal),
-        h * 0.78 * reveal,
+        Math.max(0, w * (0.2 + 0.62 * reveal)),
+        Math.max(0, h * 0.78 * reveal),
         0, 0, Math.PI * 2,
       )
       ctx.clip()
@@ -665,6 +706,7 @@ export default function App() {
   })
   const inkKey = JSON.stringify(p.ink)
   const lastGeom = useRef(null)
+  const lastSeed = useRef(null)
 
   useEffect(() => {
     if (!fontsReady) return
@@ -678,9 +720,14 @@ export default function App() {
     layerRef.current = makeLayer(genome, ratio)
     layerRatio.current = ratio
     artRef.current = layerRef.current
-    // The grow-out belongs to a new composition. Restarting it on every frame
-    // of an ink drag would make the ink dials unusable.
-    if (geomChanged) growOut(layerRef.current)
+    /* The grow-out belongs to a NEW COMPOSITION — Mutate, Grow, Fresh, Back, a
+       new word — and the seed is what says so. Keying it on the geometry meant
+       every step of a dial drag armed another 900ms reveal, so the mark spent
+       the whole drag at a few percent of itself and only came back a second
+       after you let go. A dial is a live control: it repaints, whole. */
+    const fresh = lastSeed.current !== genome.seed
+    lastSeed.current = genome.seed
+    if (geomChanged && fresh) growOut(layerRef.current)
     else paintLayer(singleRef.current, layerRef.current, 1)
   }, [genome, geomKey, inkKey])
 
