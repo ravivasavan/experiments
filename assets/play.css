@@ -458,7 +458,9 @@ a { color: inherit; }
   align-items: center;
   gap: 6px;
   height: 44px;
-  margin: 0;
+  /* Block margins only: the inline ones are the dock's auto margins that
+     centre the row, and a bare margin: 0 here outranked them. */
+  margin-block: 0;
   padding: 0 16px;
   border-radius: 22px;
   font-size: 13px;
