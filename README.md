@@ -12,7 +12,7 @@ The home page is a horizontal timeline built from `assets/timeline/experiments.j
 
 1. **The thing itself.** Either host it here at `<YYYYMMDD>/<slug>/index.html`, or host it elsewhere and give the entry a `url`.
 
-   A play that needs no dials can be plain HTML/CSS/JS with no build step. One with dials gets a Vite project at `poc/<slug>/` that builds straight into its dated folder — the engine stays plain JavaScript in `public/`, and React is there only to render the DialKit panel. `assets/CHROME.md` §8 has the shape; copy `poc/camouflage/` and change the two paths in `vite.config.js`.
+   A play that needs no dials can be plain HTML/CSS/JS with no build step. One with dials gets a Vite project at `poc/<slug>/` that builds straight into its dated folder — the engine stays plain JavaScript in `public/`, and React is there only to render the DialKit panel. `assets/CHROME.md` §8 has the shape; copy `poc/chroma/` and change the two paths in `vite.config.js`.
 2. **Three shots** at `assets/timeline/<slug>/*.png`, 1280×800. They render as a scattered stack ~210px wide, so favour whole-screen views over detail crops. Mixing light and dark reads well.
 3. **An entry** in `assets/timeline/experiments.json`:
    ```json
