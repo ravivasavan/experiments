@@ -348,7 +348,42 @@
     const ratio = Math.min(Math.min(bounds.width / w, bounds.height / h) * Math.min(devicePixelRatio || 1, 2), 1920 / w, 1920 / h);
     try { renderer.draw(Math.max(1, Math.round(w * ratio)), Math.max(1, Math.round(h * ratio))); }
     catch (error) { toast(error.message); }
+    scheduleTone();
   }
+
+  // The canvas ignores the theme, so the chrome and the Tools are told what
+  // they are actually sitting on: the rendered pixels in the band the pills
+  // occupy, read back after a draw (the context keeps its buffer). When the
+  // stage letterboxes and does not reach that band, the pills sit on the page,
+  // and the theme decides. Debounced, so a dial drag is not a readback a frame.
+  let toneTimer, toneCanvas;
+  function scheduleTone() { clearTimeout(toneTimer); toneTimer = setTimeout(sampleTone, 120); }
+  function sampleTone() {
+    const art = $('art');
+    const r = art.getBoundingClientRect();
+    const bandBottom = 112; // --chrome-top + 64 + 8, the pills' row at every width
+    let tone = null;
+    if (r.top <= 72 && r.height > 0 && art.width > 0) { // the pills span 40–104; past 72 the canvas is under less than half of them
+      try {
+        toneCanvas ||= document.createElement('canvas');
+        toneCanvas.width = 32; toneCanvas.height = 4;
+        const ctx = toneCanvas.getContext('2d', { willReadFrequently: true });
+        const sh = Math.max(1, Math.round(art.height * Math.min(1, (bandBottom - r.top) / r.height)));
+        ctx.drawImage(art, 0, 0, art.width, sh, 0, 0, 32, 4);
+        const d = ctx.getImageData(0, 0, 32, 4).data;
+        const lin = v => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+        let sum = 0;
+        for (let i = 0; i < d.length; i += 4) sum += 0.2126 * lin(d[i]) + 0.7152 * lin(d[i + 1]) + 0.0722 * lin(d[i + 2]);
+        const mean = sum / (d.length / 4);
+        // Contrast crossover for the two inks sits near L 0.19: below it light
+        // text wins on the band, above it dark text does, whatever the theme.
+        tone = mean < 0.19 ? 'dark' : 'light';
+      } catch (e) { tone = null; }
+    }
+    if (tone) document.documentElement.dataset.chromeTone = tone;
+    else delete document.documentElement.dataset.chromeTone;
+  }
+  addEventListener('resize', scheduleTone);
   function schedule() { cancelAnimationFrame(frame); frame = requestAnimationFrame(render); save(); }
 
   function applyChrome() {

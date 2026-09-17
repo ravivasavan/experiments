@@ -47,7 +47,7 @@
     {
       "slug": "teletext",
       "name": "Teletext",
-      "date": "20260804",
+      "date": "20260810",
       "description": "A layout generator on a real 40 × 25 teletext page",
       "status": "live",
       "tech": "vanilla JS, WST Level 1, Bedstead, DialKit",

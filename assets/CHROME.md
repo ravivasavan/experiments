@@ -37,6 +37,32 @@ job is the panel; what DialKit has no control for — a body of copy, a palette
 swatch, a list that grows as you click the canvas — stays in the drawer beside
 it. See §8.
 
+## Tools — the chrome's family (2026-09-18)
+
+Everything a play puts on the canvas — the **rail**, the **dock** and the
+**drawer** — is one group, *Tools*, and it reads as an extension of the site
+chrome, not a second system:
+
+- **Rail** hangs under the avatar pill in its column: `left: --chrome-top`,
+  `top: --chrome-tools` (pill bottom + 8px), 64px glass circles on the chrome's
+  own material (`--pill-bg` / `--pill-filter` / `--pill-edge`), 8px apart. The
+  icon sits on a 48px disc that fills at 6% on hover and stays filled at 12%
+  when the mode is on — the same active state as the menu's chips. No accent.
+- **Drawer** hangs under the menu pill: `top: --chrome-tools`, `right:
+  --chrome-top`, 360 wide; minimised it is a 64px disc in that corner (56 on a
+  phone).
+- **Dock** keeps its 44px pills — the one size exception — but wears the
+  chrome's material. Position unchanged (bottom, centred).
+- **There is no drawn rule any more.** `.chrome-rule` is `display: none`;
+  drop the element from templates as they are rebuilt.
+- **Tone.** A play whose canvas ignores the theme sets
+  `html[data-chrome-tone="dark|light"]` (or `rvChrome.setTone()`); the
+  package's pills and the Tools swap to light-on-dark or dark-on-light tokens.
+  Chroma does this from its palette's ground colour.
+
+Geometry numbers older sections quote (rule 144, tools 160 / 96, 112) are
+superseded: everything derives from `--chrome-top` (40 / 16 / 12).
+
 ## Layout: the content is the whole viewport, the sheet overlays it
 
 **No page reserves room for the sheet.** The experiment's artwork is centred on

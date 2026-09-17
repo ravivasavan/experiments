@@ -25,6 +25,11 @@
    whichever stylesheet the page links first. */
 
 html {
+  /* Last-resort pill material, in case the package never arrives (see the
+     palette fallback below): normally chrome.css sets these on :root. */
+  --pill-bg: rgba(255, 245, 245, 0.2);
+  --pill-filter: blur(10px) saturate(180%);
+  --pill-edge: inset 0 0 0 1px color-mix(in srgb, var(--fg) 5%, transparent);
   --night: #0d1b1e;
   --orange: #ff795c;
   --olive: #567c30;
@@ -112,20 +117,25 @@ html[data-theme="night"] {
      positioned off the other three, so a fold only has to restate the four
      numbers and everything stays lined up under the pills. */
   --chrome-top: 40px;
-  --chrome-rule: 144px;   /* 40 above the pills + 64 of pill + 40 below */
-  --chrome-tools: 160px;  /* the rule, plus the usual gap */
-  --chrome-pad: 40px;
+  /* The Tools — rail, dock, drawer — are the chrome's family: the rail hangs
+     under the avatar pill in its column, the drawer under the menu pill on its
+     right margin, each 8px below the pill above it. Every position derives from
+     --chrome-top, so a fold restates one number. --chrome-rule is the bottom
+     edge of the pills; there is no drawn rule any more. */
+  --chrome-rule: calc(var(--chrome-top) + 64px);
+  --chrome-tools: calc(var(--chrome-rule) + 8px);
+  --chrome-pad: var(--chrome-top);
 
   /* The floating settings sheet. It is an overlay: the content underneath is
      the whole viewport and nothing reserves room for the glass, so the only
      geometry here is the sheet's own — how wide the pane is, how far it is
      inset, and how big the disc is once it is minimised. */
   --panel-w: 360px;
-  --panel-gap: 16px;
+  --panel-gap: var(--chrome-top);
   /* The minimised drawer is a tool pill's disc: the same 44px box and the same
      16px glyph as everything else at this level, so the chrome has one icon
      size and one container size throughout. */
-  --sheet-min: 44px;
+  --sheet-min: 64px;
   /* Where the sheet's top edge sits. Overridden below on a page that has a
      tools row, because the two would otherwise start on the same line. */
   --sheet-top: var(--chrome-tools);
@@ -205,15 +215,9 @@ a { color: inherit; }
    --nav-margin steps (40 / 16 / 12) are play's --chrome-top, so the rule lands
    the same distance under the pills at every width. */
 
-.chrome-rule {
-  position: fixed;
-  top: var(--chrome-rule);
-  left: 0;
-  right: 0;
-  border-top: 1px solid var(--separator);
-  z-index: var(--z-rule);
-  pointer-events: none;
-}
+/* Retired 2026-09-18: the Tools column under the avatar took over the job of
+   saying where the site's chrome ends. Templates may still carry the element. */
+.chrome-rule { display: none; }
 
 /* ------------------------------------------ the glass material, on its own -- */
 
@@ -330,7 +334,7 @@ a { color: inherit; }
 /* --- the rail --- */
 .rail {
   top: var(--chrome-tools);
-  left: var(--panel-gap);
+  left: var(--chrome-top);
   flex-direction: column;
   max-height: calc(100% - var(--chrome-tools) - var(--panel-gap));
   overflow-y: auto;
@@ -342,16 +346,47 @@ a { color: inherit; }
    zoom cluster closes its own gaps so it reads as one control, and takes a
    wider gap from whatever is above it. */
 .rail__group { display: flex; flex-direction: column; gap: 8px; }
-.rail__group--zoom { gap: 2px; margin-top: 8px; }
+.rail__group--zoom { gap: 8px; margin-top: 0; }
 
 /* Icon only, on the same 44px round-rect as every other tool pill. The label
    stays in the markup and stays in the a11y tree — it is just not drawn. */
+/* The rail's pills ARE chrome pills: the avatar's 64px glass circle, the same
+   material tokens, the icon centred on a 48px disc that fills on hover (6%)
+   and stays filled when the mode is on (12%) — exactly how the menu's chips
+   show active. No accent: the accent is the play's and can be any colour. */
 .rail .tool-pill {
-  width: 44px;
+  position: relative;
+  width: 64px;
+  height: 64px;
   padding: 0;
   justify-content: center;
   flex-shrink: 0;
+  border-radius: 32px;
+  background: var(--pill-bg);
+  backdrop-filter: var(--pill-filter);
+  -webkit-backdrop-filter: var(--pill-filter);
+  box-shadow: var(--pill-edge);
+  color: var(--fg);
 }
+.rail .tool-pill::before {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--fg) 0%, transparent);
+  transition: background-color 200ms ease;
+}
+.rail .tool-pill__icon { position: relative; z-index: 1; }
+.rail .tool-pill:hover,
+.rail .tool-pill:focus-visible,
+.rail .tool-pill:active,
+.rail .tool-pill.is-on,
+.rail .tool-pill[disabled]:hover { box-shadow: var(--pill-edge); color: var(--fg); }
+.rail .tool-pill:hover::before,
+.rail .tool-pill:focus-visible::before { background: color-mix(in srgb, var(--fg) 6%, transparent); }
+.rail .tool-pill.is-on::before { background: color-mix(in srgb, var(--fg) 12%, transparent); }
+.rail .tool-pill.is-on:hover::before { background: color-mix(in srgb, var(--fg) 16%, transparent); }
+.rail .tool-pill:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 .rail .tool-pill__label {
   position: absolute;
   width: 1px;
@@ -387,6 +422,38 @@ a { color: inherit; }
    the rail's auto margin would. */
 .dock > :first-child { margin-left: auto; }
 .dock > :last-child { margin-right: auto; }
+
+/* The dock keeps its 44px pills (the one size exception in the family) but
+   wears the chrome's material, not the drawer's glass. */
+.dock .tool-pill {
+  background: var(--pill-bg);
+  backdrop-filter: var(--pill-filter);
+  -webkit-backdrop-filter: var(--pill-filter);
+  box-shadow: var(--pill-edge);
+  color: var(--fg);
+}
+.dock .tool-pill:hover,
+.dock .tool-pill:focus-visible { box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 6%, transparent), var(--pill-edge); }
+.dock .tool-pill:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
+.dock .tool-pill:active { box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
+.dock .tool-pill.is-on { color: var(--fg); box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
+
+/* Tone, as the package does it: a canvas that ignores the theme tells the
+   Tools what they sit on (html[data-chrome-tone], set by rvChrome.setTone). */
+:root[data-chrome-tone="dark"] .rail,
+:root[data-chrome-tone="dark"] .dock,
+:root[data-chrome-tone="dark"] .sheet__icon {
+  --fg: #fff5f5; --ink: #fff5f5;
+  --pill-bg: rgba(255, 245, 245, 0.10);
+  --pill-edge: inset 0 0 0 1px rgba(255, 245, 245, 0.18);
+}
+:root[data-chrome-tone="light"] .rail,
+:root[data-chrome-tone="light"] .dock,
+:root[data-chrome-tone="light"] .sheet__icon {
+  --fg: #0d1b1e; --ink: #0d1b1e;
+  --pill-bg: rgba(255, 245, 245, 0.55);
+  --pill-edge: inset 0 0 0 1px rgba(13, 27, 30, 0.10);
+}
 
 
 
@@ -778,11 +845,9 @@ input[type="range"].dial {
 @media (max-width: 900px) {
   :root {
     --chrome-top: 16px;
-    --chrome-rule: 96px;
-    --chrome-tools: 112px;
     --chrome-pad: 16px;
     /* A thumb's disc rather than a pointer's. */
-    --sheet-min: 44px;
+    --sheet-min: 56px;
   }
 
   /* --- rail and dock, folded --- */
@@ -867,8 +932,6 @@ input[type="range"].dial {
 @media (max-width: 640px) {
   :root {
     --chrome-top: 12px;
-    --chrome-rule: 88px;
-    --chrome-tools: 104px;
     --chrome-pad: 12px;
     --panel-gap: 12px;
   }
