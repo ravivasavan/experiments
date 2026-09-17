@@ -10,7 +10,7 @@
 //
 // Space: y DOWN, baseline at y = 0, cap line at y = -capH.
 
-import { flattenCommands } from '../vector.js'
+import { flattenCommands } from '../flatten.js'
 
 /* Outer letters bigger, the baseline arced, each glyph nudged off true. The
    three moves a letterer makes before drawing a single spike. */

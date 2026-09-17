@@ -76,10 +76,51 @@ function bracket({ base, dir, L, w0 }) {
   return wedge({ base, dir, L, w0: w0 * 1.35 })
 }
 
-export function toPolygon(p) {
-  if (p.kind === 'sweep') return sweep(p)
-  if (p.kind === 'bracket') return bracket(p)
-  return wedge(p)
+/* Sink the root into the letter before drawing it.
+
+   An anchor is a convex EXTREMITY — the sharpest point of the outline, with a
+   normal pointing away from the ink. So a primitive whose base sits exactly on
+   it has almost nothing behind it: the base chord is perpendicular to the way
+   out, and at an extremity everything on that chord is already outside the
+   letter. That is why the first pass came out as splinters hovering a hair off
+   the strokes they were supposed to be growing from.
+
+   Push the base back down its own direction by a base-width or so and lengthen
+   to match, and the root is buried in solid ink. The union welds it. */
+function sunk(p) {
+  const s = p.sink || 0
+  if (!s) return p
+  const dl = Math.hypot(p.dir[0], p.dir[1]) || 1
+  return {
+    ...p,
+    base: [p.base[0] - (p.dir[0] / dl) * s, p.base[1] - (p.dir[1] / dl) * s],
+    L: p.L + s,
+  }
+}
+
+/* Wind it the way the letters are wound.
+
+   The whole composition is filled as ONE path with the nonzero rule, which is
+   what lets a counter punch a hole in an O. An ornament wound the other way
+   from the letter it crosses cancels against it and punches a hole too — those
+   were the white diamonds appearing in the strokes wherever a blade passed
+   over one. Orientation is not cosmetic here; it is the difference between
+   union and subtraction. */
+export function orient(poly, wind) {
+  if (!wind) return poly
+  let a = 0
+  for (let i = 0; i < poly.length; i++) {
+    const p = poly[i]
+    const q = poly[(i + 1) % poly.length]
+    a += p[0] * q[1] - q[0] * p[1]
+  }
+  return Math.sign(a) === Math.sign(wind) ? poly : poly.slice().reverse()
+}
+
+export function toPolygon(prim) {
+  const p = sunk(prim)
+  const poly = p.kind === 'sweep' ? sweep(p) : p.kind === 'bracket' ? bracket(p) : wedge(p)
+  return orient(poly, prim.wind)
 }
 
 /* Mirror a primitive about a vertical axis. Bilateral symmetry about the

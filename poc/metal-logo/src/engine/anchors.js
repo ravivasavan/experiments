@@ -102,16 +102,24 @@ function ringAnchors(ring, outerSign, glyphIndex, minTurn) {
     // convex on the OUTSIDE of this ring, and sharp enough to be a feature
     if (Math.sign(turn) !== Math.sign(outerSign)) continue
     if (Math.abs(turn) < minTurn) continue
-    // the bisector, pointing away from the shape
-    const bis = norm([t0[0] - t1[0], t0[1] - t1[1]])
-    const nx = -bis[1] * outerSign
-    const ny = bis[0] * outerSign
+    /* The outward bisector. t0 − t1 IS it — at the tip of a spike the two
+       tangents are near-opposite and their difference points straight out of
+       the point, and the winding cancels because both tangents flip with it.
+
+       This used to take that vector and rotate it a quarter turn, which is a
+       TANGENT. Every ornament in the engine has been leaving its corner sideways
+       along the edge it was standing on rather than away from the letter, and
+       every anchor has been classified crown/root/flank on that same rotated
+       vector. It is why the spikes read as glancing off the letterforms. */
+    const nx = norm([t0[0] - t1[0], t0[1] - t1[1]])[0]
+    const ny = norm([t0[0] - t1[0], t0[1] - t1[1]])[1]
     const seg = (Math.hypot(...sub(p, a)) + Math.hypot(...sub(b, p))) / 2
     out.push({
       x: p[0], y: p[1],
       nx, ny,
       turn: Math.abs(turn),
       width: seg,
+      outerSign,
       glyph: glyphIndex,
       id: glyphIndex * 1000 + i,
     })
@@ -129,6 +137,65 @@ function classify(a, set) {
   if (a.y >= lower && a.ny > 0.25) return 'root'        // pointing down off the bottom
   if (Math.abs(a.nx) > 0.62) return 'flank'             // pointing out to the side
   return 'edge'
+}
+
+/* Is there a STROKE behind this corner?
+//
+   The anchors are found on the simplified outline and the ink drawn is the
+   ragged one. That is the trick that makes this work on these faces — but it
+   means a corner can be the tip of a three-unit whisker the type designer drew,
+   with nothing behind it, and an ornament rooted there hangs in the air a
+   hair off the letter. Those were the floating splinters.
+
+   So walk back into the shape along the corner's own normal and ask for a RUN
+   of ink, not the first point of it. What comes back is how deep the ornament
+   has to start to be standing in something; nothing at all means this corner is
+   raggedness, and raggedness is not an anchor. */
+export function indexRings(polys) {
+  return (polys || []).map(bboxOfRing)
+}
+
+function bboxOfRing(poly) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity
+  for (const p of poly) {
+    if (p[0] < x0) x0 = p[0]
+    if (p[0] > x1) x1 = p[0]
+    if (p[1] < y0) y0 = p[1]
+    if (p[1] > y1) y1 = p[1]
+  }
+  return { poly, box: [x0, y0, x1, y1] }
+}
+
+function inRings(rings, x, y) {
+  let c = false
+  for (const r of rings) {
+    const b = r.box
+    if (x < b[0] || x > b[2] || y < b[1] || y > b[3]) continue
+    const poly = r.poly
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+      const yi = poly[i][1]
+      const yj = poly[j][1]
+      if ((yi > y) !== (yj > y) &&
+          x < ((poly[j][0] - poly[i][0]) * (y - yi)) / (yj - yi) + poly[i][0]) c = !c
+    }
+  }
+  return c
+}
+
+export function depthAlong(rings, x, y, dx, dy, scale) {
+  const step = scale * 0.012
+  const max = scale * 0.16
+  let run = 0
+  for (let t = step; t <= max; t += step) {
+    if (inRings(rings, x - dx * t, y - dy * t)) {
+      if (++run >= 3) return t
+    } else run = 0
+  }
+  return null
+}
+
+function inkDepth(rings, a, scale) {
+  return depthAlong(rings, a.x, a.y, a.nx, a.ny, scale)
 }
 
 export function findAnchors(set, opts) {
@@ -158,8 +225,16 @@ export function findAnchors(set, opts) {
       if (simple.length < 5) continue
       anchors.push(...ringAnchors(simple, outerSign, g.index, minTurn))
     }
+
+    // measured against THIS glyph's own ink, at this glyph's own scale
+    const rings = g.polys.map(bboxOfRing)
+    for (const a of anchors) {
+      if (a.glyph !== g.index || a.depth !== undefined) continue
+      a.depth = inkDepth(rings, a, scale)
+    }
   })
 
-  for (const a of anchors) a.cls = classify(a, set)
-  return anchors
+  const solid = anchors.filter((a) => a.depth != null)
+  for (const a of solid) a.cls = classify(a, set)
+  return solid
 }

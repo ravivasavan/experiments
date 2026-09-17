@@ -6,6 +6,7 @@ import { makeEnvelope } from './engine/envelope.js'
 import { typeset, fitToEnvelope, bboxOf } from './engine/typeset.js'
 import { findAnchors } from './engine/anchors.js'
 import { compose, toPolygons } from './engine/compose.js'
+import { orient } from './engine/primitives.js'
 import { sigilPolys } from './engine/sigil.js'
 import {
   loadFont,
@@ -625,9 +626,12 @@ export default function App() {
     const env = makeEnvelope(pv.silhouette, { A: 0, H: pv.size })
     const fitted = fitToEnvelope(set, env)
     const anchors = findAnchors(fitted, pv.letters)
-    const { prims } = compose(anchors, env, { ...pv.ornament, ...pv.composition }, genome.seed)
+    const { prims } = compose(anchors, env, { ...pv.ornament, ...pv.composition }, genome.seed, fitted.polys)
     const ornament = toPolygons(prims)
-    const sig = sigilPolys(pv.composition.sigil, env, fitted)
+    // the sigil is filled into the same nonzero path, so it is wound with
+    // everything else or it subtracts wherever it touches
+    const wind = anchors.length ? anchors[0].outerSign : 1
+    const sig = sigilPolys(pv.composition.sigil, env, fitted).map((p) => orient(p, wind))
     return { env, fitted, anchors, prims, polys: [...fitted.polys, ...ornament, ...sig] }
   }
 
