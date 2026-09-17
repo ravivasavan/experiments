@@ -70,7 +70,7 @@
 
     #empty {
       position: absolute; inset: 0; display: grid; place-content: center; justify-items: center;
-      gap: 16px; text-align: center; padding: 200px 24px 24px; pointer-events: none;
+      gap: 16px; text-align: center; padding: 24px; pointer-events: none;
     }
     #empty > * { pointer-events: auto; }
     #empty h1 { font-size: 34px; font-weight: 400; letter-spacing: -0.02em; line-height: 1.1; }
@@ -91,12 +91,6 @@
     /* One melt point: its number, its two dials, and the way out. */
     .bridge { display: none; }
     /* Labil Grotesk ships 400 only, so emphasis is colour, not weight. */
-
-    /* Folded: the sheet swings to the bottom of the screen, so the empty
-       state's copy sits clear of the tools row instead of centring on it. */
-    @media (max-width: 900px) {
-      #empty { padding-top: 180px; }
-    }
   </style>
 </head>
 <body>

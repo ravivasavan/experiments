@@ -216,7 +216,8 @@
   </nav>
 
   <div id="stage" data-pan></div>
-  <p id="hint">click anywhere to magnetise</p>
+  <!-- Status only (all closed, camera unavailable) — there is no prompt; the click is for people to find. -->
+  <p id="hint" class="gone"></p>
   <input id="file" type="file" accept="image/*">
 
   <!-- The dials drawer. Static markup so play.js finds it at DOMContentLoaded

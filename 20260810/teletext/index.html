@@ -73,9 +73,9 @@
       overflow: auto;
       display: grid;
       place-items: center;
-      /* Clears both chrome rows at the top. The sides are even, so the screen
-         sits on the middle of the window rather than beside the sheet. */
-      padding: 204px var(--chrome-pad) 48px;
+      /* No padding: the screen centres on the window itself, and the chrome and
+         Tools lie over it like everywhere else. */
+      padding: 0;
     }
     #screen-wrap { display: grid; gap: 16px; justify-items: center; }
     /* The page never inverts with the theme: teletext is black, full stop.
@@ -84,12 +84,6 @@
       display: block;
       background: #000;
       image-rendering: pixelated;
-    }
-    #caption {
-      font-size: 13px;
-      color: var(--muted);
-      font-variant-numeric: tabular-nums;
-      text-align: center;
     }
 
     /* ---- the two controls with no shared shape ----
@@ -117,9 +111,9 @@
     @media (max-width: 900px) {
       html, body { height: auto; overflow: visible; }
       #stage {
-        height: auto;
+        min-height: 100svh;
         overflow: visible;
-        padding: 168px var(--chrome-pad) 24px;
+        padding: 0 var(--chrome-pad);
       }
     }
     .bridge { display: none; }
@@ -177,13 +171,13 @@
       </span>
       <span class="tool-pill__label">Randomise</span>
     </button>
+    <p class="readout" id="caption" aria-live="polite">…</p>
   </nav>
 
   <main id="stage" data-pan="free">
     <div id="screen-wrap">
       <canvas id="screen" width="480" height="500" role="img"
               aria-label="A teletext page, 40 columns by 25 rows"></canvas>
-      <p id="caption">…</p>
     </div>
   </main>
 

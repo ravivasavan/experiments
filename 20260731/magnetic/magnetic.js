@@ -252,7 +252,7 @@
   // ---------- magnetise / scatter ----------
   function magnetise() {
     anchor.x = (innerWidth - portrait.w) / 2;
-    anchor.y = Math.max((innerHeight - portrait.h) / 2, 112);
+    anchor.y = (innerHeight - portrait.h) / 2; // dead centre; the chrome lies over it like everywhere else
     const cx = innerWidth / 2, cy = innerHeight / 2;
     const now = performance.now();
     for (const w of wins) {
@@ -439,7 +439,7 @@
 
   // ---------- shuffle / resize ----------
   btnShuffle.addEventListener('click', () => {
-    hint.textContent = 'click anywhere to magnetise';
+    hint.textContent = '';
     hint.classList.add('gone');
     build();
     if (assembled) magnetise();

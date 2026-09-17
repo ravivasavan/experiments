@@ -93,27 +93,7 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 /* The composition and the export size, riding in the dock beside the verbs —
    the bottom edge is one bar, the same bargain camouflage's seed makes. */
-.readout {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  /* The same 44px as every pill in the dock — it is part of that bar, not a
-     caption floating next to it. */
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 22px;
-  font-size: 13px;
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-  /* The dock's material, exactly — a readout on different glass read as a
-     third kind of container beside the pills. */
-  background: var(--pill-bg);
-  backdrop-filter: var(--pill-filter);
-  -webkit-backdrop-filter: var(--pill-filter);
-  box-shadow: var(--pill-edge);
-}
-.readout__sep { opacity: 0.5; }
+/* .readout lives in play.css now — the dock's status pill is shared with Teletext. */
 
 /* --------------------------------------------------------- the palettes -- */
 

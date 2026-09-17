@@ -53,6 +53,14 @@ chrome, not a second system:
   phone).
 - **Dock** keeps its 44px pills — the one size exception — but wears the
   chrome's material. Position unchanged (bottom, centred).
+- **Readout.** A dock may carry one non-button, `<p class="readout">`, for a
+  line of status (Chroma's composition and size, Teletext's cell budget): the
+  same 44px pill and material as the verbs beside it, in the muted ink. Lives
+  in play.css, not in a play's own CSS.
+- **Centred, full stop.** The artwork centres on the viewport's own centre — no
+  top padding for the chrome, no floor under the pills, no bottom padding for
+  the dock. The chrome and the Tools lie over it. No prompts on the canvas
+  either (Magnetic's "click anywhere" went); people find the click.
 - **There is no drawn rule any more.** `.chrome-rule` is `display: none`;
   drop the element from templates as they are rebuilt.
 - **Tone.** A play whose canvas ignores the theme sets
