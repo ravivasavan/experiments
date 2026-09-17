@@ -60,10 +60,16 @@
   --glass-blur: blur(24px) saturate(160%);
   --glass-edge: inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
   --glass-specular: inset 0 1px 0 color-mix(in srgb, white var(--glass-spec), transparent);
-  --glass-shadow: 0 1px 2px rgba(13, 27, 30, 0.06), 0 24px 64px rgba(13, 27, 30, 0.18);
+  /* Flat. Play's overlays are glass and a hairline, and nothing casts.
+     A drop shadow on a bar that has to scroll gets clipped by the scroller at
+     its padding edge, which is a straight cut across the glow — and the padding
+     you add to stop that is 32px of dead space on every side of every bar. The
+     shadow was never worth either. Keep both tokens so the plays that name them
+     go flat too rather than erroring. */
+  --glass-shadow: 0 0 rgba(0, 0, 0, 0);
   /* The same ambience at pill scale — 64px of drop under a 44px control reads
      as a mistake, so the small parts get a shorter throw. */
-  --glass-shadow-sm: 0 1px 2px rgba(13, 27, 30, 0.06), 0 8px 24px rgba(13, 27, 30, 0.10);
+  --glass-shadow-sm: 0 0 rgba(0, 0, 0, 0);
   --glass-radius: 24px;
 
   /* The sheet is the one piece of glass that carries running text, and it lies
@@ -441,13 +447,6 @@ a { color: inherit; }
   gap: 8px;
   overscroll-behavior: contain;
   scrollbar-width: none;
-  /* A scroller clips at its padding edge, and these boxes are exactly one pill
-     thick — so the pills' ambient shadow gets sliced off and what you see is a
-     straight edge across the glow. Both axes need the room, not just the one
-     the bar scrolls on: the padding gives it and the negative margin hands it
-     straight back, so the pills stay on the line the tokens put them on. */
-  padding: 32px;
-  margin: -32px;
   pointer-events: none;
 }
 .rail::-webkit-scrollbar,
@@ -460,7 +459,7 @@ a { color: inherit; }
   top: var(--chrome-tools);
   left: var(--panel-gap);
   flex-direction: column;
-  max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) + 64px);
+  max-height: calc(100% - var(--chrome-tools) - var(--panel-gap));
   overflow-y: auto;
   touch-action: pan-y;
 }
@@ -928,15 +927,13 @@ input[type="range"].dial {
     left: 0;
     right: 0;
     bottom: var(--panel-gap);
-    /* The 32px is the shadow room the negative margin hands back; the gutter
-       has to be added on top of it, or the first pill starts 16px off-screen. */
-    padding-inline: calc(32px + var(--chrome-pad));
+    padding-inline: var(--chrome-pad);
     justify-content: flex-start;
   }
   body:has(.sheet) .dock { bottom: calc(var(--panel-gap) + 60px + 8px); }
   :root[data-play-sheet="min"] body:has(.sheet) .dock {
     bottom: var(--panel-gap);
-    padding-right: calc(32px + var(--sheet-min) + var(--chrome-pad) + 8px);
+    padding-right: calc(var(--sheet-min) + var(--chrome-pad) + 8px);
   }
   /* Start-aligned once folded: a centred row has nothing to centre against when
      it is already wider than the screen. */
@@ -948,9 +945,7 @@ input[type="range"].dial {
      underneath it. */
   .rail {
     left: var(--chrome-pad);
-    /* + 64px hands back the 32px of shadow padding at each end, the way the
-       desktop rule does — without it the folded rail scrolls a pill early. */
-    max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) * 2 - 60px - 44px + 64px);
+    max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) * 2 - 60px - 44px);
   }
 
   /* --- bottom sheet --- */

@@ -266,17 +266,38 @@ export default function App() {
   // The world is full-bleed and pans under the glass, and it centres on the
   // viewport's own centre: the sheet is an overlay, not a column cut out of
   // the page, and minimising it uncovers whatever it was lying on.
+  /* Dead centre, and nothing else. The old version floored y at 200 and then
+     added 60 on top, which put the mark low and off the bottom as soon as the
+     ornament reached — and left no way of knowing which way to drag back. */
   function centerView() {
     const vp = viewportRef.current
     if (!vp) return
     const rect = vp.getBoundingClientRect()
-    const contentH = SINGLE_H
     view.current = {
       x: (rect.width - WORLD_W) / 2,
-      y: Math.max(200, (rect.height - contentH) / 2 + 60),
+      y: (rect.height - SINGLE_H) / 2,
       z: 1,
     }
     applyView()
+  }
+
+  function zoomBy(k) {
+    const vp = viewportRef.current
+    if (!vp) return
+    const rect = vp.getBoundingClientRect()
+    const z = Math.min(6, Math.max(0.25, view.current.z * k))
+    // zoom about the middle of what is on screen, so the mark stays put
+    const cx = rect.width / 2
+    const cy = rect.height / 2
+    const f = z / view.current.z
+    view.current = {
+      x: cx - (cx - view.current.x) * f,
+      y: cy - (cy - view.current.y) * f,
+      z,
+    }
+    applyView()
+    clearTimeout(zoomBlitTimer.current)
+    zoomBlitTimer.current = setTimeout(reblitAll, 120)
   }
 
   function pushHistory(g) {
@@ -409,6 +430,9 @@ export default function App() {
       return () => el && el.removeEventListener('click', fn)
     }
     const offs = [
+      on('p-in', () => zoomBy(1.25)),
+      on('p-out', () => zoomBy(1 / 1.25)),
+      on('p-fit', () => { centerView(); reblitAll() }),
       on('p-mutate', () => mutateOne()),
       on('p-grow', () => growRandom()),
       on('p-fresh', () => freshOne()),
@@ -627,20 +651,38 @@ export default function App() {
     ctx.setTransform(1, 0, 0, 1, 0, 0)
   }
 
-  const globalKey = JSON.stringify({
+  /* Two keys, because they cost different things. Everything that changes the
+     POLYGONS is one; the ink dials are the other and repaint the same polygons
+     on the GPU, which is why dragging swell is free.
+
+     This used to be one key holding only text, font and size — so every dial in
+     the panel below those three did nothing at all. */
+  const geomKey = JSON.stringify({
     text: p.text, font: p.font, size: p.size,
     svg: svg ? svg.stamp : null, fontsReady,
+    silhouette: p.silhouette, letters: p.letters,
+    ornament: p.ornament, composition: p.composition,
   })
+  const inkKey = JSON.stringify(p.ink)
+  const lastGeom = useRef(null)
 
-  // Geometry only changes with the letterform or the growth; the ink dials
-  // repaint from the same polygons, which is why dragging bleed is free.
   useEffect(() => {
     if (!fontsReady) return
-    polysRef.current = inkPolys(genome)
-    layerRef.current = makeLayer(genome, blitRatio())
+    const geomChanged = lastGeom.current !== geomKey
+    if (geomChanged) {
+      polysRef.current = inkPolys(genome)
+      lastGeom.current = geomKey
+    }
+    if (!polysRef.current) return
+    const ratio = blitRatio()
+    layerRef.current = makeLayer(genome, ratio)
+    layerRatio.current = ratio
     artRef.current = layerRef.current
-    growOut(layerRef.current)
-  }, [genome, globalKey])
+    // The grow-out belongs to a new composition. Restarting it on every frame
+    // of an ink drag would make the ink dials unusable.
+    if (geomChanged) growOut(layerRef.current)
+    else paintLayer(singleRef.current, layerRef.current, 1)
+  }, [genome, geomKey, inkKey])
 
   // dev-only: #svgdump overlays the traced vector of the selected variant
   useEffect(() => {
@@ -653,7 +695,7 @@ export default function App() {
       setSvgDump(s.replace('<svg ', '<svg style="width:min(100%,1100px)" '))
     })
     return () => cancelAnimationFrame(raf)
-  }, [genome, globalKey, fontsReady])
+  }, [genome, geomKey, fontsReady])
 
   function onFile(e) {
     loadSvgFile(e.target.files?.[0], setSvg)

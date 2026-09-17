@@ -470,8 +470,18 @@ never a `box-shadow` that silently replaces a base hairline (restate it).
 There is exactly one `::before` grow left in `play.css`. If you add a second,
 it is wrong.
 
-Glass: `--glass-bg --glass-blur --glass-edge --glass-specular --glass-shadow
---glass-shadow-sm --glass-radius`. Apply them with the `.glass` class rather
+Glass: `--glass-bg --glass-blur --glass-edge --glass-specular --glass-radius`.
+
+**Play's overlays are flat.** `--glass-shadow` and `--glass-shadow-sm` still
+exist so nothing that names them breaks, but both are transparent and nothing
+casts. An overlay is a tint, a blur and a hairline — that is the whole material.
+
+This is not only taste. A drop shadow on a bar that has to scroll gets clipped
+by the scroller at its padding edge, and what you see is a straight cut across
+the glow; the fix was 32px of padding and a matching negative margin on every
+side of every bar, and it had to be got right again at every fold. Flat has no
+such failure mode, and the 64px of compensation came out of `.rail` and `.dock`
+with it. Apply them with the `.glass` class rather
 than by hand; the only two that move between day and night are `--glass-mix`
 (62% / 52%) and `--glass-spec` (45% / 12%), and everything else derives.
 
