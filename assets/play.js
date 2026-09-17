@@ -1,75 +1,20 @@
 /* play.ravivasavan.com — the shared behaviour.
-   Four things every page needs and none of them owns: the theme pill, the
-   circadian script arriving only when it's wanted, the tools row's sideways
-   drag, and the sheet folding into a bottom sheet on a phone. Nothing here
-   knows what any experiment does.
+   Three things every page needs and none of them owns: the rail and the dock's
+   sideways drag, the sheet folding into a bottom sheet on a phone, and panning
+   the stage out from under the glass. Nothing here knows what any experiment
+   does.
+
+   The theme is not here. The theme cycle, the theme-color meta and circadian.js
+   all belong to the shared chrome package
+   (https://ravivasavan.com/chrome/v1/chrome.js, window.rvChrome) — see
+   ../../ravi/chrome/README.md. A page carries the FOUC script in its head and
+   the chrome script tag at the end of its body; this file touches neither.
 
    Classic script, loaded with defer, before the page's own scripts. */
 (function () {
   'use strict';
 
   var html = document.documentElement;
-  var THEMES = ['day', 'night', 'system', 'circadian'];
-  var DAY = '#fff5f5';
-  var NIGHT = '#0d1b1e';
-
-  /* ---------------------------------------------------------------- theme -- */
-
-  function themeColour(t) {
-    if (t === 'circadian') {
-      // circadian.js publishes --bg inline on <html>; before it lands, the
-      // cache the head script restored is the same value.
-      var live = getComputedStyle(html).getPropertyValue('--bg').trim();
-      if (live) return live;
-      try {
-        var cache = JSON.parse(localStorage.getItem('circadian-cache'));
-        if (cache && cache['--bg']) return cache['--bg'];
-      } catch (e) {}
-      return DAY;
-    }
-    if (t === 'day') return DAY;
-    if (t === 'night') return NIGHT;
-    return matchMedia('(prefers-color-scheme: dark)').matches ? NIGHT : DAY;
-  }
-
-  function paintThemeColour() {
-    var meta = document.getElementById('theme-color');
-    if (meta) meta.setAttribute('content', themeColour(html.dataset.theme));
-  }
-
-  // The sun palette is 19KB of zone table; it only loads for the people who
-  // asked for it, and only once.
-  function loadCircadian() {
-    if (html.dataset.theme !== 'circadian') return;
-    if (document.getElementById('circadian-script')) return;
-    var s = document.createElement('script');
-    s.id = 'circadian-script';
-    s.src = '/assets/circadian.js';
-    s.defer = true;
-    document.head.appendChild(s);
-  }
-
-  function setTheme(t) {
-    html.dataset.theme = t;
-    try { localStorage.setItem('theme', t); } catch (e) {}
-    loadCircadian();
-    paintThemeColour();
-  }
-
-  document.addEventListener('click', function (e) {
-    var pill = e.target.closest && e.target.closest('[data-theme-toggle]');
-    if (!pill) return;
-    var i = THEMES.indexOf(html.dataset.theme || 'system');
-    setTheme(THEMES[(i + 1) % THEMES.length]);
-  });
-
-  // Circadian repaints --bg every minute, and the OS can flip under "system":
-  // the address bar follows both.
-  new MutationObserver(paintThemeColour).observe(html, { attributes: true, attributeFilter: ['data-theme', 'style'] });
-  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paintThemeColour);
-
-  loadCircadian();
-  paintThemeColour();
 
   /* ---------------------------------------------------------------- dials -- */
   /* WebKit draws no progress on a range, so .dial paints its filled half with a
@@ -516,7 +461,6 @@
   // A page that sets a dial's value in code calls play.dials() to repaint it.
   window.play = {
     dials: paintDials,
-    setTheme: setTheme,
     openSheet: openSheet,
     closeSheet: closeSheet,
     minimiseSheet: function (min) { setMin(min !== false); },

@@ -13,32 +13,39 @@
   <meta name="twitter:card" content="summary">
   <meta name="theme-color" id="theme-color" content="#fff5f5">
   <script>
-    /* Set data-theme and the address-bar colour before paint, to avoid a
-       flash. Cycles: day → night → system → circadian. Circadian colours are
-       computed by circadian.js, which play.js only loads when it's wanted, so
-       its last cached tokens are re-applied here to keep first paint right. */
+    /* Set data-theme before paint to avoid FOUC. Cycles: day → night → system
+       → circadian. Circadian colours are computed by circadian.js (loaded on
+       demand by chrome.js), so re-apply its last cached tokens here to keep
+       first paint correct. Also resolve the theme-color meta (mobile browser
+       chrome) to match, same logic chrome.js uses at runtime. */
     (function () {
       var t = null;
       try { t = localStorage.getItem('theme'); } catch (e) {}
       if (t !== 'day' && t !== 'night' && t !== 'system' && t !== 'circadian') t = 'system';
       document.documentElement.dataset.theme = t;
-      var c = '#fff5f5';
-      if (t === 'night') c = '#0d1b1e';
-      else if (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches) c = '#0d1b1e';
-      else if (t === 'circadian') {
+      var DAY = '#fff5f5', NIGHT = '#0d1b1e';
+      var color = t === 'night' ? NIGHT : DAY;
+      if (t === 'system') {
+        try {
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) color = NIGHT;
+        } catch (e) {}
+      }
+      if (t === 'circadian') {
         try {
           var cache = JSON.parse(localStorage.getItem('circadian-cache'));
           for (var k in cache) document.documentElement.style.setProperty(k, cache[k]);
-          if (cache && cache['--bg']) c = cache['--bg'];
+          if (cache && cache['--bg']) color = cache['--bg'];
         } catch (e) {}
       }
-      var m = document.getElementById('theme-color');
-      if (m) m.setAttribute('content', c);
+      try {
+        var meta = document.getElementById('theme-color');
+        if (meta) meta.setAttribute('content', color);
+      } catch (e) {}
     })();
   </script>
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
-  <link rel="preload" href="/assets/fonts/LabilGrotesk-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="https://ravivasavan.com/chrome/v1/chrome.css">
   <link rel="stylesheet" href="/assets/play.css">
   <style>
     /* Page-specific only — chrome, tokens, reset and controls all live in
@@ -144,42 +151,7 @@
   </style>
 </head>
 <body>
-  <div class="chrome">
-    <a class="icon-pill chrome__back" href="/" aria-label="Back to play index">
-      <span class="icon-pill__icon">
-        <svg viewBox="4 4 16 16" fill="none" stroke="currentColor" stroke-width="1.3333" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="m15 18-6-6 6-6"/>
-        </svg>
-      </span>
-    </a>
-    <header class="header-pill chrome__id">
-      <div class="header-pill__inner">
-        <div class="header-pill__avatar">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect width="2.00001" height="2.00001" transform="matrix(-1 0 0 1 32 13)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 20 13)" fill="currentColor"/> <path d="M34.0098 34.9766V48H36V34.9766H34.0098ZM13.9902 34.9766H12V48H13.9902V35.0293H15.9805V32.9814H13.9902V34.9766ZM32 13H16V9H14V17H16V15H32V25H30V27H18V31H16V33H18V35H30V33H32V35H34V33H32V31H34V15H40V13H34V9H32V13ZM12 22H14V17H12V22ZM28 21H30V19H28V21ZM20 21H22V19H20V21ZM30 9H32V7H30V9ZM16 9H18V7H16V9ZM18 7H30V5H18V7Z" fill="currentColor"/> <rect width="4" height="6" transform="matrix(-1 0 0 1 18 27)" fill="currentColor"/> <rect width="2.00001" height="4.00001" transform="matrix(-1 0 0 1 16 21)" fill="currentColor"/> <path d="M16 25H18V21H16V25Z" fill="currentColor"/> <rect width="16.0001" height="2.00001" transform="matrix(-1 0 0 1 30 25)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 32 23)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 24 23)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 28 21)" fill="currentColor"/> </svg>
-        </div>
-        <div class="header-pill__label">
-          <span class="header-pill__name">Ravi Vasavan</span>
-          <span class="header-pill__role">Magnetic</span>
-        </div>
-      </div>
-    </header>
-    <button class="icon-pill icon-pill--theme chrome__theme" type="button" aria-label="Toggle theme" data-theme-toggle>
-      <span class="icon-pill__icon">
-        <svg data-tstate="day" viewBox="-1.3333 -1.3333 26.6667 26.6667" fill="none" stroke="currentColor" stroke-width="2.2222" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
-        </svg>
-        <svg data-tstate="night" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-        </svg>
-        <svg data-tstate="system" viewBox="-1.3333 -1.3333 26.6667 26.6667" fill="none" stroke="currentColor" stroke-width="2.2222" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>
-        </svg>
-        <svg data-tstate="circadian" viewBox="-1.3333 -1.3333 26.6667 26.6667" fill="none" stroke="currentColor" stroke-width="2.2222" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-        </svg>
-      </span>
-    </button>
-  </div>
+  <div data-chrome></div>
 
   <!-- The rule marks where the site's chrome ends and this experiment's begins. -->
   <div class="chrome-rule" aria-hidden="true"></div>
@@ -263,6 +235,10 @@
 <!-- magnetic.js first: it owns the state the panel opens on. A classic defer
      script and a module both run after parsing, in document order. -->
 <script src="/assets/play.js" defer></script>
+<script src="https://ravivasavan.com/chrome/v1/chrome.js" defer
+        data-surface="play"
+        data-back="https://play.ravivasavan.com"
+        data-back-label="Back to Play"></script>
 <script src="./magnetic.js" defer></script>
 <script type="module" src="/src/main.jsx"></script>
 </body>

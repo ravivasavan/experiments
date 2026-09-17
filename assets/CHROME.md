@@ -1,18 +1,26 @@
 # play.ravivasavan.com — the shared chrome
 
-Everything in this file is already implemented in `/assets/play.css` and
-`/assets/play.js`. A page links those two files, uses the markup below verbatim,
-and keeps nothing of its own but the experiment.
+Everything in this file from the rule down is implemented in `/assets/play.css`
+and `/assets/play.js`. A page links those two files, uses the markup below
+verbatim, and keeps nothing of its own but the experiment.
+
+Level 1 is neither of those files any more: it is the **shared chrome package**
+at `https://ravivasavan.com/chrome/v1/`, one stylesheet and one script that every
+*.ravivasavan.com surface links. Its contract is `chrome/README.md` in the `ravi`
+repo (`~/Projects/Personal/ravi/chrome/README.md`), and §1 and §2 here say what a
+play does about it.
 
 The idea, in one line: **level 1 is the site's, level 2 is the tool's, and the
 settings float above the content on a pane of glass — they are not a sidebar cut
 out of the page.**
 
-- Level 1 — 64px glass pills at `--chrome-top` (40 / 16 / 12 by fold): back or
-  home at the left, the identity pill dead centre, the theme pill at the right.
-- A full-width hairline at `--chrome-rule` (120 / 96 / 88).
+- Level 1 — the package: a 64px glass avatar pill at the top left that expands
+  to the name and "‹ Back to Play", and a menu pill at the top right (About ·
+  Play · theme). Both sit at its `--nav-margin` (40 / 16 / 12 by fold), which is
+  play's `--chrome-top`.
+- A full-width hairline at `--chrome-rule` (144 / 96 / 88) — ours.
 - Level 2 — the experiment's own 44px glass tool pills, split by what they do.
-  The **rail** runs down the left from `--chrome-tools` (136 / 112 / 104) and
+  The **rail** runs down the left from `--chrome-tools` (160 / 112 / 104) and
   holds what changes the view: modes, zoom, step back. Icon only. The **dock**
   floats at the bottom edge and holds the verbs: upload, export, shuffle,
   clear. Labels kept.
@@ -47,6 +55,22 @@ Pages that measure their own stage measure the full viewport.
 Copy this verbatim. Only `<title>`, the description, the canonical/og URLs, and
 the page `<style>` change per page.
 
+The theme-color meta and the script under it belong to the **shared chrome
+package**, and are copied from its README as they stand — they are the only
+chrome code a page owns. The package is served from the brand home, CORS on,
+ten-minute cache, never fingerprinted:
+
+```
+https://ravivasavan.com/chrome/v1/chrome.css
+https://ravivasavan.com/chrome/v1/chrome.js
+https://ravivasavan.com/chrome/v1/circadian.js   (fetched by chrome.js, on demand)
+https://ravivasavan.com/chrome/v1/avatar.svg
+```
+
+The contract is `chrome/README.md` in the `ravi` repo —
+`~/Projects/Personal/ravi/chrome/README.md`. It wins over this file on anything
+level 1; read it before touching this section.
+
 ```html
 <!doctype html>
 <html lang="en">
@@ -63,127 +87,146 @@ the page `<style>` change per page.
   <meta name="twitter:card" content="summary">
   <meta name="theme-color" id="theme-color" content="#fff5f5">
   <script>
-    /* Set data-theme and the address-bar colour before paint, to avoid a
-       flash. Cycles: day → night → system → circadian. Circadian colours are
-       computed by circadian.js, which play.js only loads when it's wanted, so
-       its last cached tokens are re-applied here to keep first paint right. */
+    /* Set data-theme before paint to avoid FOUC. Cycles: day → night → system
+       → circadian. Circadian colours are computed by circadian.js (loaded on
+       demand by chrome.js), so re-apply its last cached tokens here to keep
+       first paint correct. Also resolve the theme-color meta (mobile browser
+       chrome) to match, same logic chrome.js uses at runtime. */
     (function () {
       var t = null;
       try { t = localStorage.getItem('theme'); } catch (e) {}
       if (t !== 'day' && t !== 'night' && t !== 'system' && t !== 'circadian') t = 'system';
       document.documentElement.dataset.theme = t;
-      var c = '#fff5f5';
-      if (t === 'night') c = '#0d1b1e';
-      else if (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches) c = '#0d1b1e';
-      else if (t === 'circadian') {
+      var DAY = '#fff5f5', NIGHT = '#0d1b1e';
+      var color = t === 'night' ? NIGHT : DAY;
+      if (t === 'system') {
+        try {
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) color = NIGHT;
+        } catch (e) {}
+      }
+      if (t === 'circadian') {
         try {
           var cache = JSON.parse(localStorage.getItem('circadian-cache'));
           for (var k in cache) document.documentElement.style.setProperty(k, cache[k]);
-          if (cache && cache['--bg']) c = cache['--bg'];
+          if (cache && cache['--bg']) color = cache['--bg'];
         } catch (e) {}
       }
-      var m = document.getElementById('theme-color');
-      if (m) m.setAttribute('content', c);
+      try {
+        var meta = document.getElementById('theme-color');
+        if (meta) meta.setAttribute('content', color);
+      } catch (e) {}
     })();
   </script>
   <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
-  <link rel="preload" href="/assets/fonts/LabilGrotesk-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="https://ravivasavan.com/assets/fonts/LabilGrotesk-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="https://ravivasavan.com/chrome/v1/chrome.css">
   <link rel="stylesheet" href="/assets/play.css">
   <style>
     /* Page-specific CSS only. No tokens, no @font-face for Labil Grotesk, no
-       chrome, no controls — play.css has all of it. A page that needs its own
-       face (teletext's Bedstead) still declares that one here. */
+       chrome, no controls — chrome.css and play.css have all of it. A page that
+       needs its own face (teletext's Bedstead) still declares that one here,
+       from /assets/fonts/. */
   </style>
 </head>
 ```
 
-The `<meta name="theme-color">` **must** carry `id="theme-color"` — play.js
-repaints it by id when the theme changes and every minute under circadian.
+The `<meta name="theme-color">` **must** carry `id="theme-color"` — the script
+above resolves it before paint, and chrome.js repaints it by id on every theme
+change and every minute under circadian.
+
+**The font comes with chrome.css.** It declares the Labil Grotesk `@font-face`
+pointing at `https://ravivasavan.com/assets/fonts/LabilGrotesk-Regular.woff2`,
+served with `Access-Control-Allow-Origin: *`. A second declaration anywhere —
+play.css, a page's `<style>` — is a second download of the same file. The
+`preload` above names that same URL, which is worth having.
 
 At the very end of `<body>`, in this order:
 
 ```html
   <script src="/assets/play.js" defer></script>
+  <script src="https://ravivasavan.com/chrome/v1/chrome.js" defer
+          data-surface="play"
+          data-back="https://play.ravivasavan.com"
+          data-back-label="Back to Play"></script>
   <script src="./whatever-this-page-does.js" defer></script>   <!-- or an inline defer block -->
 </body>
 ```
 
-There is **no** `<script src="/assets/circadian.js">` anywhere any more.
-play.js injects it (`id="circadian-script"`) only when the theme is, or becomes,
-circadian.
+`data-surface="play"` on every page here — it is which menu chip reads as the
+current one. `data-back` is what the avatar pill links to and what turns its
+role line into "‹ Back to Play": an experiment sets it, **the landing page
+leaves it out entirely** and the pill is the identity again.
+
+There is **no** `<script src="/assets/circadian.js">` anywhere, and no
+`/assets/circadian.js` to point at — the file is gone. chrome.js fetches the
+package's copy when the theme is, or becomes, circadian.
 
 ---
 
 ## 2. Level 1 — the site row
 
-### (a) Experiment pages
-
-`.chrome__back` / `.chrome__id` / `.chrome__theme` place the three pills on a
-`1fr auto 1fr` grid, so the identity pill is dead centre whatever the sides
-weigh. `.header-pill__role` carries the experiment's name (it hides at ≤900 on
-an experiment page; on the landing page it is the tagline and holds to ≤640).
+Not ours. chrome.js renders the whole row into one mount, which is body's first
+child; the rule under it is still ours.
 
 ```html
-<!-- Top row, site level: back left, identity centred, theme hard right. -->
-<div class="chrome">
-  <a class="icon-pill chrome__back" href="/" aria-label="Back to play index">
-    <span class="icon-pill__icon">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
-    </span>
-  </a>
-  <header class="header-pill chrome__id">
-    <div class="header-pill__inner">
-      <div class="header-pill__avatar">
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"> <rect width="2.00001" height="2.00001" transform="matrix(-1 0 0 1 32 13)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 20 13)" fill="currentColor"/> <path d="M34.0098 34.9766V48H36V34.9766H34.0098ZM13.9902 34.9766H12V48H13.9902V35.0293H15.9805V32.9814H13.9902V34.9766ZM32 13H16V9H14V17H16V15H32V25H30V27H18V31H16V33H18V35H30V33H32V35H34V33H32V31H34V15H40V13H34V9H32V13ZM12 22H14V17H12V22ZM28 21H30V19H28V21ZM20 21H22V19H20V21ZM30 9H32V7H30V9ZM16 9H18V7H16V9ZM18 7H30V5H18V7Z" fill="currentColor"/> <rect width="4" height="6" transform="matrix(-1 0 0 1 18 27)" fill="currentColor"/> <rect width="2.00001" height="4.00001" transform="matrix(-1 0 0 1 16 21)" fill="currentColor"/> <path d="M16 25H18V21H16V25Z" fill="currentColor"/> <rect width="16.0001" height="2.00001" transform="matrix(-1 0 0 1 30 25)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 32 23)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 24 23)" fill="currentColor"/> <rect width="4.00001" height="2.00001" transform="matrix(-1 0 0 1 28 21)" fill="currentColor"/> </svg>
-      </div>
-      <div class="header-pill__label">
-        <span class="header-pill__name">Ravi Vasavan</span>
-        <span class="header-pill__role">Teletext</span><!-- the experiment's name -->
-      </div>
-    </div>
-  </header>
-  <button class="icon-pill icon-pill--theme chrome__theme" type="button" aria-label="Toggle theme" data-theme-toggle>
-    <span class="icon-pill__icon">
-      <svg data-tstate="day" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
-      </svg>
-      <svg data-tstate="night" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
-      </svg>
-      <svg data-tstate="system" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>
-      </svg>
-      <svg data-tstate="circadian" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
-      </svg>
-    </span>
-  </button>
-</div>
-
-<!-- The rule marks where the site's chrome ends and this experiment's begins. -->
-<div class="chrome-rule" aria-hidden="true"></div>
+<body>
+  <div data-chrome></div>
+  <div class="chrome-rule" aria-hidden="true"></div>
 ```
 
-### (b) The landing page
+What it draws: an **avatar pill** at the top left — a 64px glass circle at rest
+that expands on hover or keyboard focus to "Ravi Vasavan" and a role line, which
+on an experiment reads "‹ Back to Play" and links to `data-back` (on the landing
+page it is his titles and links home). Touch never expands it. And a **menu
+pill** at the top right — About · Play · theme — whose chip for the current
+surface carries `aria-current="page"`. The theme chip owns the cycle day → night
+→ system → circadian, persisted to `localStorage['theme']`: the same key on
+every *.ravivasavan.com surface, so the choice follows the visitor across them.
 
-Same pills, different container: `.header-pills` tucks the two icon pills in
-against the identity pill instead of pushing them to the edges, and there is no
-`.header-pill__role` and no `.chrome-rule`.
+The mount is `display: contents` and contributes no box. `.chrome-rule` is a
+full-width hairline at `--chrome-rule`, and still means what it always meant —
+everything above the line is the site's, everything below it belongs to the
+experiment. The landing page has no rule.
 
-```html
-<div class="header-pills">
-  <a class="icon-pill icon-pill--home" href="https://ravivasavan.com" aria-label="Home"> … </a>
-  <header class="header-pill"> … (as above, without .header-pill__role) … </header>
-  <button class="icon-pill icon-pill--theme" type="button" aria-label="Toggle theme" data-theme-toggle> … </button>
-</div>
-```
+### What a page must not do
 
-**The theme glyphs use `data-tstate`, not `data-state`.** The landing page
-currently says `data-state` on its four theme SVGs — rename them.
-(`data-state="on" | "off"` is still the right attribute for a *two-face toggle
-glyph* on an `.icon-pill` or `.tool-pill`, e.g. camera on/off. That is a
-different thing and play.css supports both.)
+- **No `@font-face` for Labil Grotesk.** chrome.css declares it. (§1.)
+- **No level-1 markup or CSS.** `.chrome`, `.chrome__back` / `.chrome__id` /
+  `.chrome__theme`, `.header-pills`, `.header-pill*` and `.icon-pill*` are gone
+  from play.css, and so are the `data-tstate` theme glyph rules. A page that
+  still carries any of that markup is drawing a second, dead header.
+- **No theme handling.** No toggle, no `<meta id="theme-color">` painting, no
+  circadian script. `[data-theme-toggle]` is not a hook any more and neither is
+  `window.play.setTheme`; the way in, if a page ever needs one, is
+  `window.rvChrome.setTheme('day'|'night'|'system'|'circadian')`.
+- **No `scrollbar-gutter: stable`.** No page reserves a gutter: chrome.js
+  measures the platform scrollbar and sets `--nav-right-comp` so the right-hand
+  chrome lands on the same window x whether the page scrolls or not. Reserving
+  a gutter fights it.
+- **Nothing of yours prefixed `nav-id`, `nav-menu` or `nav-chip`**, and nothing
+  of yours at z-index ≥ 500 — that is the chrome's (`--nav-z`). Play's own rail
+  and dock sit at `--z-chrome` 500 with it; page content stays below 450.
+
+### Geometry — why nothing under the line had to move
+
+The package's `--nav-margin` steps 40 → 16 (≤900) → 12 (≤640) and its pills are
+64px, which is exactly the fold play already had: `--chrome-top` 40/16/12,
+`--chrome-rule` 144/96/88 (`margin + 64 + margin`) and `--chrome-tools`
+160/112/104 line up underneath at every width. `--chrome-top` is now only the
+package's margin restated — play.css positions nothing with it.
+
+### The palette, if chrome.css never arrives
+
+chrome.css ships `--bg --fg --separator --pill-*` and the theme blocks at
+`:root`. play.css keeps a last-resort copy of the colours anchored to **`html`**
+(0,0,1) rather than `:root`, so it sits below chrome.css whichever stylesheet
+the page links first and can never shadow it: a chrome.css that fails to load
+costs the page its nav, not its legibility. Everything the package does not
+ship — `--ink`, `--muted`, `--field` — is derived from `--bg` / `--fg` at
+`:root`, which matters under circadian: the package's circadian.js publishes
+only `--bg`, `--fg`, `--separator` and `--pill-bg` inline, where play's old copy
+also published `--ink`, `--muted` and `--field`.
 
 ---
 
@@ -388,9 +431,6 @@ like the pane does.
 
 | Hook | What it does |
 |---|---|
-| `[data-theme-toggle]` (any element, delegated click) | cycles day → night → system → circadian, writes `localStorage.theme` |
-| `<meta id="theme-color">` | repainted on every theme change, on OS scheme change, and each time circadian updates `--bg` |
-| `/assets/circadian.js` | injected once as `id="circadian-script"` when the theme is or becomes circadian |
 | `.dock` | sideways scrolling when the verbs outgrow the space (touch pans natively) |
 | `.rail` | vertical scrolling when the modes outgrow the height |
 | `.sheet__body` | made `inert` while the sheet is folded and shut — and, with `.sheet__head`, while it is minimised — so the clipped controls leave the tab order and the a11y tree |
@@ -399,10 +439,16 @@ like the pane does.
 | `<html data-play-sheet>` | `min` \| `open`, stamped before first paint from `localStorage['play.sheet']` |
 | `input[type="range"].dial` | `--dial-fill` kept in step with the value, so the filled half of the track paints in WebKit |
 | `window.play.dials(root?)` | call after setting a dial's value **in code** — an `input` event from the user is handled already |
-| `window.play.setTheme(t)`, `window.play.openSheet(el)`, `window.play.closeSheet(el)`, `window.play.minimiseSheet(bool)`, `window.play.isSheetMinimised()` | if a page ever needs them |
+| `window.play.openSheet(el)`, `window.play.closeSheet(el)`, `window.play.minimiseSheet(bool)`, `window.play.isSheetMinimised()` | if a page ever needs them |
+
+play.js hooks nothing to do with the theme. The cycle, the `theme-color` meta
+and circadian.js are the chrome package's — `window.rvChrome.setTheme(t)` and
+`window.rvChrome.refresh()` are its whole API, and `[data-theme-toggle]` means
+nothing to anything any more.
 
 play.js is a classic script with `defer`, loaded **before** the page's own
-scripts. Anything of yours that reads `.sheet` geometry should also be `defer`.
+scripts and before chrome.js. Anything of yours that reads `.sheet` geometry
+should also be `defer`.
 
 ---
 
@@ -410,21 +456,24 @@ scripts. Anything of yours that reads `.sheet` geometry should also be `defer`.
 
 Colour: `--night --orange --olive --white`, `--bg --fg --ink --muted --field
 --separator`, `--accent` (= `--orange`).
-`--fg` and `--ink` are the same colour under two names; circadian.js publishes
-both, so use whichever your page already says.
+`--fg` and `--ink` are the same colour under two names — `--ink` is now defined
+as `var(--fg)` — so use whichever your page already says.
 
-Pills: `--pill-bg --pill-filter --pill-edge`.
+`--bg`, `--fg`, `--separator` and the `--pill-*` trio come from chrome.css;
+play.css keeps a fallback copy of the first three on `html`, and derives
+`--ink`, `--muted` and `--field` from them at `:root`. Either way you just name
+them. (§2, *The palette, if chrome.css never arrives*.)
 
 **One glyph size, three container sizes, one hover.**
 
 | | container | glyph | what it is |
 |---|---|---|---|
-| `.icon-pill` | 64 (48 inner) | 16 | level 1 — back, home, theme |
 | `.tool-pill` | 44 | 16 | level 2 — rail and dock, and the minimised drawer disc (`--sheet-min`) |
 | `.panel-icon` | 32 | 16 | inside a panel — the drawer's minimise, melt's remove-point, chroma's padlocks |
 
-Every glyph is 16px on the 24 grid. Nothing else is a size: 28, 24 and 14 were
-all in here and are not any more.
+Every glyph is 16px on the 24 grid — the chrome package's pills are drawn to the
+same rule, at 64 (48 inner). Nothing else is a size: 28, 24 and 14 were all in
+here and are not any more.
 
 **And the artwork inside the glyph box is normalised too.** A 16px box is not
 the same as a 16px icon: Lucide draws an eye 20 wide, a chevron 16, a download
@@ -447,10 +496,9 @@ units — multiply by `clientWidth / viewBox.width` to get what is drawn.
 
 DialKit's own icons are exempt. It is a plugin and it brings its own set.
 
-**The growing inner surface is level-1 chrome and nothing else.** `.icon-pill`
-grows a `::before` from inset 8 to inset 3.2 over 240ms on
-`cubic-bezier(0.4, 0, 0.2, 1)`, with the pill itself still. That move needs
-empty ground to arrive on, and the header is the only place there is any.
+**The growing inner surface is level-1 chrome and nothing else**, which means it
+is chrome.css's and not in this repo at all. That move needs empty ground to
+arrive on, and the header is the only place there is any.
 
 **Everywhere else the control already has a fill, so the hover works that fill.**
 A play-space button is glass or a tinted chip before you touch it; growing a
@@ -467,8 +515,8 @@ second surface underneath reads as a second object arriving. Instead:
 `:focus-visible` is the hover state **plus** the ring — not a second idiom, and
 never a `box-shadow` that silently replaces a base hairline (restate it).
 
-There is exactly one `::before` grow left in `play.css`. If you add a second,
-it is wrong.
+There is no `::before` grow left in `play.css` at all. If you add one, it is
+wrong.
 
 Glass: `--glass-bg --glass-blur --glass-edge --glass-specular --glass-radius`.
 
@@ -524,23 +572,29 @@ throughout; any page-local token block must be too.
 ## 7. Checklist per page
 
 - [ ] Head block replaced with §1 verbatim (title, description, canonical, og,
-      twitter, theme-color **with the id**, FOUC script, icons, font preload,
-      `play.css`).
-- [ ] `<link rel="stylesheet" href="/assets/play.css">` added; the page's own
-      `<style>` reduced to page-specific rules only.
+      twitter, theme-color **with the id**, the package's FOUC script, icons,
+      the font preload pointing at ravivasavan.com, `chrome.css`, `play.css`).
+- [ ] `<div data-chrome></div>` is body's **first** child, with `.chrome-rule`
+      after it on an experiment page and no rule on the landing page.
+- [ ] `<script src="https://ravivasavan.com/chrome/v1/chrome.js" defer>` at the
+      end of body with `data-surface="play"` — plus `data-back` and
+      `data-back-label` on an experiment, neither on the landing page.
+- [ ] Deleted from the page: every level-1 pill — `.chrome`, `.chrome__*`,
+      `.header-pills`, `.header-pill*`, `.icon-pill*`, the four `data-tstate`
+      theme glyphs — in markup and in CSS.
 - [ ] Deleted from the page's CSS: the Labil Grotesk `@font-face`, the `:root`
       / `:root[data-theme="night"]` / `prefers-color-scheme` token blocks, the
-      reset, `.chrome*`, `.header-pill*`, `.icon-pill*`, `.rail`, `.dock`,
-      `.tool-pill*`, and the generic control styles now covered by `.field`,
-      `.dial`, `.input`, `.select`, `.textarea`, `.switch`, `.btn`, `.swatch`.
-- [ ] No reference to `LabilGrotesk-Regular.woff` remains — the file is gone,
-      only the `.woff2` ships.
+      reset, `scrollbar-gutter: stable`, `.rail`, `.dock`, `.tool-pill*`, and
+      the generic control styles now covered by `.field`, `.dial`, `.input`,
+      `.select`, `.textarea`, `.switch`, `.btn`, `.swatch`.
+- [ ] No `LabilGrotesk` `@font-face` anywhere but chrome.css; the only
+      reference left is the preload of the ravivasavan.com URL.
 - [ ] `<script src="/assets/circadian.js">` removed; `<script
       src="/assets/play.js" defer>` added before the page's own scripts, which
       are `defer` too.
-- [ ] The page's local theme-toggle listener and `dragRow` IIFE deleted —
-      play.js owns both. (The button keeps `data-theme-toggle`.)
-- [ ] Theme glyphs use `data-tstate`, one for each of day/night/system/circadian.
+- [ ] The page's local theme-toggle listener, its theme-color painter and its
+      `dragRow` IIFE deleted — chrome.js owns the first two, play.js the third.
+      No `data-theme-toggle` left anywhere.
 - [ ] Any theme block the page keeps for its own tokens is written
       `:root[data-theme="…"]`, not bare.
 - [ ] `#panel` converted to `.sheet` + `.sheet__head` + `.sheet__body`; the
@@ -698,15 +752,19 @@ by reshaping a row DialKit drew.
 
 ## 11. The header band
 
-`.chrome-rule::before` is a `--chrome-rule`-tall band of `--glass-bg` and
-`--glass-blur` hanging off the hairline, so level 1 is a moment of glass rather
-than pills floating on nothing. It hangs off the rule and not off `.chrome`,
-because `.chrome` is a `pointer-events: none` grid whose box is only as tall as
-its pills.
+There is no band. Level 1 is two pills of the package's own glass and the space
+between them is the page — `play.css` draws `.chrome-rule` as a hairline and
+nothing else.
 
-It is worth having only where the artwork runs **underneath** it — a glass band
-over bare page is just a slightly different shade of page. That is one more
+If it ever comes back it belongs on `.chrome-rule::before`, a
+`--chrome-rule`-tall band of `--glass-bg` and `--glass-blur` hanging off the
+hairline. The rule is the only thing at that level we own: the package's mount
+is `display: contents` and its pills are not ours to hang anything off, and
+nothing here may reach into `.nav-id` / `.nav-menu` / `.nav-chip` to try.
+
+It would be worth having only where the artwork runs **underneath** it — a glass
+band over bare page is just a slightly different shade of page. That is one more
 reason a stage should be the whole viewport with no padding reserved for the
-chrome: chroma's preview bleeds to all four edges and the band has something to
-blur. It is in the `prefers-reduced-transparency` list with every other glass
-surface.
+chrome: chroma's preview bleeds to all four edges and the band would have
+something to blur. It would go in the `prefers-reduced-transparency` list with
+every other glass surface.
