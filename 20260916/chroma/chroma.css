@@ -106,10 +106,12 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
   color: var(--muted);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-edge), var(--glass-specular);
+  /* The dock's material, exactly — a readout on different glass read as a
+     third kind of container beside the pills. */
+  background: var(--pill-bg);
+  backdrop-filter: var(--pill-filter);
+  -webkit-backdrop-filter: var(--pill-filter);
+  box-shadow: var(--pill-edge);
 }
 .readout__sep { opacity: 0.5; }
 

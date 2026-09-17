@@ -336,10 +336,12 @@ a { color: inherit; }
 
 /* --- the rail --- */
 .rail {
-  top: var(--chrome-tools);
-  left: var(--chrome-top);
+  --bar-pad: 8px;
+  padding: var(--bar-pad);
+  top: calc(var(--chrome-tools) - var(--bar-pad));
+  left: calc(var(--chrome-top) - var(--bar-pad));
   flex-direction: column;
-  max-height: calc(100% - var(--chrome-tools) - var(--panel-gap));
+  max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) + var(--bar-pad) * 2);
   overflow-y: auto;
   touch-action: pan-y;
 }
@@ -408,9 +410,14 @@ a { color: inherit; }
    folds to its disc the dock takes the width back. Both edges are animated on
    the same curve as the fold, so the two move as one gesture. */
 .dock {
-  left: var(--panel-gap);
-  right: var(--panel-gap);
-  bottom: var(--panel-gap);
+  /* A scroller on one axis clips on both, so a focus ring drawn 2px outside a
+     pill was cut at the top and bottom. Pad the box and pull it back by the
+     same amount: the pills sit where they did, the ring has room. */
+  --bar-pad: 8px;
+  padding: var(--bar-pad);
+  left: calc(var(--panel-gap) - var(--bar-pad));
+  right: calc(var(--panel-gap) - var(--bar-pad));
+  bottom: calc(var(--panel-gap) - var(--bar-pad));
   justify-content: center;
   overflow-x: auto;
   touch-action: pan-x;
@@ -441,21 +448,15 @@ a { color: inherit; }
 .dock .tool-pill:active { box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
 .dock .tool-pill.is-on { color: var(--fg); box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
 
-/* Tone, as the package does it: a canvas that ignores the theme tells the
-   Tools what they sit on (html[data-chrome-tone], set by rvChrome.setTone). */
-:root[data-chrome-tone="dark"] .rail,
-:root[data-chrome-tone="dark"] .dock,
-:root[data-chrome-tone="dark"] .sheet__icon {
-  --fg: #fff5f5; --ink: #fff5f5;
-  --pill-bg: rgba(255, 245, 245, 0.10);
-  --pill-edge: inset 0 0 0 1px rgba(255, 245, 245, 0.18);
-}
-:root[data-chrome-tone="light"] .rail,
-:root[data-chrome-tone="light"] .dock,
-:root[data-chrome-tone="light"] .sheet__icon {
-  --fg: #0d1b1e; --ink: #0d1b1e;
-  --pill-bg: rgba(255, 245, 245, 0.55);
-  --pill-edge: inset 0 0 0 1px rgba(13, 27, 30, 0.10);
+/* Tone, as the package does it: a canvas that ignores the theme sets
+   html[data-chrome-tone] (Chroma, from the pixels under the pill row) and the
+   Tools keep their theme colours but stop relying on what is beneath them —
+   80% of the theme's background instead of a 20% tint. */
+:root[data-chrome-tone] .rail,
+:root[data-chrome-tone] .dock,
+:root[data-chrome-tone] .sheet__icon {
+  --pill-bg: color-mix(in srgb, var(--bg) 80%, transparent);
+  --pill-edge: inset 0 0 0 1px color-mix(in srgb, var(--fg) 14%, transparent);
 }
 
 
@@ -877,7 +878,7 @@ input[type="range"].dial {
      bargain the drawer makes — but stops short of whatever the dock is doing
      underneath it. */
   .rail {
-    left: var(--chrome-pad);
+    left: calc(var(--chrome-pad) - var(--bar-pad));
     max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) * 2 - 60px - 44px);
   }
 

@@ -56,9 +56,10 @@ chrome, not a second system:
 - **There is no drawn rule any more.** `.chrome-rule` is `display: none`;
   drop the element from templates as they are rebuilt.
 - **Tone.** A play whose canvas ignores the theme sets
-  `html[data-chrome-tone="dark|light"]` (or `rvChrome.setTone()`); the
-  package's pills and the Tools swap to light-on-dark or dark-on-light tokens.
-  Chroma does this from its palette's ground colour.
+  `html[data-chrome-tone]` (or `rvChrome.setTone()`); the package's pills and
+  the Tools keep the theme's colours but go opaque enough (80% of the theme's
+  background) to carry their own text over any canvas. Chroma sets it from the
+  rendered pixels under the pill row. The theme always decides the colours.
 
 Geometry numbers older sections quote (rule 144, tools 160 / 96, 112) are
 superseded: everything derives from `--chrome-top` (40 / 16 / 12).
