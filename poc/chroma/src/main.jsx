@@ -255,8 +255,10 @@ function mount() {
   )
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', mount, { once: true })
-} else {
-  mount()
-}
+/* app.js paints the palettes and publishes window.chroma; the panel reads both
+   as it mounts. Vite hoists this module into <head>, so on a slow network it
+   can execute before app.js has — the readyState check that used to be here
+   passed in that case and mounted an empty panel (a story of "7", no locks).
+   Wait for app.js's own word instead. */
+if (window.chroma) mount()
+else document.addEventListener('chroma:ready', mount, { once: true })

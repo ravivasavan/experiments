@@ -206,8 +206,8 @@ function mount() {
   )
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', mount, { once: true })
-} else {
-  mount()
-}
+/* The page script publishes window.teletext; the panel reads it as it mounts.
+   Vite hoists this module into <head>, so on a slow network it can run before
+   that script has — wait for its word rather than trusting the order. */
+if (window.teletext) mount()
+else document.addEventListener('teletext:ready', mount, { once: true })

@@ -63,8 +63,8 @@ function mount() {
   )
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', mount, { once: true })
-} else {
-  mount()
-}
+/* The page script publishes window.magnetic; the panel reads it as it mounts.
+   Vite hoists this module into <head>, so on a slow network it can run before
+   that script has — wait for its word rather than trusting the order. */
+if (window.magnetic) mount()
+else document.addEventListener('magnetic:ready', mount, { once: true })

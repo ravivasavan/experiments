@@ -472,4 +472,7 @@
       else relayout();
     }
   };
+  // The panel (src/main.jsx) reads this API as it mounts, and its module can
+  // run before this script — Vite hoists it into the head. Say when ready.
+  document.dispatchEvent(new Event('magnetic:ready'));
 })();

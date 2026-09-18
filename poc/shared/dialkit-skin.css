@@ -45,10 +45,14 @@
   --dial-text-secondary: color-mix(in srgb, var(--fg) 82%, transparent);
   --dial-text-tertiary: color-mix(in srgb, var(--fg) 40%, transparent);
 
-  --dial-border: color-mix(in srgb, var(--fg) 10%, transparent);
-  --dial-border-hover: color-mix(in srgb, var(--fg) 20%, transparent);
+  /* The panel wears the chrome's material — the same tint, edge and blur as
+     the menu pill above it and the dock pills below — not the denser glass
+     the old drawer had. --pill-bg / --pill-edge come from chrome.css and
+     already follow the theme and the tone. */
+  --dial-border: var(--separator);
+  --dial-border-hover: color-mix(in srgb, var(--fg) 14%, transparent);
 
-  --dial-glass-bg: var(--glass-bg);
+  --dial-glass-bg: var(--pill-bg);
   --dial-dropdown-bg: var(--glass-bg);
   --dial-radius: 10px;
   --dial-row-height: 40px;
@@ -59,6 +63,21 @@
 
   font-family: "Labil Grotesk", system-ui, sans-serif;
   -webkit-font-smoothing: inherit;
+}
+
+/* The chrome pills blur AND saturate what is beneath them; DialKit's own
+   filter is a bare blur of --dial-backdrop-blur px. Give the panel the pills'
+   filter so the three surfaces read as one material. */
+.dialkit-panel[data-mode="popover"] .dialkit-panel-inner {
+  backdrop-filter: var(--pill-filter);
+  -webkit-backdrop-filter: var(--pill-filter);
+}
+/* Tone: when the canvas ignores the theme the pills go to 80% of the theme's
+   background with a firmer edge (chrome.css does this for the nav, play.css
+   for the rail and dock). The panel follows the same way. */
+:root[data-chrome-tone] .dialkit-root[data-theme] {
+  --dial-glass-bg: color-mix(in srgb, var(--bg) 80%, transparent);
+  --dial-border: color-mix(in srgb, var(--fg) 14%, transparent);
 }
 
 /* ------------------------------------------ hosting it as the popover -- */
@@ -83,6 +102,13 @@
 .dialkit-panel[data-mode="popover"] .dialkit-panel-inner:not([data-collapsed="true"]) {
   max-height: calc(100vh - var(--chrome-tools) - var(--panel-gap) - 44px - 8px);
   overflow-y: auto;
+}
+/* DialKit pads its scroll box on three sides and not the fourth, so the last
+   row sat on the glass's bottom edge. The box's height is set inline from its
+   content, so padding on the box itself only becomes scroll; pad the content
+   instead — the same 12px DialKit uses at the sides. */
+.dialkit-panel[data-mode="popover"] .dialkit-panel-inner:not([data-collapsed="true"]) > .dialkit-folder-root {
+  padding-bottom: 12px;
 }
 /* Folded, the dock keeps its 8px pad inside the margin, so the pills sit one
    pad higher than the desktop rule assumes. */

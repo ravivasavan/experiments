@@ -871,4 +871,8 @@
      delegated handler above — all it needs from here is the glyph and a way to
      ask for the pressed state to be refreshed once the buttons exist. */
   window.chroma = { lockIcon: LOCK_ICON, markLocks: markLocks };
+  // The panel (src/main.jsx) reads the painted palettes and this API when it
+  // mounts. Its module can run before this script — Vite hoists it into the
+  // head — so say when the page is ready rather than trusting the order.
+  document.dispatchEvent(new Event('chroma:ready'));
 })();
