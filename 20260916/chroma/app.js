@@ -754,9 +754,9 @@
     if (!renderer || exporting) return;
     const recipe = structuredClone(state);
     exporting = true;
-    const button = $('download');
+    const button = $('download'), label = button.querySelector('.tool-pill__label');
     button.disabled = true;
-    button.textContent = 'Rendering…';
+    label.textContent = 'Rendering…';
     await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
     try {
       const [w, h] = recipe.resolution.split('x').map(Number);
@@ -773,7 +773,7 @@
     finally {
       exporting = false;
       button.disabled = !renderer;
-      button.textContent = 'Export';
+      label.textContent = 'Export';
       render();
     }
   });

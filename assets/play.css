@@ -502,7 +502,12 @@ a { color: inherit; }
 .sheet {
   position: fixed;
   top: var(--sheet-top);
-  right: var(--panel-gap);
+  /* The menu pill above sits at --nav-margin plus the package's scrollbar
+     compensation (chrome.js sets --nav-right-comp on <html> when the page
+     has no bar, 0 when it has one). The drawer hangs under that pill, so its
+     right edge takes the same term or it lands a scrollbar's width to the
+     right of the menu on every page that doesn't scroll. */
+  right: calc(var(--panel-gap) + var(--nav-right-comp, 0px));
   width: var(--panel-w);
   /* As tall as its contents and no taller — melt's four dials should not lay a
      full-height pane of glass over the artwork. Past the viewport it stops and
@@ -916,9 +921,11 @@ input[type="range"].dial {
     /* Right-anchored and sized, not stretched between two edges: the same
        reason the pane is, so the width can travel to the minimised disc. */
     left: auto;
-    right: var(--panel-gap);
+    right: calc(var(--panel-gap) + var(--nav-right-comp, 0px));
     bottom: var(--panel-gap);
-    width: calc(100% - var(--panel-gap) * 2);
+    /* Same compensation as the pane: the right end stays under the menu pill,
+       the left end stays on the margin. */
+    width: calc(100% - var(--panel-gap) * 2 - var(--nav-right-comp, 0px));
     height: 60px;
     padding: 0;
     gap: 0;
