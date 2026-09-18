@@ -23,24 +23,25 @@ out of the page.**
   The **rail** runs down the left from `--chrome-tools` (160 / 112 / 104) and
   holds what changes the view: modes, zoom, step back. Icon only. The **dock**
   floats at the bottom edge and holds the verbs: upload, export, shuffle,
-  clear. Labels kept.
-- The dials drawer — one pane of glass, `--panel-w` wide, inset `--panel-gap`
-  from the viewport, floating over the content and starting on the first line
-  below the chrome. **It is as tall as its contents and no taller**, and past
-  the viewport it stops and scrolls. On a phone it swings down to the bottom of
-  the screen and collapses to its head. Either way it minimises into a disc the
-  size of a tool pill.
+  clear, plus the selectors and readout that belong beside them. Labels kept.
+- The settings panel is **DialKit's own popover**, exactly as it ships — its
+  bubble, its drag, its open/close motion — pinned under the menu pill by one
+  rule in `poc/shared/dialkit-skin.css`. A page adds no positioning CSS of its
+  own to it at all. It holds only DialKit-native parameter controls (slider,
+  toggle, select, colour, text, spring, folder); everything else — verbs, the
+  selectors that belong to a verb, free text, file input, readouts — lives in
+  the dock. See §4 and §5.
 
-Inside the drawer, the dials themselves are **DialKit**, rendered inline. A
-play keeps its own engine in plain JS and mounts a small React root whose only
-job is the panel; what DialKit has no control for — a body of copy, a palette
-swatch, a list that grows as you click the canvas — stays in the drawer beside
-it. See §8.
+A play keeps its own engine in plain JS and mounts a small React root whose
+only job is the panel. What DialKit has no control for at all — a body of
+copy, a list that grows as you click the canvas — stays in the dock, behind a
+pill that opens it. See §9 for how a play wires its own React root to an
+engine that doesn't know DialKit exists.
 
 ## Tools — the chrome's family (2026-09-18)
 
 Everything a play puts on the canvas — the **rail**, the **dock** and the
-**drawer** — is one group, *Tools*, and it reads as an extension of the site
+**panel** — is one group, *Tools*, and it reads as an extension of the site
 chrome, not a second system:
 
 - **Rail** hangs under the avatar pill in its column: `left: --chrome-top`,
@@ -48,15 +49,16 @@ chrome, not a second system:
   own material (`--pill-bg` / `--pill-filter` / `--pill-edge`), 8px apart. The
   icon sits on a 48px disc that fills at 6% on hover and stays filled at 12%
   when the mode is on — the same active state as the menu's chips. No accent.
-- **Drawer** hangs under the menu pill: `top: --chrome-tools`, `right:
-  --chrome-top`, 360 wide; minimised it is a 64px disc in that corner (56 on a
-  phone).
+- **Panel** hangs under the menu pill: DialKit's own popover, pinned there by
+  `poc/shared/dialkit-skin.css` (`top: --chrome-tools`, `right: --panel-gap +
+  --nav-right-comp`) and bounded to stop 8px above the dock. Bubble, drag,
+  open/close motion are all DialKit's own, unstyled by us.
 - **Dock** keeps its 44px pills — the one size exception — but wears the
   chrome's material. Position unchanged (bottom, centred).
 - **Readout.** A dock may carry one non-button, `<p class="readout">`, for a
-  line of status (Chroma's composition and size, Teletext's cell budget): the
-  same 44px pill and material as the verbs beside it, in the muted ink. Lives
-  in play.css, not in a play's own CSS.
+  line of status (chroma's composition · palette · zoom, teletext's page ·
+  scheme · swatches): the same 44px pill and material as the verbs beside it,
+  in the muted ink. Lives in play.css, not in a play's own CSS. §5.
 - **Centred, full stop.** The artwork centres on the viewport's own centre — no
   top padding for the chrome, no floor under the pills, no bottom padding for
   the dock. The chrome and the Tools lie over it. No prompts on the canvas
@@ -72,16 +74,19 @@ chrome, not a second system:
 Geometry numbers older sections quote (rule 144, tools 160 / 96, 112) are
 superseded: everything derives from `--chrome-top` (40 / 16 / 12).
 
-## Layout: the content is the whole viewport, the sheet overlays it
+## Layout: the content is the whole viewport, the panel overlays it
 
-**No page reserves room for the sheet.** The experiment's artwork is centred on
+**No page reserves room for the panel.** The experiment's artwork is centred on
 the *viewport's* centre and its canvases and backgrounds run edge to edge; the
-glass lies on top and covers a corner of it. That is deliberate, and minimise is
-the answer to it — one click and the whole sheet is a 64px disc.
+glass lies on top and covers a corner of it. That is deliberate, and DialKit's
+own bubble is the answer to it — one click and the whole panel collapses to
+DialKit's own disc.
 
-So: no `padding-right` for the panel, no shrunken stage, no `bottom: 76px` to
-clear the phone's bottom sheet, and no `--sheet-inset` — the token is gone.
-Pages that measure their own stage measure the full viewport.
+So: no `padding-right` for the panel, no shrunken stage, no `--sheet-inset` —
+the token, and the sheet it inset for, are both gone. Pages that measure their
+own stage measure the full viewport. On a phone there is no bottom sheet to
+clear either: DialKit's popover bubbles the same way it does on desktop,
+smaller, still under the menu pill's margin.
 
 ---
 
@@ -276,7 +281,7 @@ step back through history. It is icon only; a vertical column of words is a
 menu, not a rail. The label stays in the markup and stays in the a11y tree.
 
 ```html
-<nav class="rail" aria-label="Atlas view">
+<nav class="rail" aria-label="Your play’s view">
   <button class="tool-pill" id="t-in" type="button" aria-label="Zoom in">
     <span class="tool-pill__icon"><svg viewBox="0 0 24 24" …>…</svg></span>
     <span class="tool-pill__label">In</span>
@@ -284,14 +289,15 @@ menu, not a rail. The label stays in the markup and stays in the a11y tree.
 </nav>
 ```
 
-**The dock** takes the verbs — upload, export, shuffle, clear. They fire and
-they are done, so they keep their labels and sit where the hand already is. It
-centres on **the page**, not on the space beside the drawer: the drawer is an
-overlay and it moves, and the verbs should not shuffle sideways every time it
-folds.
+**The dock** takes the verbs — upload, export, shuffle, clear — plus the
+selectors and readout that belong beside them (§5). They fire and they are
+done, so they keep their labels and sit where the hand already is. It centres
+on **the page**, not on the space beside the panel: the panel is an overlay
+and it moves (DialKit drags and bubbles it on its own), and the verbs should
+not shuffle sideways every time it does.
 
 ```html
-<nav class="dock" aria-label="Atlas actions">
+<nav class="dock" aria-label="Your play’s actions">
   <button class="tool-pill" id="t-export" type="button" aria-label="Download the list as JSON">
     <span class="tool-pill__icon"><svg viewBox="0 0 24 24" …>…</svg></span>
     <span class="tool-pill__label">Export</span>
@@ -299,8 +305,8 @@ folds.
 </nav>
 ```
 
-A play with only verbs gets no rail at all — camouflage has one pill and it is
-in the dock.
+A play with nothing that changes what you're looking at gets no rail at all —
+everything it has is a verb, and lives in the dock.
 
 `.is-on` tints the text and icon `--accent` and swaps the hairline for an accent
 one; in the rail that accent is how a mode reads as active with its label
@@ -310,184 +316,212 @@ hidden. `[disabled]` and `.tool-pill--danger` are also supported.
 `pointer-events: none` (the pills are `auto`) because the padding that keeps the
 scroller from clipping their shadow makes them bigger than the pills. A hidden
 `<input type="file">` does *not* belong in them — it is the dialog a pill opens,
-not a control in the bar. Atlas and melt both kept one inside the old tools row,
-and both threw on load the day the row was rebuilt.
+not a control in the bar. Melt keeps `#file` outside both `.rail` and `.dock`
+for exactly this reason; an earlier play that put one inside the tools row
+threw on load the day the row was rebuilt.
 
-A small always-on readout — camouflage's seed, chroma's composition and size —
-rides in the dock as a chip beside the pills, rather than floating separately at
-the bottom edge and fighting it at every width.
+A small always-on readout — chroma's composition, palette and zoom, melt's
+point count and file name — rides in the dock as a chip beside the pills,
+rather than floating separately at the bottom edge and fighting it at every
+width. §5 has the markup.
 
-Folded (≤900) the dock lifts to sit on top of the collapsed drawer, and drops
-back beside the disc when the drawer is minimised. The rail keeps its column.
-Anything else of yours anchored to the bottom edge has to clear the dock: 44px
-of pill on `--panel-gap`, plus a gap.
+Folded (≤900) the dock keeps its own bottom edge; it does not lift over
+anything, because there is nothing fixed under it any more — DialKit's bubble
+sits wherever DialKit puts it, independent of the dock's geometry. The rail
+keeps its column. Anything else of yours anchored to the bottom edge has to
+clear the dock: 44px of pill on `--panel-gap`, plus a gap.
 
-## 4. The sheet
+## 4. The panel — DialKit as shipped
 
-A `.sheet` is the whole settings surface. It is `position: fixed` — it is **not**
-a grid column, and it is **not** something your layout makes room for. Nothing
-else needs to change about your layout at all.
+The settings panel on every play is DialKit's own popover, mounted once and
+left alone:
 
-```html
-<aside class="sheet" aria-label="Settings">
-  <div class="sheet__head">
-    <span class="sheet__title">Settings</span>
-    <span class="sheet__summary">480 × 500</span><!-- optional; tabular figures -->
-  </div>
-  <div class="sheet__body">
-
-    <h2 class="sheet__section">Geometry</h2>
-
-    <!-- range -->
-    <label class="field">
-      <span class="field__top">
-        <span class="field__label">Columns</span>
-        <span class="field__value" id="v-cols">40</span>
-      </span>
-      <input class="dial" type="range" id="c-cols" min="10" max="80" value="40">
-    </label>
-
-    <!-- select -->
-    <label class="field">
-      <span class="field__top"><span class="field__label">Service spec</span></span>
-      <select class="select" id="c-spec">
-        <option value="ceefax">Ceefax · BBC</option>
-      </select>
-    </label>
-
-    <!-- text / number; .field__row puts two side by side -->
-    <div class="field__row">
-      <label class="field">
-        <span class="field__top"><span class="field__label">Page</span></span>
-        <input class="input" type="number" id="c-page" value="100">
-      </label>
-      <label class="field">
-        <span class="field__top"><span class="field__label">Seed</span></span>
-        <input class="input" type="number" id="c-seed" value="7">
-      </label>
-    </div>
-
-    <!-- textarea -->
-    <label class="field">
-      <span class="field__top"><span class="field__label">Copy</span></span>
-      <textarea class="textarea" id="c-copy"></textarea>
-    </label>
-
-    <h2 class="sheet__section">Display</h2>
-
-    <!-- switch: the checkbox is still the control, the pill is just what you see -->
-    <label class="switch">Reveal codes<input type="checkbox" id="c-reveal" checked><span class="switch__track"></span></label>
-    <label class="switch">Test card<input type="checkbox" id="c-test"><span class="switch__track"></span></label>
-
-    <!-- buttons -->
-    <div class="field__row">
-      <button class="btn" type="button" id="c-reset">Reset</button>
-      <button class="btn btn--primary" type="button" id="c-export">Export</button>
-    </div>
-
-    <!-- swatches, chips and anything else of yours keep their own look -->
-    <div class="swatches">
-      <span class="swatch" style="background:#ff795c"></span>
-    </div>
-
-    <p class="sheet__note">A line of explanation, 13px.</p>
-  </div>
-</aside>
+```jsx
+<DialRoot
+  mode="popover"
+  position="top-right"
+  productionEnabled
+  defaultOpen={readOpen()}
+  onOpenChange={writeOpen}
+/>
 ```
 
-Order matters: `.switch` needs `<input type="checkbox">` immediately followed by
-`<span class="switch__track">`, both inside the `<label class="switch">`.
+rendered into `<div id="root"></div>`, the mount's only job. `readOpen` /
+`writeOpen` read and write one site-wide preference, the way every other
+play's does:
 
-**Reserving room: don't.** A stage is the whole viewport —
-`position: fixed; inset: 0`, or `100%` of both — and whatever it draws is
-centred on the viewport's centre. Delete every `padding-right:
-var(--sheet-inset)`, every `right: var(--sheet-inset)`, every `bottom: 76px`,
-and any measurement in your script that subtracts the panel before it centres
-something. Delete the old `#panel::before` divider too — the sheet floats, so
-there is no edge to draw.
+```js
+const PANEL_KEY = 'play.panel';               // 'open' | 'min'
+function readOpen() {
+  try { return localStorage.getItem(PANEL_KEY) !== 'min'; } catch (e) { return true; }
+}
+function writeOpen(open) {
+  try { localStorage.setItem(PANEL_KEY, open ? 'open' : 'min'); } catch (e) {}
+}
+```
 
-### Minimise
+That is the whole contract on the page's side. There is no `.sheet`, no head,
+no minimise button, no bottom sheet, no fold behaviour to write — DialKit's
+popover ships its own bubble, its own drag, its own open/close motion, and
+`defaultOpen`/`onOpenChange` are the only hooks a page needs into any of it.
 
-The sheet folds into a single round glass button and stays folded until it is
-asked back — across reloads, and across plays.
+**Hosts add no positioning CSS of their own.** The one override is
+`poc/shared/dialkit-skin.css`'s rule for `.dialkit-panel[data-mode="popover"]`:
+`top: var(--chrome-tools)`, `right: calc(var(--panel-gap) +
+var(--nav-right-comp, 0px))` — the same margin-plus-scrollbar-compensation term
+the menu pill uses, so the two right edges line up — and `z-index:
+var(--z-sheet)` (450, under the chrome's 500). The panel's own inner scroll box
+is bounded there too, to stop 8px above the dock's 44px pills (16px on ≤900
+folds, where the dock keeps an 8px pad inside the margin). A play's own CSS
+never touches `.dialkit-panel` or `.dialkit-panel-inner` for position, size or
+z-index — only the skin does, in the one file every play links.
 
-- play.js appends a **`.sheet__min`** button (32px glass-inset disc, Lucide
-  `minimize-2` at 16px) to `.sheet__head` if the markup has none, and a
-  **`.sheet__icon`** button (Lucide `sliders-horizontal` at 20px) as the
-  sheet's last child. Neither belongs in your markup; write your head as
-  though they weren't there and they will land in the right places (the
-  minimise button is the head's hard-right item, and `.sheet__summary` keeps
-  its own right edge by taking the slack to its left).
-- Minimised, the sheet *is* the button: 64px round, same material, anchored
-  where its top-right corner was — `top` the sheet's own top, `right
-  var(--panel-gap)`. Folded (≤900) it is 56px at the bottom-right, above the
-  safe area. 240ms `cubic-bezier(0.4, 0, 0.2, 1)` on width, height and
-  border-radius; nothing under `prefers-reduced-motion`.
-- The state is one preference for the whole site:
-  `localStorage['play.sheet']` = `'min'` | `'open'`.
-- **It is stamped on `<html>`, not on the sheet**: `data-play-sheet="min"`,
-  written by play.js at script-execution time — deferred, so the document is
-  parsed and nothing has painted yet — and every rule keys off the root. That
-  is what stops the flash, and it is also why a page that builds its sheet in
-  script (metal's DialKit panel) gets the minimised geometry on that sheet's
-  first frame. Pages need no head script of their own for it.
-- Keyboard and focus: both controls are real buttons, so Enter and Space work.
-  Minimising moves focus to the disc; restoring puts it back on the minimise
-  button in the head. Escape keeps the meaning it always had — it closes an
-  open bottom sheet, and does nothing to a minimised one.
-- While minimised the head and the body are both `inert` and `aria-hidden`;
-  the disc carries `aria-label="Show settings"` and `aria-expanded`.
+The skin also recolours DialKit's `--dial-*` tokens from the site palette (§7,
+§11) and hands its two body-portaled dropdowns (the select, the presets menu)
+the site's glass, since nothing scoped to the panel can reach something that
+portals to `<body>`.
 
-### Mobile behaviour (≤900px)
+**What may live in the panel: DialKit-native parameter controls only** —
+slider, toggle, select, colour, text, spring, folder. DialKit's own *actions*
+are reserved for things that act on a parameter: melt's `remove` action per
+point, a reset. Everything else — a verb (export, copy, randomise, an
+open-in), the selector that belongs to a verb (export size, export format),
+free multi-line text, a file input, a readout — is not a DialKit control, so
+it does not go in the panel. It goes in the dock. §5 has the full list and the
+markup.
 
-play.css swings the sheet to `left/right/bottom: var(--panel-gap)` and collapses
-it to 60px showing the grabber and `.sheet__head`. play.js:
+**One allowed injection.** A per-row adornment that attaches to a parameter
+and does not change DialKit's own geometry may sit beside a row DialKit drew —
+chroma's padlocks are the example. It lives in a gutter made by extra right
+padding on the panel's own scroll box, never by reshaping a row:
 
-- **injects `.sheet__grab`** (36 × 4) as the sheet's first child if the markup
-  has none, so you do not have to write it;
-- makes `.sheet__head` a `role="button" tabindex="0"` with `aria-expanded`, unless
-  it already has a `role`;
-- toggles `.is-open` on a click on `.sheet__head` or `.sheet__grab` (a `button`,
-  `a`, `input`, `select`, `textarea` or `label` inside the head keeps its own
-  click), on Enter/Space on the head, and on a >24px drag of the grabber;
-- measures the content and writes `--sheet-full` so `.is-open` grows to
-  `min(72vh, content)` over 320ms;
-- closes every open sheet on Escape, and on crossing the 900px boundary.
+```css
+/* chroma.css */
+.dialkit-panel .dialkit-panel-inner { padding-right: calc(12px + 26px); }
+.dialkit-panel .has-lock { position: relative; }
+.prop-lock { position: absolute; right: -24px; top: 50%; transform: translateY(-50%); /* … */ }
+```
 
-Minimise works here too, and is independent of open/collapsed: restoring the
-disc gives you back whichever of the two the sheet was in.
+That is the only place a play's own CSS is allowed to name `.dialkit-panel` or
+`.dialkit-panel-inner` at all.
 
-Nothing pads the body any more — the collapsed glass lies over the artwork
-like the pane does.
+**Phone consequence:** there is no bottom sheet any more. DialKit's popover
+bubbles the same way on a phone as it does on desktop — smaller, still pinned
+under the menu pill's margin — rather than swinging to the bottom of the
+screen. Nothing in play.css or a play's own CSS handles a phone case for the
+panel; there isn't one.
+
+## 5. The dock — verbs, selectors, readout
+
+Everything that is not a DialKit-native parameter control lives here (or in
+the rail, for a view tool — §3): verbs, the selectors that belong to a verb,
+free multi-line text, file input, and the readout.
+
+**The selector pill** is a 44px pill whose whole face is the native `<select>`
+— invisible, laid on top — so the platform's own menu opens and the pill still
+reads as a pill. The label is the current choice, kept in step by the play's
+own script; the chevron just says it opens.
+
+```html
+<label class="tool-pill tool-pill--select" aria-label="Export size">
+  <span class="tool-pill__label" id="size-label">7680 × 4320 · 16:9</span>
+  <span class="tool-pill__chevron" aria-hidden="true">
+    <svg viewBox="0 0 24 24" …><path d="m6 9 6 6 6-6"/></svg>
+  </span>
+  <select class="tool-pill__select" id="resolution">
+    <option value="7680x4320">8K · 7680 × 4320</option>
+    <!-- … -->
+  </select>
+</label>
+```
+
+**The readout** is a dock's one non-button: a line of status on the same 44px
+pill and material as the verbs beside it, in the muted ink, `<span
+class="readout__sep">·</span>` between parts.
+
+```html
+<p class="readout" aria-live="polite">
+  <span id="composition-label">Aperture · 0042</span>
+  <span class="readout__sep">·</span>
+  <span id="palette-name">Rose room</span>
+  <span class="readout__sep">·</span>
+  <span data-view-level>100%</span>
+</p>
+```
+
+Chroma's reads composition · palette name · zoom; melt's reads point count ·
+file name; teletext's reads page/layout/scheme plus five 8px colour dots;
+magnetic's reads tile count.
+
+**The bridge.** A play's engine keeps listening to the same inputs it always
+did — an app.js written before DialKit existed doesn't change. Those inputs
+move into a `<div class="bridge" hidden aria-hidden="true">` at the end of the
+body, and the panel drives them instead of a hand:
+
+```html
+<div class="bridge" hidden aria-hidden="true">
+  <input id="flow" type="range" min="0" max="100" value="60" tabindex="-1">
+  <input id="seed" type="number" min="0" max="999999" step="1" value="42" tabindex="-1">
+  <!-- … palette buttons, colour pickers, the copy textarea, the file input … -->
+</div>
+```
+
+**The state round-trip** is two one-way streets, not a binding:
+
+- *Panel → engine.* On a DialKit value changing, set the bridged element's
+  `.value` and fire the event the engine already listens to — compare before
+  writing, so an echo doesn't turn into a loop:
+
+  ```js
+  function drive(id, event, value) {
+    const el = document.getElementById(id);
+    if (!el || String(el.value) === String(value)) return;
+    el.value = String(value);
+    el.dispatchEvent(new Event(event, { bubbles: true }));
+  }
+  ```
+
+- *Engine → panel.* When the engine moves a value itself — Randomise, Reset, a
+  recipe in the URL hash, a 15° snap — it dispatches one `CustomEvent` on the
+  document (chroma's is `chroma:sync`) carrying everything that changed, and
+  the panel's `useEffect` echoes it straight into DialKit with
+  `controller.setValues({ … })`. Because the drive functions above already
+  compare before writing, the panel doesn't need a re-entrancy flag to keep
+  that echo from bouncing back out to the engine.
 
 ---
 
-## 5. What play.js hooks
+## 6. What play.js hooks
+
+play.js has nothing left to say about the panel — DialKit keeps its own open
+state, its own focus handling, its own `inert`ing of what's behind it when it
+bubbles. What is left is the rail, the dock, and panning:
 
 | Hook | What it does |
 |---|---|
-| `.dock` | sideways scrolling when the verbs outgrow the space (touch pans natively) |
-| `.rail` | vertical scrolling when the modes outgrow the height |
-| `.sheet__body` | made `inert` while the sheet is folded and shut — and, with `.sheet__head`, while it is minimised — so the clipped controls leave the tab order and the a11y tree |
-| `.sheet`, `.sheet__head`, `.sheet__grab`, `.is-open` | the bottom-sheet behaviour above |
-| `.sheet__min`, `.sheet__icon` | injected if absent; the two halves of minimise |
-| `<html data-play-sheet>` | `min` \| `open`, stamped before first paint from `localStorage['play.sheet']` |
-| `input[type="range"].dial` | `--dial-fill` kept in step with the value, so the filled half of the track paints in WebKit |
-| `window.play.dials(root?)` | call after setting a dial's value **in code** — an `input` event from the user is handled already |
-| `window.play.openSheet(el)`, `window.play.closeSheet(el)`, `window.play.minimiseSheet(bool)`, `window.play.isSheetMinimised()` | if a page ever needs them |
+| `.dock` | sideways drag-to-scroll when the verbs outgrow the space (touch pans natively); swallows the click a drag would otherwise finish on |
+| `.rail` | the same, vertically, when the modes outgrow the height |
+| `input[type="range"].dial` | `--dial-fill` kept in step with the value, so the filled half of the track paints in WebKit. None of the four adopted plays' bridged inputs carry this class any more — DialKit drives them directly — but it still fires on any page that keeps a real, visible `.dial` |
+| `window.play.dials(root?)` | call after setting a `.dial`'s value **in code** — an `input` event from the user is handled already |
+| `[data-pan]`, `[data-pan="free"]` | the panning and zoom behaviour, §10 |
 
 play.js hooks nothing to do with the theme. The cycle, the `theme-color` meta
 and circadian.js are the chrome package's — `window.rvChrome.setTheme(t)` and
 `window.rvChrome.refresh()` are its whole API, and `[data-theme-toggle]` means
 nothing to anything any more.
 
+**The panel API is gone.** `window.play.openSheet` / `closeSheet` /
+`minimiseSheet` / `isSheetMinimised` do not exist; there is no sheet to drive.
+A page that wants to know or set whether the panel is open reads or writes
+`localStorage['play.panel']` itself (§4) — DialKit reads that on mount through
+`defaultOpen` and reports every change back through `onOpenChange`.
+
 play.js is a classic script with `defer`, loaded **before** the page's own
-scripts and before chrome.js. Anything of yours that reads `.sheet` geometry
-should also be `defer`.
+scripts and before chrome.js.
 
 ---
 
-## 6. Tokens you may use
+## 7. Tokens you may use
 
 Colour: `--night --orange --olive --white`, `--bg --fg --ink --muted --field
 --separator`, `--accent` (= `--orange`).
@@ -499,12 +533,17 @@ play.css keeps a fallback copy of the first three on `html`, and derives
 `--ink`, `--muted` and `--field` from them at `:root`. Either way you just name
 them. (§2, *The palette, if chrome.css never arrives*.)
 
-**One glyph size, three container sizes, one hover.**
+**One glyph size, one hover.**
 
 | | container | glyph | what it is |
 |---|---|---|---|
-| `.tool-pill` | 44 | 16 | level 2 — rail and dock, and the minimised drawer disc (`--sheet-min`) |
-| `.panel-icon` | 32 | 16 | inside a panel — the drawer's minimise, melt's remove-point, chroma's padlocks |
+| `.tool-pill` | 44 | 16 | level 2 — rail and dock |
+
+There is no shared `.panel-icon` size any more: the popover's own chrome
+(minimise, close, folder toggles) is DialKit's to draw, at whatever size it
+draws it. A per-row adornment injected into the panel (§4) is sized by the
+play that adds it — chroma's `.prop-lock` is 22px, defined in `chroma.css`,
+not in play.css.
 
 Every glyph is 16px on the 24 grid — the chrome package's pills are drawn to the
 same rule, at 64 (48 inner). Nothing else is a size: 28, 24 and 14 were all in
@@ -542,9 +581,11 @@ second surface underneath reads as a second object arriving. Instead:
 | | rest | hover |
 |---|---|---|
 | `.tool-pill` | glass | `inset 0 0 0 999px var(--wash)` over the glass, shadow lifts |
-| `.sheet__icon` | transparent on glass | `background: var(--wash)` |
-| `.panel-icon`, `.sheet__min` | 6% chip | `var(--wash-strong)` + a 22% hairline |
 | `.btn` | filled form control | tints, like `.select` and `.input` |
+
+The popover's own hover states — a row, a folder header, its own icon buttons
+— are DialKit's, recoloured by the skin's `--dial-*` tokens (§11) and not
+touched here.
 
 `--wash` and `--wash-strong` are the two steps; `--focus-ring` is the one ring.
 `:focus-visible` is the hover state **plus** the ring — not a second idiom, and
@@ -568,28 +609,23 @@ with it. Apply them with the `.glass` class rather
 than by hand; the only two that move between day and night are `--glass-mix`
 (62% / 52%) and `--glass-spec` (45% / 12%), and everything else derives.
 
-The `.sheet` is the exception, in two places. It lies over the experiment's own
-artwork at every width now that the content runs the full viewport beneath it,
-so it swaps the shared tint for `--sheet-mix` / `--sheet-spec` (86% / 34% day,
-80% / 10% night) and `--sheet-blur` (`blur(24px) saturate(120%)` — the same
-blur, less of the canvas's colour pulled up into the type).
+DialKit's own text sits directly on the panel's glass rather than under a
+second, denser tint the way the old sheet raised its own `--muted`: the skin
+writes `--dial-text-label` and friends at a flat 82% of `--fg` (not derived
+from `--muted`'s 55%, which measures 1.4–2.4:1 over a saturated canvas) because
+its two portaled dropdowns hang off `<body>`, outside any element that could
+redefine `--muted` for them. Nothing here needs restating in a page's own CSS
+— the skin is the one place that value lives.
 
-And it redefines `--muted` for everything inside it: `color-mix(in srgb,
-var(--fg) 82%, transparent)`, because :root's 55% measures 1.4–2.4:1 over a
-saturated canvas. So `.field__label`, `.sheet__summary`, `.sheet__section` and
-`.sheet__note` all just say `var(--muted)` and get the readable one — as does
-any label of your own, and DialKit's, without restating anything. Don't put a
-second `opacity` on top of it; that is what dropped `.sheet__section` to
-1.4:1.
+Geometry: `--chrome-top --chrome-rule --chrome-tools --chrome-pad --panel-gap`.
+**`--panel-w`, `--sheet-min` and `--sheet-top` are gone** along with the sheet
+they measured — the panel is DialKit's own popover and sizes itself.
+**`--sheet-inset` is gone** too — nothing reserves room for the panel, so
+there is nothing to inset.
 
-Geometry: `--chrome-top --chrome-rule --chrome-tools --chrome-pad`,
-`--panel-w --panel-gap --sheet-min` (64 / 56, the minimised disc) and
-`--sheet-top` (the drawer's own top edge — the first line below the chrome, and
-where the rail starts too). **`--sheet-inset` is gone** — nothing reserves room
-for the drawer, so there is nothing to inset.
-
-Stacking: `--z-sheet` 450 < `--z-rule` 499 < `--z-chrome` 500. Keep your page's
-own content below 450.
+Stacking: `--z-sheet` 450 < `--z-rule` 499 < `--z-chrome` 500. The name is the
+old drawer's, kept because `dialkit-skin.css` still reads it as the popover's
+own floor. Keep your page's own content below 450.
 
 `@media (prefers-reduced-transparency: reduce)` already turns every glass
 surface opaque. Reduced-motion is handled for the chrome; your experiment's own
@@ -604,7 +640,7 @@ throughout; any page-local token block must be too.
 
 ---
 
-## 7. Checklist per page
+## 8. Checklist per page
 
 - [ ] Head block replaced with §1 verbatim (title, description, canonical, og,
       twitter, theme-color **with the id**, the package's FOUC script, icons,
@@ -632,42 +668,63 @@ throughout; any page-local token block must be too.
       No `data-theme-toggle` left anywhere.
 - [ ] Any theme block the page keeps for its own tokens is written
       `:root[data-theme="…"]`, not bare.
-- [ ] `#panel` converted to `.sheet` + `.sheet__head` + `.sheet__body`; the
-      `#panel::before` divider and the `grid-template-columns: … var(--panel-w)`
-      body grid removed.
+- [ ] The panel is `<DialRoot mode="popover" position="top-right"
+      productionEnabled defaultOpen={readOpen()} onOpenChange={writeOpen} />`
+      mounted at `<div id="root"></div>`, reading/writing
+      `localStorage['play.panel']` (§4). No `.sheet`, no `#dial-mount`, no
+      `mode="inline"`, no `createPortal` anywhere.
+- [ ] The panel holds DialKit-native parameter controls only. A verb, a
+      selector that belongs to a verb, free multi-line text, a file input or a
+      readout is in the dock instead (§5) — never forced into the panel as a
+      DialKit action or a custom row.
+- [ ] The page's own CSS never names `.dialkit-panel` or `.dialkit-panel-inner`
+      except for the one allowed injection (a per-row adornment gutter, §4).
+      No positioning, sizing or z-index rule of the page's own touches either.
 - [ ] The experiment's buttons are split between `.rail` (what changes the
-      view) and `.dock` (the verbs), and neither holds anything that is not a
-      `.tool-pill` — a hidden file input goes outside both.
+      view), `.dock` (the verbs, selectors and readout) and the panel
+      (parameters) — the rail and dock hold nothing that is not a `.tool-pill`
+      (or the one `.readout`) — a hidden file input goes outside all three.
 - [ ] Anything of the page's own anchored to the bottom edge clears the dock.
-- [ ] Nothing reserves room for the drawer: no `--sheet-inset` anywhere in the
-      CSS or the script, no `bottom: 76px` at ≤900, no `tools--sheet` class.
-      The stage is the full viewport and its artwork is centred on the
-      viewport's centre.
-- [ ] Every checkbox converted to `.switch` (checkbox kept, visually hidden).
-- [ ] Every slider given `class="dial"`; any code that sets a dial's value calls
-      `play.dials()` after.
-- [ ] **Every id, name and data-attribute the page's JS reads is unchanged.**
-      Rewrap the markup, never rename the hooks.
+- [ ] Nothing reserves room for the panel: no `--sheet-inset`, `--panel-w`,
+      `--sheet-min` or `--sheet-top` anywhere in the CSS or the script — they
+      don't exist any more. The stage is the full viewport and its artwork is
+      centred on the viewport's centre.
+- [ ] Every parameter that used to be a checkbox is a DialKit toggle now; a
+      checkbox that isn't a parameter (rare) still uses `.switch`.
+- [ ] Every parameter that used to be a range input is a DialKit-native
+      control; the bridged `<input type="range">` behind it (§5) carries no
+      `class="dial"` and is driven only by the panel, never by hand.
+- [ ] **Every id, name and data-attribute the page's own script reads is
+      unchanged.** Rewrap the markup, put it in the `.bridge` (§5), never
+      rename the hooks.
 - [ ] `assets/img/favicon.svg` and `assets/img/apple-touch-icon.png` referenced.
 - [ ] Checked at 1440 and 390, day and night, with no console errors.
 
 ---
 
-## 8. The dials are DialKit
+## 9. The dials are DialKit
 
-Every play's drawer is a DialKit panel, rendered `mode="inline"` into a
-`#dial-mount` the page's own markup provides. The engine stays plain JavaScript
-— canvas, WebGL, whatever it already was — and a small React root does nothing
-but own the controls.
+Every play's panel is DialKit's own popover, mounted at `<div id="root"></div>`
+with a plain `createRoot(...).render(...)` — no portal, no `mode="inline"`, no
+mount div of the page's own. The engine stays plain JavaScript — canvas,
+WebGL, whatever it already was — and a small React root does nothing but own
+the controls and drive the engine's existing inputs (§5):
 
 ```jsx
-createPortal(<DialRoot mode="inline" theme="dark" productionEnabled />, mount)
+function mount() {
+  createRoot(document.getElementById('root')).render(
+    <React.StrictMode>
+      <Controls />
+      <DialRoot mode="popover" position="top-right"
+                defaultOpen={readOpen()} onOpenChange={writeOpen} productionEnabled />
+    </React.StrictMode>
+  )
+}
 ```
 
-`theme="dark"` pins DialKit to one of its own palettes: the skin in
-`poc/shared/dialkit-skin.css` repaints nearly all of it from the site's tokens,
-but not quite all, and the default ("system") would make whatever is left follow
-the OS — so the panel could go light while the page stayed in night.
+There is no `theme` prop set. `poc/shared/dialkit-skin.css` repaints
+`--dial-*` from the site's tokens (§11) — colour is the skin's job, not a
+DialKit theme name's.
 
 Each play is its own Vite project under `poc/<slug>/`, building straight into
 its dated folder, and takes its Geist-Mono dropper and chunk split from
@@ -678,20 +735,25 @@ loads as a classic `defer` script.
 `<head>`, so in document order it runs *before* the engine's defer script
 further down the body. Both finish before `DOMContentLoaded`, so that is when to
 mount — unless the engine is itself a `DOMContentLoaded` handler (melt), in
-which case its listener is registered *second* and the panel has to wait for an
-event the engine dispatches.
+which case its listener is registered *second* and the panel has to wait for a
+custom event the engine dispatches once it's actually ready (melt's is
+`melt:ready`).
 
-**The engine keeps the state.** The panel reads it once, to open on it, and
-writes back on change; when the engine moves a value itself — a randomise, a
-reset, a recipe in the hash, a snap to 15° — it tells the panel, and the panel
-echoes that into its dials behind a flag so the echo is not posted straight back
-as if the reader had done it.
+**The engine keeps the state.** The panel reads it once, through
+`useDialKitController`'s defaults, to open on it; every value that changes
+after is driven onto the engine's own inputs via the bridge (§5), and when the
+engine moves a value itself — a randomise, a reset, a recipe in the hash, a
+snap to 15° — it tells the panel through a `CustomEvent`, which the panel
+echoes into `controller.setValues({ … })`. The drive functions compare before
+writing (§5), so that echo does not need a re-entrancy flag to stay out of a
+loop.
 
-**What DialKit has no control for stays in the drawer beside it.** There is no
-multi-line text, no custom control and no per-dial lock, so teletext's copy,
-melt's per-point list, chroma's palette swatches and chroma's padlocks are
-ordinary markup under a `.sheet__section`, below the panel. That is the expected
-shape, not a workaround — the panel is for the dials.
+**What DialKit has no control for at all stays in the dock, behind a pill.**
+There is no multi-line text, no custom control and no per-dial lock as a
+DialKit primitive, so teletext's copy bar, melt's file input and chroma's
+padlocks are ordinary markup outside the panel (§5), or the one allowed
+in-panel injection (§4). That is the expected shape, not a workaround — the
+panel is for parameters.
 
 **DialKit titles a dial from its key.** `everywhere: [0, 0, 40, 1]` renders
 "Everywhere"; there is no label option on the range shorthand. Name the key what
@@ -700,11 +762,12 @@ through.
 
 ---
 
-## 9. Panning
+## 10. Panning
 
-The drawer is an overlay, so it will sometimes lie on the part of the artwork
-you wanted. Minimising it is one answer; moving the artwork out from under it is
-the other, and play.js gives every stage the second one.
+The panel is an overlay, so it will sometimes lie on the part of the artwork
+you wanted. Bubbling it (DialKit's own, one click) is one answer; moving the
+artwork out from under it is the other, and play.js gives every stage the
+second one.
 
 ```html
 <main id="stage" data-pan="free">   <!-- pointer is free: plain drag pans -->
@@ -715,8 +778,7 @@ the other, and play.js gives every stage the second one.
 chroma — and it pans on an ordinary drag, with a `grab` cursor to say so.
 `data-pan` alone is for a stage that uses the pointer for its own work — melt
 places points, magnetic throws windows — and pans only on the middle button or
-with space held, which is the idiom every canvas tool already uses. Metal has
-had a pan of its own since it had a world to move, and takes neither.
+with space held, which is the idiom every canvas tool already uses.
 
 The offset is clamped to 60% of the viewport rather than being resettable: you
 can always drag back, and there is no way to throw the artwork somewhere you
@@ -744,7 +806,7 @@ where it was. `data-view="fit"` goes back to 1× and no offset, and **lights up
 whenever there is something to go back from** — so "am I zoomed?" is answerable
 without a readout. A page with somewhere to print the number can add
 `data-view-level` to any element and it will be kept in step; chroma puts it in
-the dock beside the composition and the size.
+the dock's readout, beside the composition and the palette name.
 
 **There is no 1:1, on purpose.** Every one of these stages draws its canvas at
 exactly the size it is displayed — buffer and CSS box are the same number — so
@@ -753,12 +815,13 @@ Chroma is the one place the phrase means something and there it would mean
 something false: the preview is capped at 1920 on its longest edge, so it does
 not hold the export's pixels to show you.
 
-Camouflage has neither attribute on purpose — its pattern is full-bleed, so
-there is nothing behind the glass but more of the same pattern.
+A stage whose canvas is full-bleed and does nothing at all with the pointer
+takes neither attribute on purpose — there is nothing behind the glass but
+more of the same pattern to pan to.
 
 ---
 
-## 10. DialKit is a plugin — recolour it, do not redesign it
+## 11. DialKit is a plugin — recolour it, do not redesign it
 
 `poc/shared/dialkit-skin.css` maps DialKit's own `--dial-*` tokens onto the
 site's colours and does **nothing else**. The panel is then the site's palette
@@ -771,21 +834,22 @@ site, and it squashed DialKit's own buttons into a shape they were never drawn
 for.
 
 **Nothing in that file may change a size, a shape or a spacing DialKit chose.**
-The only exceptions are the handful of rules that hosting it *inline* requires —
-without them a panel that thinks it is a floating window draws its own window
-inside ours — and the two dropdowns, which portal to `<body>` where no token of
-ours can reach them.
+The only exceptions are *where* the popover sits — `top`, `right` and
+`z-index` on `.dialkit-panel[data-mode="popover"]`, and the `max-height` bound
+on `.dialkit-panel-inner` that stops it under the dock (§4) — and the two
+dropdowns, which portal to `<body>` where no token of ours can reach them
+without a rule of our own.
 
-DialKit's icons are exempt from §6's glyph rule for the same reason. It brings
+DialKit's icons are exempt from §7's glyph rule for the same reason. It brings
 its own set.
 
 Anything of ours that sits beside a DialKit control — chroma's padlocks — goes
-in a gutter we make on our own container (`#dial-mount { padding-right }`), not
-by reshaping a row DialKit drew.
+in a gutter made by extra `padding-right` on `.dialkit-panel-inner` (chroma.css,
+§4), not by reshaping a row DialKit drew.
 
 ---
 
-## 11. The header band
+## 12. The header band
 
 There is no band. Level 1 is two pills of the package's own glass and the space
 between them is the page — `play.css` draws `.chrome-rule` as a hairline and

@@ -777,8 +777,8 @@
     caption.textContent = `40 × 25 · ${codes} cell${codes === 1 ? '' : 's'} spent on attributes` +
       ` · ${mode} · ${SCHEMES[state.scheme].name}` +
       (state.revealed ? ' · revealed' : '') + (state.pagesFrom ? ' · pages from' : '');
-    // Collapsed on a phone, the sheet's head is all that shows — so it says
-    // which page this is rather than repeating the word "settings".
+    // The summary rides in the dock's readout beside the scheme's dots: which
+    // page this is, in the one line the bar has room for.
     summary.textContent = `P${state.number} · ${mode[0].toUpperCase() + mode.slice(1)}` +
       ` · ${SCHEMES[state.scheme].name}`;
   }
@@ -813,10 +813,11 @@
     }
   }
 
-  /* The copy and the fastext line are still real fields in the drawer — a
-     multi-line body of text is not a dial, and DialKit has no control for one.
-     Everything else is the panel's, and is pushed to it rather than to the
-     DOM. */
+  /* The copy is a real field still — a multi-line body of text is not a dial,
+     and DialKit has no control for one, so it lives in the dock's copy bar.
+     The fastext line is the panel's text row, mirrored into a hidden input so
+     this binding need not change. Everything else is the panel's, and is
+     pushed to it rather than to the DOM. */
   let onPanel = null;
   function panelValues() {
     return {
@@ -1018,7 +1019,10 @@
   });
 
   // Touching any control drops out of the slideshow, so it can't fight you.
-  document.getElementById('panel').addEventListener('input', () => { if (state.pagesFrom) { stopCycle(); build(); } });
+  // Delegated at the document since the sheet went: the controls are spread
+  // across DialKit's popover, the dock and the copy bar now, and every one of
+  // them still fires input.
+  document.addEventListener('input', () => { if (state.pagesFrom) { stopCycle(); build(); } });
 
   // Start from a seed, as asked: the page is already composed on arrival.
   (function start() {

@@ -48,14 +48,16 @@
   <link rel="stylesheet" href="https://ravivasavan.com/chrome/v1/chrome.css">
   <link rel="stylesheet" href="/assets/play.css">
   <style>
-    /* Melt's own half of the page. The type, the tokens, the two chrome rows
-       and every control in the sheet come from play.css. */
+    /* Melt's own half of the page. The type, the tokens, the rail, the dock
+       and the DialKit popover all come from play.css and dialkit-skin.css;
+       there is no settings drawer of Melt's own any more (play vault decision
+       2026-09-18-dialkit-panel-and-dock-rule). */
 
     html, body { height: 100%; overflow: hidden; }
 
     /* ---- the stage ---- */
-    /* The full viewport — the sheet is a pure overlay that may sit over part
-       of the artwork; that's what minimise is for. */
+    /* The full viewport now that nothing overlays it but the rail, the dock
+       and the DialKit popover. */
     #stage {
       position: fixed; inset: 0;
       overflow: hidden; touch-action: none;
@@ -79,16 +81,15 @@
     #empty .link:hover { color: var(--accent); }
     #fatal { font-size: 14px; color: var(--accent); max-width: 44ch; line-height: 1.45; }
 
-    /* ---- the sheet's own furniture ---- */
-    /* Folded, the head is all you see of the sheet, so it carries the count and
-       the file: the summary truncates rather than pushing the count off. */
-    #ptcount { white-space: nowrap; }
+    /* ---- the dock readout ---- */
+    /* Count and file, in the dock now. The bar itself already scrolls rather
+       than wrapping (play.css's .dock), so there is nothing left to truncate
+       here. */
     #n { font-variant-numeric: tabular-nums; }
-    #nlabel { color: var(--muted); }
-    #status { min-width: 0; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-
-    /* One melt point: its number, its two dials, and the way out. */
+    /* Everything the script binds that isn't a DialKit-native control lives
+       here, off-screen but still wired: the click handler, the is-on class
+       and the B-key peek all still talk to the real button. */
     .bridge { display: none; }
     /* Labil Grotesk ships 400 only, so emphasis is colour, not weight. */
   </style>
@@ -129,6 +130,13 @@
       <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
       <span class="tool-pill__label">Export</span>
     </button>
+    <!-- The count and the file were the sheet head's; the sheet is gone, so
+         they ride in the dock the way Chroma's composition line does. -->
+    <p class="readout" aria-live="polite">
+      <span id="ptcount"><span id="n">0</span> <span id="nlabel">melt points</span></span>
+      <span class="readout__sep">·</span>
+      <span id="status">Drop an SVG to start</span>
+    </p>
   </nav>
 
   <!-- The picker the Upload pills open. It lives outside both bars: it is not a
@@ -159,20 +167,6 @@
       <button class="link" id="e-sample" type="button">or try the sample</button>
     </div>
   </main>
-
-  <aside class="sheet" aria-label="Melt settings">
-    <div class="sheet__head">
-      <span class="sheet__title" id="ptcount">Melt · <span id="n">0</span> <span id="nlabel">melt points</span></span>
-      <span class="sheet__summary" id="status" aria-live="polite">Drop an SVG to start</span>
-    </div>
-    <div class="sheet__body">
-
-      <!-- All of it is DialKit's: the global dials, the Before toggle, and a
-           folder per melt point rebuilt as points come and go. -->
-      <div id="dial-mount"></div>
-
-    </div>
-  </aside>
 
   <div id="root"></div>
 

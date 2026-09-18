@@ -1,9 +1,20 @@
 import React, { useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import { DialRoot, useDialKitController } from 'dialkit'
 import 'dialkit/styles.css'
 import '../../shared/dialkit-skin.css'
+
+/* The panel is DialKit as it ships — its popover, its bubble, its motion —
+   pinned under the menu pill by one rule in dialkit-skin.css. It holds the
+   page's parameters and nothing else: the verbs (Randomise, Text, Picture,
+   Clear, Export), the format that belongs to Export, the file chooser, the
+   body copy and the readout are the dock's (see the play vault decision
+   2026-09-18-dialkit-panel-and-dock-rule).
+
+   teletext.js is untouched in the way that matters. The parameters still move
+   through window.teletext.setValues/onChange, exactly as they did inside the
+   drawer, and the verbs still work by clicking the buttons the script already
+   binds — now hidden in the page's .bridge. */
 
 const engine = () => window.teletext
 
@@ -57,24 +68,6 @@ function Controls() {
       scale: { type: 'select', options: SCALES, default: String(o.scale ?? 2) },
     },
     fastext: { type: 'text', default: o.links ?? 'INDEX, MAGNETIC, BLOCK, A-Z', placeholder: 'Fastext links' },
-    /* The buttons are DialKit's actions now. Each one clicks the button the
-       script already binds, so nothing about teletext's own wiring changes. */
-    clearPicture: { type: 'action', label: 'Clear picture' },
-    exportPng: { type: 'action', label: 'PNG' },
-    exportTti: { type: 'action', label: 'TTI' },
-    openEditTf: { type: 'action', label: 'Open in edit.tf' },
-    copyUnicode: { type: 'action', label: 'Copy as Unicode' },
-  }, {
-    onAction: (action) => {
-      const id = {
-        clearPicture: 'c-clearimg',
-        exportPng: 'x-png',
-        exportTti: 'x-tti',
-        openEditTf: 'x-edittf',
-        copyUnicode: 'x-unicode',
-      }[String(action)]
-      if (id) document.getElementById(id)?.click()
-    },
   })
 
   const v = controller.values
@@ -117,17 +110,98 @@ function Controls() {
   return null
 }
 
-function Settings() {
-  const mount = document.getElementById('dial-mount')
-  if (!mount) return null
-  return createPortal(<DialRoot mode="inline" theme="dark" productionEnabled />, mount)
+/* --------------------------------------------------------------- the dock -- */
+/* The verbs the drawer used to hold. Every one of them works through the
+   .bridge, so teletext.js keeps the wiring it has always had — the dock only
+   decides when to fire it and what the pills say. */
+
+const $ = (id) => document.getElementById(id)
+
+/* What the script writes into #drop when there is no picture; the file's name
+   when there is. It is the one signal that covers both the chooser and a drop,
+   which is why the Clear pill follows it. */
+const NO_PICTURE = 'Drop an image, or click to choose'
+
+function wireDock() {
+  /* Text — a multi-line body of copy is not a dial, so DialKit has no row for
+     it and the pill opens a bar on the dock's own material instead. */
+  const bar = $('text-bar')
+  const textPill = $('p-text')
+  const copy = $('c-copy')
+  const showBar = (open) => {
+    bar.hidden = !open
+    textPill.classList.toggle('is-on', open)
+    textPill.setAttribute('aria-expanded', String(open))
+    if (open) copy.focus()
+  }
+  textPill.addEventListener('click', () => showBar(bar.hidden))
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || bar.hidden) return
+    showBar(false)
+    textPill.focus()
+  })
+
+  /* Picture — the pill opens the hidden chooser, and Clear is only there once
+     there is something to clear. */
+  const drop = $('drop')
+  const clearPill = $('p-clearpic')
+  $('p-picture').addEventListener('click', () => $('file').click())
+  clearPill.addEventListener('click', () => $('c-clearimg').click())
+  const followPicture = () => { clearPill.hidden = drop.textContent.trim() === NO_PICTURE }
+  followPicture()
+  new MutationObserver(followPicture).observe(drop, { childList: true, characterData: true, subtree: true })
+
+  /* A picture can be dropped anywhere on the page now that the well has gone.
+     The script's own drop handler is on #drop, so the event is forwarded there
+     rather than the dock learning to read a file — and forwarded without
+     bubbling, or it would arrive straight back at this listener. */
+  for (const type of ['dragenter', 'dragover']) {
+    document.addEventListener(type, (e) => {
+      if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) e.preventDefault()
+    })
+  }
+  document.addEventListener('drop', (e) => {
+    if (!e.dataTransfer || !e.dataTransfer.files.length) return
+    e.preventDefault()
+    drop.dispatchEvent(new DragEvent('drop', { dataTransfer: e.dataTransfer, bubbles: false, cancelable: true }))
+  })
+
+  /* Export and the format beside it: one verb, one selector that belongs to
+     it. The option values are the ids of the buttons the script already binds,
+     so Export is a click on whichever one is chosen. The choice is remembered —
+     it is a habit, not a property of the page. */
+  const FORMAT_KEY = 'play.teletext.format'
+  const format = $('x-format')
+  const formatLabel = $('x-format-label')
+  try {
+    const saved = localStorage.getItem(FORMAT_KEY)
+    if (saved && [...format.options].some((opt) => opt.value === saved)) format.value = saved
+  } catch (e) {}
+  const paintFormat = () => { formatLabel.textContent = format.options[format.selectedIndex].textContent }
+  paintFormat()
+  format.addEventListener('change', () => {
+    paintFormat()
+    try { localStorage.setItem(FORMAT_KEY, format.value) } catch (e) {}
+  })
+  $('p-export').addEventListener('click', () => $(format.value)?.click())
+}
+
+/* Open or bubbled is a preference, one key for the whole site, the way the
+   old sheet's was. */
+const PANEL_KEY = 'play.panel'
+function readOpen() {
+  try { return localStorage.getItem(PANEL_KEY) !== 'min' } catch (e) { return true }
+}
+function writeOpen(open) {
+  try { localStorage.setItem(PANEL_KEY, open ? 'open' : 'min') } catch (e) {}
 }
 
 function mount() {
-  createRoot(document.getElementById('root')).render(
+  wireDock()
+  createRoot($('root')).render(
     <React.StrictMode>
       <Controls />
-      <Settings />
+      <DialRoot mode="popover" position="top-right" defaultOpen={readOpen()} onOpenChange={writeOpen} productionEnabled />
     </React.StrictMode>
   )
 }

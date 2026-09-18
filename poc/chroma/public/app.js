@@ -175,7 +175,11 @@
       detail: {
         flow: state.flow, scale: state.scale, rotation: state.rotation,
         glow: state.glow, grain: state.grain, seed: state.seed,
-        mode: state.mode, locks: { ...state.locks }
+        mode: state.mode, locks: { ...state.locks },
+        // The panel shows the palette and the colours too now, so it has to
+        // hear about them when Randomise, a recipe or an import moves them.
+        palette: state.palette, colors: [...state.colors], paletteName: paletteName(),
+        resolution: state.resolution
       }
     }));
   }

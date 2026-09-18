@@ -1,8 +1,9 @@
 /* play.ravivasavan.com — the shared skin.
    Everything every page has in common lives here once: the theme tokens, the
-   hairline under the site chrome, the experiment's own rail and dock, the
-   settings drawer, and the glass material they all float on. Pages keep only
-   what is theirs.
+   experiment's own rail and dock, the dock's selector and readout, and the
+   glass material they float on. The settings panel is DialKit's own popover,
+   recoloured and pinned by poc/shared/dialkit-skin.css (rule: the play vault's
+   2026-09-18 panel-and-dock decision). Pages keep only what is theirs.
 
    Level 1 — the avatar pill, the menu pill, the theme switch, the type — is
    not here any more. It is the shared chrome package, served from
@@ -60,10 +61,6 @@ html[data-theme="night"] {
    (which are --bg, --fg, --separator and --pill-bg, and nothing else). */
 
 :root {
-  /* Lets the drawer's height: auto animate down to the minimised disc rather
-     than snapping. Ignored where it isn't supported; nothing depends on it. */
-  interpolate-size: allow-keywords;
-
   /* Play-space buttons already have a fill, so their hover is a wash over it
      rather than a surface growing underneath — that move belongs to the level-1
      chrome and nothing else. One ring for focus, so every control agrees. */
@@ -104,46 +101,27 @@ html[data-theme="night"] {
   --glass-shadow-sm: 0 0 rgba(0, 0, 0, 0);
   --glass-radius: 24px;
 
-  /* The sheet is the one piece of glass that carries running text, and it lies
-     directly over the experiment's own artwork at every width now that the
-     content runs the full viewport under it. 62% of the background is not
-     enough ground for a 13px label to survive teletext's saturated raster, so
-     the sheet keeps the material's blur, edge and shadow but sits on a denser
-     tint and a calmer saturation of its own — enough to read on, still thin
-     enough for the canvas to show through it. */
-  --sheet-mix: 86%;
-  --sheet-spec: 34%;
-  --sheet-blur: blur(24px) saturate(120%);
 
   /* Chrome geometry. --chrome-top is the package's --nav-margin restated, and
      not used to place anything here — the rule, the rail and the dock are
      positioned off the other three, so a fold only has to restate the four
      numbers and everything stays lined up under the pills. */
   --chrome-top: 40px;
-  /* The Tools — rail, dock, drawer — are the chrome's family: the rail hangs
-     under the avatar pill in its column, the drawer under the menu pill on its
-     right margin, each 8px below the pill above it. Every position derives from
+  /* The Tools — rail, dock, panel — are the chrome's family: the rail hangs
+     under the avatar pill in its column, the DialKit panel under the menu pill
+     on its right margin, each 8px below the pill above it. Every position derives from
      --chrome-top, so a fold restates one number. --chrome-rule is the bottom
      edge of the pills; there is no drawn rule any more. */
   --chrome-rule: calc(var(--chrome-top) + 64px);
   --chrome-tools: calc(var(--chrome-rule) + 8px);
   --chrome-pad: var(--chrome-top);
 
-  /* The floating settings sheet. It is an overlay: the content underneath is
-     the whole viewport and nothing reserves room for the glass, so the only
-     geometry here is the sheet's own — how wide the pane is, how far it is
-     inset, and how big the disc is once it is minimised. */
-  --panel-w: 360px;
+  /* --panel-gap is the Tools' inset from the screen edge: the dock's, and the
+     DialKit panel's (dialkit-skin.css pins the popover with it). */
   --panel-gap: var(--chrome-top);
-  /* The minimised drawer is a tool pill's disc: the same 44px box and the same
-     16px glyph as everything else at this level, so the chrome has one icon
-     size and one container size throughout. */
-  --sheet-min: 64px;
-  /* Where the sheet's top edge sits. Overridden below on a page that has a
-     tools row, because the two would otherwise start on the same line. */
-  --sheet-top: var(--chrome-tools);
 
-  /* Stacking, one place. Content < sheet < rule < chrome/tools. */
+  /* Stacking, one place. Content < panel < chrome/tools. --z-sheet is the
+     DialKit popover's floor (the name is the drawer's, kept for the skin). */
   --z-sheet: 450;
   --z-rule: 499;
   --z-chrome: 500;
@@ -159,8 +137,6 @@ html[data-theme="night"] {
   --field: color-mix(in srgb, var(--fg) 6%, transparent);
   --glass-mix: 52%;
   --glass-spec: 12%;
-  --sheet-mix: 80%;
-  --sheet-spec: 10%;
   --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
@@ -169,8 +145,6 @@ html[data-theme="night"] {
     --field: color-mix(in srgb, var(--fg) 6%, transparent);
     --glass-mix: 52%;
     --glass-spec: 12%;
-    --sheet-mix: 80%;
-    --sheet-spec: 10%;
     --chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23fff5f5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   }
 }
@@ -405,10 +379,7 @@ a { color: inherit; }
 }
 
 /* --- the dock --- */
-/* Centred on the space it actually has, not on the viewport: with the drawer
-   open the dock centres on what is left of the screen, and when the drawer
-   folds to its disc the dock takes the width back. Both edges are animated on
-   the same curve as the fold, so the two move as one gesture. */
+
 .dock {
   /* A scroller on one axis clips on both, so a focus ring drawn 2px outside a
      pill was cut at the top and bottom. Pad the box and pull it back by the
@@ -423,9 +394,9 @@ a { color: inherit; }
   touch-action: pan-x;
 }
 
-/* The dock centres on the page, not on the gap beside the drawer. The drawer is
+/* The dock centres on the page, not on the gap beside the panel. The panel is
    an overlay and it moves; the verbs should not shuffle sideways every time it
-   folds. If the glass covers the artwork, pan it or minimise the glass. */
+   folds. If the glass covers the artwork, pan it or bubble the panel. */
 
 /* A dock too wide for its box scrolls instead of spilling: centring collapses
    to a start-aligned row the moment the pills stop fitting, the same reason
@@ -448,9 +419,30 @@ a { color: inherit; }
 .dock .tool-pill:active { box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
 .dock .tool-pill.is-on { color: var(--fg); box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
 
+/* --- the selector --- */
+/* A dock can carry a selector where a verb needs one — the export size beside
+   Export, a format beside a save. It is a 44px pill like its neighbours whose
+   whole face is the native <select>, invisible and on top, so the platform's
+   own menu opens and the pill reads as a pill. The label is the current
+   choice, written by the play's script; the chevron says it opens. */
+.dock .tool-pill--select { position: relative; padding-right: 12px; }
+.dock .tool-pill__chevron { display: grid; place-items: center; width: 16px; height: 16px; opacity: 0.6; }
+.dock .tool-pill__chevron svg { width: 16px; height: 16px; display: block; }
+.dock .tool-pill__select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+  font-size: 16px; /* iOS: a smaller control zooms the page on focus */
+}
+.dock .tool-pill--select:has(.tool-pill__select:focus-visible) { outline: 2px solid var(--fg); outline-offset: 2px; }
+
 /* --- the readout --- */
 /* A dock can carry one non-button: a line of status (Chroma's composition and
-   size, Teletext's cell budget) on the same 44px pill as the verbs beside it,
+   palette, Teletext's page and scheme) on the same 44px pill as the verbs beside it,
    on the same material, in the muted ink. It is part of the bar, not a caption
    floating near it. */
 .dock .readout {
@@ -480,188 +472,10 @@ a { color: inherit; }
    Tools keep their theme colours but stop relying on what is beneath them —
    80% of the theme's background instead of a 20% tint. */
 :root[data-chrome-tone] .rail,
-:root[data-chrome-tone] .dock,
-:root[data-chrome-tone] .sheet__icon {
+:root[data-chrome-tone] .dock {
   --pill-bg: color-mix(in srgb, var(--bg) 80%, transparent);
   --pill-edge: inset 0 0 0 1px color-mix(in srgb, var(--fg) 14%, transparent);
 }
-
-
-
-/* ------------------------------------------------------------- the sheet -- */
-/* Settings float over the content on their own pane of glass, inset from the
-   viewport rather than butted against it. It is a pure overlay: the artwork
-   underneath runs the full width and is centred on the viewport, and the glass
-   lies on top of it. Covering some of the artwork is what minimise is for. */
-
-/* Nothing sits between the rule and the drawer any more — the experiment's own
-   buttons went to the rail and the dock — so the glass starts on the first line
-   below the chrome and runs to the bottom of the screen.
- */
-
-.sheet {
-  position: fixed;
-  top: var(--sheet-top);
-  /* The menu pill above sits at --nav-margin plus the package's scrollbar
-     compensation (chrome.js sets --nav-right-comp on <html> when the page
-     has no bar, 0 when it has one). The drawer hangs under that pill, so its
-     right edge takes the same term or it lands a scrollbar's width to the
-     right of the menu on every page that doesn't scroll. */
-  right: calc(var(--panel-gap) + var(--nav-right-comp, 0px));
-  width: var(--panel-w);
-  /* As tall as its contents and no taller — melt's four dials should not lay a
-     full-height pane of glass over the artwork. Past the viewport it stops and
-     scrolls. interpolate-size on :root is what keeps auto → the disc an
-     animation rather than a jump, where the browser supports it. */
-  height: auto;
-  max-height: calc(100% - var(--sheet-top) - var(--panel-gap));
-  z-index: var(--z-sheet);
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  overflow-y: auto;
-  /* No scrollbar, on either engine. That it scrolls is said by the shadow the
-     content passes under at the top and bottom edges — see the box-shadow
-     below, where the two inset hints ride along with the glass. */
-  scrollbar-width: none;
-  overscroll-behavior: contain;
-  /* Secondary type inside the sheet, redefined once for everything in it —
-     the shared labels, DialKit's, and each experiment's own. :root's --muted
-     is 55% of the ink mixed into the page, which measures 3.87:1 on flat
-     ground and collapses to under 2:1 the moment a saturated canvas is behind
-     the glass on a phone. 82% of the ink clears 4.5:1 against the darkest and
-     the lightest backdrop the experiments put under the sheet. */
-  --muted: color-mix(in srgb, var(--fg) 82%, transparent);
-  /* The denser tint, at every width: there is always artwork behind it. */
-  background: color-mix(in srgb, var(--bg) var(--sheet-mix), transparent);
-  backdrop-filter: var(--sheet-blur);
-  -webkit-backdrop-filter: var(--sheet-blur);
-  border-radius: var(--glass-radius);
-  /* Flat pane: the hairline alone. No specular, no scroll-hint shading, no
-     shadow — a "shadow" here would only ever be a glow, since the pane sits
-     on the artwork it is tinted from. */
-  box-shadow: var(--glass-edge);
-  transition:
-    width         240ms cubic-bezier(0.4, 0, 0.2, 1),
-    height        240ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-radius 240ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-.sheet::-webkit-scrollbar { display: none; }
-
-/* The grabber only exists folded; play.js adds it if the markup left it out. */
-.sheet__grab:hover { background: color-mix(in srgb, var(--fg) 34%, transparent); }
-.sheet__grab {
-  cursor: grab;
-  display: none;
-  position: absolute;
-  top: 8px;
-  left: 50%;
-  width: 36px;
-  height: 4px;
-  margin-left: -18px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--fg) 22%, transparent);
-}
-
-.sheet__head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex: 0 0 auto;
-}
-.sheet__title { font-size: 14px; }
-/* The minimise button is the head's hard-right item, so the summary takes the
-   slack to its left and stays where it always was. */
-.sheet__summary { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; margin-left: auto; }
-
-/* The minimise control — play.js appends it to the head if the markup has
-   none, the way it appends the grabber. Glass-inset disc, 16px glyph. */
-/* The small in-panel icon button: the drawer's minimise, melt's remove-point,
-   chroma's padlocks. 32px around the same 16px glyph, and the same growing
-   surface as everything else — a panel is a tighter place than the chrome, so
-   it is the one size below 44px, and it is the only one. */
-.sheet__min,
-.panel-icon {
-  flex: 0 0 auto;
-  width: 32px;
-  height: 32px;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: 16px;
-  padding: 0;
-  background: color-mix(in srgb, var(--fg) 6%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
-  color: var(--ink);
-  cursor: pointer;
-  transition:
-    background-color 240ms cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow       240ms cubic-bezier(0.4, 0, 0.2, 1),
-    color            240ms ease;
-}
-/* Already a filled chip at 6% — the hover deepens that fill and firms the
-   hairline, which is legible at 32px where a growing surface is not. */
-.sheet__min:hover,
-.panel-icon:hover {
-  background: var(--wash-strong);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 22%, transparent);
-}
-.sheet__min:focus-visible,
-.panel-icon:focus-visible {
-  outline: none;
-  background: var(--wash-strong);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 22%, transparent), var(--focus-ring);
-}
-.sheet__min svg,
-.panel-icon svg { width: 16px; height: 16px; display: block; }
-
-/* And what is left of the sheet once it is minimised: the disc's whole face is
-   this button, so the glass is still the sheet — nothing else moves. */
-.sheet__icon {
-  display: none;
-  position: absolute;
-  inset: 0;
-  place-items: center;
-  border: 0;
-  border-radius: inherit;
-  padding: 0;
-  background: transparent;
-  color: var(--ink);
-  cursor: pointer;
-  overflow: hidden;
-  transition: background-color 240ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-/* NO position here. The rule opens with `position: absolute; inset: 0`, and a
-   second position declaration in the same block silently outranks it — which
-   is what took the button out of the disc and left the glyph sitting against
-   its top edge instead of centred in it. */
-.sheet__icon:hover { background: var(--wash); }
-.sheet__icon:focus-visible { outline: none; background: var(--wash); box-shadow: var(--focus-ring); }
-.sheet__icon svg { width: 16px; height: 16px; display: block; }
-
-.sheet__body {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-/* Uppercase and letter-spaced, but not dimmed a second time: 60% of an
-   already-secondary ink measured 1.4:1 over teletext's raster. */
-.sheet__section {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 400;
-  color: var(--muted);
-  margin-top: 8px;
-}
-.sheet__section:first-child { margin-top: 0; }
-
-.sheet__note { font-size: 13px; line-height: 1.45; color: var(--muted); }
 
 /* ------------------------------------------------------------- controls -- */
 /* One shape for every setting on every experiment: a label row with the value
@@ -872,34 +686,22 @@ input[type="range"].dial {
 
 /* ---------------------------------------------------------------- folds -- */
 /* ≤900 the geometry tightens with the package's --nav-margin, the tools row
-   scrolls sideways rather than shedding its labels, and the sheet swings down
-   to the bottom of the screen. */
+   scrolls sideways rather than shedding its labels. */
 
 @media (max-width: 900px) {
   :root {
     --chrome-top: 16px;
     --chrome-pad: 16px;
-    /* A thumb's disc rather than a pointer's. */
-    --sheet-min: 56px;
   }
 
   /* --- rail and dock, folded --- */
-  /* The drawer swings down to the bottom of the screen here, so the dock can no
-     longer live there: it lifts to sit on top of the collapsed glass. Minimised,
-     the drawer is only a disc in the corner and the dock drops back down beside
-     it. */
-  .dock,
-  body:has(.sheet) .dock {
+  /* The dock runs the width of the screen and scrolls, start-aligned. */
+  .dock {
     left: 0;
     right: 0;
     bottom: var(--panel-gap);
     padding-inline: var(--chrome-pad);
     justify-content: flex-start;
-  }
-  body:has(.sheet) .dock { bottom: calc(var(--panel-gap) + 60px + 8px); }
-  :root[data-play-sheet="min"] body:has(.sheet) .dock {
-    bottom: var(--panel-gap);
-    padding-right: calc(var(--sheet-min) + var(--chrome-pad) + 8px);
   }
   /* Start-aligned once folded: a centred row has nothing to centre against when
      it is already wider than the screen. */
@@ -907,61 +709,12 @@ input[type="range"].dial {
   .dock > :last-child { margin-right: 0; }
 
   /* The rail keeps its column — 44px of glass over the artwork is the same
-     bargain the drawer makes — but stops short of whatever the dock is doing
-     underneath it. */
+     bargain the panel makes — but stops short of the dock underneath it. */
   .rail {
     left: calc(var(--chrome-pad) - var(--bar-pad));
     max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) * 2 - 60px - 44px);
   }
 
-  /* --- bottom sheet --- */
-  /* The material is the same as the pane's; only the geometry swings down. */
-  .sheet {
-    top: auto;
-    /* Right-anchored and sized, not stretched between two edges: the same
-       reason the pane is, so the width can travel to the minimised disc. */
-    left: auto;
-    right: calc(var(--panel-gap) + var(--nav-right-comp, 0px));
-    bottom: var(--panel-gap);
-    /* Same compensation as the pane: the right end stays under the menu pill,
-       the left end stays on the margin. */
-    width: calc(100% - var(--panel-gap) * 2 - var(--nav-right-comp, 0px));
-    height: 60px;
-    padding: 0;
-    gap: 0;
-    overflow: hidden;
-    transition:
-      height        320ms cubic-bezier(0.4, 0, 0.2, 1),
-      width         240ms cubic-bezier(0.4, 0, 0.2, 1),
-      border-radius 240ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  /* --sheet-full is measured by play.js when the sheet opens, so the glass
-     grows to its content and no further — and, on a landscape phone, no
-     higher than the tools row, which draws above the sheet and would
-     otherwise land on top of its own head. */
-  .sheet.is-open {
-    height: min(
-      72vh,
-      var(--sheet-full, 72vh),
-      max(60px, calc(100vh - var(--chrome-tools) - var(--panel-gap) * 2))
-    );
-  }
-  .sheet__grab { display: block; }
-  .sheet__head {
-    flex: 0 0 60px;
-    height: 60px;
-    padding: 14px var(--panel-gap) 0;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-  .sheet__body {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: none;
-    padding: 4px var(--panel-gap) var(--panel-gap);
-  }
-  .sheet__body::-webkit-scrollbar { display: none; }
 }
 
 @media (max-width: 640px) {
@@ -979,49 +732,12 @@ input[type="range"].dial {
 [data-pan].is-panning { cursor: grabbing; }
 [data-pan] { will-change: transform; }
 
-/* ------------------------------------------------------------ minimised -- */
-/* The whole sheet folds into one disc of the same glass, anchored where its
-   top-right corner was — 64px on a pointer, 56px on a thumb — and the disc's
-   face is the button that brings it back.
-
-   The state lives on <html>, not on the sheet: play.js stamps the attribute
-   the moment it runs, which is before first paint and before a page that
-   builds its sheet in script even has one to stamp, so a sheet that was left
-   minimised never flashes open. Written after the folds so it wins at every
-   width against .sheet and .sheet.is-open alike. */
-
-:root[data-play-sheet="min"] .sheet {
-  width: var(--sheet-min);
-  height: var(--sheet-min);
-  border-radius: calc(var(--sheet-min) / 2);
-  padding: 0;
-  gap: 0;
-  overflow: hidden;
-  /* Pill-sized now, so it casts a pill's shadow — the panel's larger one reads
-     as a much bigger object than the disc actually is. */
-  box-shadow:
-    var(--glass-edge),
-    inset 0 1px 0 color-mix(in srgb, white var(--sheet-spec), transparent),
-    var(--glass-shadow-sm);
-}
-:root[data-play-sheet="min"] .sheet > :not(.sheet__icon) { display: none; }
-:root[data-play-sheet="min"] .sheet__icon { display: grid; }
-
-@media (max-width: 900px) {
-  /* Folded, the disc keeps the bottom sheet's right-hand end and lifts clear
-     of the home indicator. */
-  :root[data-play-sheet="min"] .sheet {
-    bottom: calc(var(--panel-gap) + env(safe-area-inset-bottom, 0px));
-  }
-}
-
 /* ----------------------------------------------------------- preferences -- */
 
 /* Some people get motion sick from a blur that samples a moving page, and some
    just want the text solid. Both get an opaque panel instead. */
 @media (prefers-reduced-transparency: reduce) {
   .glass,
-  .sheet,
   .tool-pill {
     background: color-mix(in srgb, var(--bg) 96%, transparent);
     backdrop-filter: none;
@@ -1032,12 +748,8 @@ input[type="range"].dial {
 /* Scoped to the chrome deliberately: an experiment's own motion is the point of
    the page, and each one handles reduced motion itself. */
 @media (prefers-reduced-motion: reduce) {
-  .panel-icon,
   .btn,
   body,
-  .sheet,
-  .sheet__min,
-  .sheet__icon,
   .switch__track,
   .switch__track::after,
   .tool-pill,

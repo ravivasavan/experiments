@@ -1,11 +1,17 @@
 import React, { useEffect, useRef } from 'react'
-import { createPortal } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import { DialRoot, useDialKitController } from 'dialkit'
 import 'dialkit/styles.css'
 import '../../shared/dialkit-skin.css'
 
-/* Vite hoists this module into <head>, so it runs before the engine's own
+/* The panel is DialKit as it ships — its popover, its bubble, its motion —
+   pinned under the menu pill by the shared skin. The drawer that used to
+   host it inline is gone; the five spring parameters are all DialKit-native
+   already, so nothing moves to the dock except the tile-count readout the
+   drawer's folded head used to show (see the play vault decision
+   2026-09-18-dialkit-panel-and-dock-rule).
+
+   Vite hoists this module into <head>, so it runs before the engine's own
    defer script further down the body. Both finish before DOMContentLoaded,
    which is the first moment window.magnetic is guaranteed to exist. */
 const engine = () => window.magnetic
@@ -30,7 +36,7 @@ function Controls() {
   useEffect(() => {
     if (!mounted.current) { mounted.current = true; return }
     engine()?.setValues({ tiles, gap, stiffness, damping, spread })
-    /* Folded, the head is all you see of the drawer. */
+    /* The dock's readout, where the drawer's folded head used to live. */
     const s = document.getElementById('m-summary')
     if (s) s.textContent = `${tiles} tiles`
   }, [tiles, gap, stiffness, damping, spread])
@@ -38,20 +44,21 @@ function Controls() {
   return null
 }
 
-/* Inline, inside the drawer index.html already put on the page, and pinned to
-   one DialKit palette so the panel follows the site's theme rather than the
-   OS's. Both for the same reasons metal does it. */
-function Settings() {
-  const mount = document.getElementById('dial-mount')
-  if (!mount) return null
-  return createPortal(<DialRoot mode="inline" theme="dark" productionEnabled />, mount)
+/* Open or bubbled is a preference, one key for the whole site, the way every
+   other play's popover reads it. */
+const PANEL_KEY = 'play.panel'
+function readOpen() {
+  try { return localStorage.getItem(PANEL_KEY) !== 'min' } catch (e) { return true }
+}
+function writeOpen(open) {
+  try { localStorage.setItem(PANEL_KEY, open ? 'open' : 'min') } catch (e) {}
 }
 
 function mount() {
   createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <Controls />
-      <Settings />
+      <DialRoot mode="popover" position="top-right" defaultOpen={readOpen()} onOpenChange={writeOpen} productionEnabled />
     </React.StrictMode>
   )
 }

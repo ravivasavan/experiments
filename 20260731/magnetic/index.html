@@ -149,11 +149,11 @@
 
     #file { display: none; }
   </style>
-  <script type="module" crossorigin src="/20260731/magnetic/assets/index-Bw__uv0n.js"></script>
-  <link rel="modulepreload" crossorigin href="/20260731/magnetic/assets/react-BLvkGNEA.js">
-  <link rel="modulepreload" crossorigin href="/20260731/magnetic/assets/dialkit-B6JcMb2L.js">
+  <script type="module" crossorigin src="/20260731/magnetic/assets/index-oXxwoqRe.js"></script>
+  <link rel="modulepreload" crossorigin href="/20260731/magnetic/assets/react-Dk8-RHi1.js">
+  <link rel="modulepreload" crossorigin href="/20260731/magnetic/assets/dialkit-CdY9f2jN.js">
   <link rel="stylesheet" crossorigin href="/20260731/magnetic/assets/dialkit-yOvin6q7.css">
-  <link rel="stylesheet" crossorigin href="/20260731/magnetic/assets/index-BtJUA2eJ.css">
+  <link rel="stylesheet" crossorigin href="/20260731/magnetic/assets/index-BniLhRuB.css">
 </head>
 <body>
   <div data-chrome></div>
@@ -218,23 +218,15 @@
       </span>
       <span class="tool-pill__label">Shuffle</span>
     </button>
+    <!-- What the sheet's folded head used to show: the tile count, kept live
+         by src/main.jsx whenever the dial moves it. -->
+    <p class="readout" aria-live="polite"><span id="m-summary">16 tiles</span></p>
   </nav>
 
   <div id="stage" data-pan></div>
   <!-- Status only (all closed, camera unavailable) — there is no prompt; the click is for people to find. -->
   <p id="hint" class="gone"></p>
   <input id="file" type="file" accept="image/*">
-
-  <!-- The dials drawer. Static markup so play.js finds it at DOMContentLoaded
-       and gives it the fold and the minimise disc; React fills the body with
-       the DialKit panel once it mounts. -->
-  <aside class="sheet" aria-label="Magnetic settings">
-    <div class="sheet__head">
-      <span class="sheet__title">Magnetic</span>
-      <span class="sheet__summary" id="m-summary">16 tiles</span>
-    </div>
-    <div class="sheet__body" id="dial-mount"></div>
-  </aside>
 
   <div id="root"></div>
 

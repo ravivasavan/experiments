@@ -49,15 +49,14 @@
   <link rel="stylesheet" href="https://ravivasavan.com/chrome/v1/chrome.css">
   <link rel="stylesheet" href="/assets/play.css">
   <link rel="stylesheet" href="./chroma.css">
-  <script type="module" crossorigin src="/20260916/chroma/assets/index-K7ckttfw.js"></script>
-  <link rel="modulepreload" crossorigin href="/20260916/chroma/assets/react-BLvkGNEA.js">
-  <link rel="modulepreload" crossorigin href="/20260916/chroma/assets/dialkit-B6JcMb2L.js">
+  <script type="module" crossorigin src="/20260916/chroma/assets/index-CBKBmQKE.js"></script>
+  <link rel="modulepreload" crossorigin href="/20260916/chroma/assets/react-Dk8-RHi1.js">
+  <link rel="modulepreload" crossorigin href="/20260916/chroma/assets/dialkit-CdY9f2jN.js">
   <link rel="stylesheet" crossorigin href="/20260916/chroma/assets/dialkit-yOvin6q7.css">
-  <link rel="stylesheet" crossorigin href="/20260916/chroma/assets/index-BtJUA2eJ.css">
+  <link rel="stylesheet" crossorigin href="/20260916/chroma/assets/index-BniLhRuB.css">
 </head>
 <body>
   <div data-chrome></div>
-  <div class="chrome-rule" aria-hidden="true"></div>
 
   <!-- What you are looking at. The composition is not here: Field, Aperture and
        Horizon are styles rather than tools, so they are a dial. -->
@@ -102,6 +101,25 @@
       <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg></span>
       <span class="tool-pill__label">Export</span>
     </button>
+    <!-- The export size belongs to the verb beside it, not to the artwork, so
+         it is a dock selector: a pill whose whole face is the native <select>.
+         #resolution is the control app.js has always listened to; #size-label
+         is the text app.js has always written. -->
+    <label class="tool-pill tool-pill--select" aria-label="Export size">
+      <span class="tool-pill__label" id="size-label">7680 × 4320 · 16:9</span>
+      <span class="tool-pill__chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+      <select class="tool-pill__select" id="resolution">
+        <option value="7680x4320">8K · 7680 × 4320</option>
+        <option value="5120x2880">5K · 5120 × 2880</option>
+        <option value="3840x2160">4K · 3840 × 2160</option>
+        <option value="2560x1440">QHD · 2560 × 1440</option>
+        <option value="1920x1080">HD · 1920 × 1080</option>
+        <option value="3440x1440">Ultrawide · 3440 × 1440</option>
+        <option value="2560x1600">Laptop · 2560 × 1600</option>
+        <option value="1440x3200">Phone · 1440 × 3200</option>
+        <option value="2160x2160">Square · 2160 × 2160</option>
+      </select>
+    </label>
     <button class="tool-pill" type="button" id="copy-link" aria-label="Copy a link containing these settings">
       <span class="tool-pill__icon"><svg viewBox="-0.6667 -0.6667 25.3333 25.3333" fill="none" stroke="currentColor" stroke-width="2.1111" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></span>
       <span class="tool-pill__label">Copy</span>
@@ -110,24 +128,17 @@
       <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></span>
       <span class="tool-pill__label">Reset</span>
     </button>
-    <p class="readout" aria-live="polite"><span id="composition-label">Aperture · 0042</span><span class="readout__sep">·</span><span id="size-label">7680 × 4320</span><span class="readout__sep">·</span><span data-view-level>100%</span></p>
+    <p class="readout" aria-live="polite"><span id="composition-label">Aperture · 0042</span><span class="readout__sep">·</span><span id="palette-name">Rose room</span><span class="readout__sep">·</span><span data-view-level>100%</span></p>
   </nav>
 
-  <aside class="sheet" aria-label="Chroma settings">
-    <div class="sheet__head">
-      <span class="sheet__title">Chroma</span>
-      <span class="sheet__summary" id="palette-name">Rose room</span>
-    </div>
-    <div class="sheet__body">
+  <!-- The controls app.js has always read, and nothing looks at. The panel is
+       DialKit's popover now (src/main.jsx) and it drives these: set an input,
+       fire its event, and app.js does what it always did — the locks, the
+       horizon's 15-degree snap, the recipe in the hash. The colour stories and
+       the swatches are painted in here by app.js too; the panel reads them for
+       its select and its colour controls. -->
+  <div class="bridge" hidden aria-hidden="true">
 
-      <!-- Everything that is a dial. -->
-      <div id="dial-mount"></div>
-
-      <!-- The real controls app.js has always read. DialKit drives these and
-           the app cannot tell the difference: it still hears an input event on
-           the same range it always listened to, and every lock, the horizon's
-           15-degree snap and the recipe in the hash go on working untouched. -->
-      <div class="bridge" hidden aria-hidden="true">
         <div id="modes" class="rail__group" hidden role="radiogroup" aria-label="Composition">
       <span class="segmented-thumb" id="mode-thumb" hidden></span>
       <button class="tool-pill" type="button" data-mode="0" role="radio" aria-pressed="false" aria-label="Field">
@@ -149,9 +160,7 @@
         <input id="glow" type="range" min="0" max="100" value="65" tabindex="-1">
         <input id="grain" type="range" min="0" max="100" value="8" tabindex="-1">
         <input id="seed" type="number" min="0" max="999999" step="1" value="42" tabindex="-1">
-      </div>
-
-      <!-- Horizon locks to 15-degree steps, and these are the useful ones. -->
+    <!-- Horizon locks to 15-degree steps, and these are the useful ones. -->
       <div class="angle-locks" id="angle-locks" hidden>
         <button type="button" data-angle="-90">−90</button>
         <button type="button" data-angle="-45">−45</button>
@@ -161,32 +170,11 @@
         <button type="button" data-angle="45">45</button>
         <button type="button" data-angle="90">90</button>
       </div>
+    <input id="palette-search" type="search" tabindex="-1">
+    <div id="palettes" role="listbox" aria-label="Colour stories"></div>
+    <div id="swatches" aria-label="Edit palette colours"></div>
+  </div>
 
-      <h2 class="sheet__section">Palette</h2>
-      <div class="palette-toolbar">
-        <label class="sr-only" for="palette-search">Search palettes</label>
-        <input class="input" id="palette-search" type="search" placeholder="Search" autocomplete="off" spellcheck="false">
-      </div>
-      <div id="palettes" class="palettes" role="listbox" aria-label="Colour stories"></div>
-      <div id="swatches" class="dial-colors" aria-label="Edit palette colours"></div>
-
-      <h2 class="sheet__section">Size</h2>
-      <label class="field">
-        <span class="field__top"><span class="field__label">Export</span></span>
-        <select class="select" id="resolution">
-          <option value="7680x4320">8K · 7680 × 4320</option>
-          <option value="5120x2880">5K · 5120 × 2880</option>
-          <option value="3840x2160">4K · 3840 × 2160</option>
-          <option value="2560x1440">QHD · 2560 × 1440</option>
-          <option value="1920x1080">HD · 1920 × 1080</option>
-          <option value="3440x1440">Ultrawide · 3440 × 1440</option>
-          <option value="2560x1600">Laptop · 2560 × 1600</option>
-          <option value="1440x3200">Phone · 1440 × 3200</option>
-          <option value="2160x2160">Square · 2160 × 2160</option>
-        </select>
-      </label>
-    </div>
-  </aside>
 
   <div id="root"></div>
   <input id="toml-file" type="file" accept=".toml,text/plain" hidden>

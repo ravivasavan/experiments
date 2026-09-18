@@ -1,0 +1,127 @@
+/* ---------------------------------------------------------------------------
+   Teletext — page-specific only.
+
+   The tokens, the reset, the rail and dock pills, the selector, the readout
+   and the glass come from play.css. The panel is DialKit's own popover,
+   recoloured and pinned under the menu pill by dialkit-skin.css. What is left
+   here is the screen itself, the copy bar the dock opens, and the dots in the
+   readout — the parts of Teletext that have no equivalent anywhere else.
+
+   Lifted out of a <style> block in index.html when the sheet went: page CSS
+   in one linked file, the way chroma.css already does it. */
+
+/* Bedstead by Ben Harris — an outline font generated from the Mullard
+   SAA5050 character ROM, reproducing the chip's diagonal-smoothing.
+   Released into the public domain. https://bjh21.me.uk/bedstead/
+   Its advance is 0.6em and ascent 0.8em, so at font-size 20px a cell is
+   exactly 12 × 20 — the SAA5050 raster, with no tracking fixes. */
+@font-face {
+  font-family: "Bedstead";
+  src: url("/assets/fonts/Bedstead-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: block;
+}
+
+/* ----------------------------------------------------------- the screen -- */
+/* The window doesn't scroll; the stage does, and it is the whole viewport:
+   the page is centred on the window's centre and the panel floats over it.
+   The fit-to-width maths in teletext.js measures that same box. */
+html, body { height: 100%; overflow: hidden; }
+#stage {
+  height: 100%;
+  overflow: auto;
+  display: grid;
+  place-items: center;
+  /* No padding: the screen centres on the window itself, and the chrome and
+     Tools lie over it like everywhere else. */
+  padding: 0;
+}
+#screen-wrap { display: grid; gap: 16px; justify-items: center; }
+/* The page never inverts with the theme: teletext is black, full stop.
+   Only the surround follows day/night. */
+#screen {
+  display: block;
+  background: #000;
+  image-rendering: pixelated;
+}
+
+/* --------------------------------------------------------- the copy bar -- */
+/* A multi-line body of text is not a dial, so the panel has no row for it and
+   the dock's Text pill opens it here instead: one bar on the dock's own
+   material, the dock's width, directly above it. It is the dock's drawer, not
+   a second panel — no head, no fold, Escape or the pill shuts it. */
+.text-bar {
+  position: fixed;
+  z-index: var(--z-chrome);
+  left: var(--panel-gap);
+  right: var(--panel-gap);
+  /* Clear of the dock: its 44px pills plus the 8px focus-ring pad it keeps
+     inside the margin, which is the same sum dialkit-skin.css uses to stop
+     the panel above them. */
+  bottom: calc(var(--panel-gap) + 44px + 8px);
+  padding: 10px;
+  border-radius: 16px;
+  background: var(--pill-bg);
+  backdrop-filter: var(--pill-filter);
+  -webkit-backdrop-filter: var(--pill-filter);
+  box-shadow: var(--pill-edge);
+  color: var(--fg);
+}
+.text-bar[hidden] { display: none; }
+.text-bar .textarea {
+  min-height: 96px;
+  max-height: min(40vh, 320px);
+  resize: none;
+  background: color-mix(in srgb, var(--fg) 5%, transparent);
+  font-family: "Bedstead", ui-monospace, monospace;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------- the readout's dots -- */
+/* The scheme's five colours are a painting of the chosen scheme, not five
+   controls — a readout. teletext.js still paints them into #swatches; #swatches
+   is simply a span in the dock's readout now, so they are dots sized for a
+   44px pill rather than bars in a drawer. */
+.dock .readout #swatches {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.dock .readout #swatches .swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+/* The cell budget is the play's whole thesis and too long for the pill beside
+   the summary, so it stays in the live region rather than on screen: the
+   script writes it as it always did and a screen reader still hears it. */
+.dock .readout #caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- the rest -- */
+
+.bridge { display: none; }
+
+/* Folded: the screen takes the width and the window scrolls again. The copy
+   bar follows the dock, which loses its margins and keeps its pad. */
+@media (max-width: 900px) {
+  html, body { height: auto; overflow: visible; }
+  #stage {
+    min-height: 100svh;
+    overflow: visible;
+    padding: 0 var(--chrome-pad);
+  }
+  .text-bar {
+    left: var(--chrome-pad);
+    right: var(--chrome-pad);
+    bottom: calc(var(--panel-gap) + 44px + 8px + 8px);
+  }
+}

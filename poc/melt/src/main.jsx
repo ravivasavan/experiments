@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import { createRoot } from 'react-dom/client'
 import { DialRoot, useDialKitController } from 'dialkit'
 import 'dialkit/styles.css'
@@ -90,17 +89,21 @@ function ControlsHost() {
   return <Controls key={points.length} points={points} />
 }
 
-function Settings() {
-  const mount = document.getElementById('dial-mount')
-  if (!mount) return null
-  return createPortal(<DialRoot mode="inline" theme="dark" productionEnabled />, mount)
+/* Open or bubbled is a preference, one key for the whole site — the panel-
+   and-dock rule (play vault, 2026-09-18-dialkit-panel-and-dock-rule). */
+const PANEL_KEY = 'play.panel'
+function readOpen() {
+  try { return localStorage.getItem(PANEL_KEY) !== 'min' } catch (e) { return true }
+}
+function writeOpen(open) {
+  try { localStorage.setItem(PANEL_KEY, open ? 'open' : 'min') } catch (e) {}
 }
 
 function mount() {
   createRoot(document.getElementById('root')).render(
     <React.StrictMode>
       <ControlsHost />
-      <Settings />
+      <DialRoot mode="popover" position="top-right" defaultOpen={readOpen()} onOpenChange={writeOpen} productionEnabled />
     </React.StrictMode>
   )
 }

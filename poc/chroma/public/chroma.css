@@ -1,28 +1,13 @@
-/* Chroma is entirely fixed-position and the document never scrolls, so the
-   root scrollbar gutter play.css keeps for scrolling pages would sit here as a
-   permanent strip of page down the right edge. */
-html, body { height: 100%; overflow: hidden; }
+/* ---------------------------------------------------------------------------
+   Chroma — page-specific only.
 
-/* Chroma — page-specific only.
-
-   The tokens, the reset, the chrome, the rail and dock pills, the drawer and
-   every generic control (.field, .select, .input, .btn) come from play.css.
-   The panel's dials come from DialKit. What is left here is the preview, the
-   palette list, the swatch rows, the angle chips, the locks and the toast —
-   the parts of Chroma that have no equivalent anywhere else.
-
-   Chroma's own token set is gone with its chrome, so anything that referenced
-   --faint, --line, --dial-surface or --mono now reads the site's. The surface
-   mixes are the ones the DialKit skin uses, so a palette row and a dial row
-   are the same grey. */
+   The tokens, the reset, the rail and dock pills, the readout, the dock
+   selector and the glass come from play.css. The panel is DialKit's own
+   popover, recoloured and pinned under the menu pill by dialkit-skin.css. What
+   is left here is the preview, the padlocks that ride on DialKit's rows and
+   the toast — the parts of Chroma that have no equivalent anywhere else. */
 
 :root {
-  --chroma-surface: color-mix(in srgb, var(--fg) 6%, transparent);
-  --chroma-surface-hover: color-mix(in srgb, var(--fg) 12%, transparent);
-  --chroma-surface-active: color-mix(in srgb, var(--fg) 16%, transparent);
-  --chroma-radius: 10px;
-  --chroma-row: 40px;
-  --chroma-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --chroma-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -91,132 +76,16 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
   font-size: 13px;
 }
 
-/* The composition and the export size, riding in the dock beside the verbs —
-   the bottom edge is one bar, the same bargain camouflage's seed makes. */
-/* .readout lives in play.css now — the dock's status pill is shared with Teletext. */
-
-/* --------------------------------------------------------- the palettes -- */
-
-.palette-toolbar { display: flex; gap: 6px; align-items: center; }
-.palette-toolbar .input { flex: 1; min-width: 0; }
-
-.palettes {
-  /* .sheet__body is a flex column, so a box with only a max-height gets
-     squashed to nothing by its siblings. It sizes itself and scrolls. */
-  flex: none;
-  min-height: 180px;
-  max-height: 320px;
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  scrollbar-width: thin;
-  padding: 2px 2px 6px 0;
-}
-.palettes::-webkit-scrollbar { width: 8px; }
-.palettes::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--fg) 12%, transparent);
-  border-radius: 99px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-.palette-group {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 14px 12px 4px;
-}
-.palette-group:first-child { padding-top: 4px; }
-
-.palette {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  /* flex: none, or the column squashes every row back to its content height
-     the moment the list outgrows its max-height — which is always. */
-  flex: none;
-  height: 52px;
-  padding: 0 12px;
-  border: 0;
-  background: none;
-  cursor: pointer;
-  border-radius: var(--chroma-radius);
-  text-align: left;
-  color: var(--muted);
-  font: inherit;
-  font-size: 13px;
-  transition: background 0.15s, color 0.15s;
-}
-.palette:hover { background: var(--chroma-surface-hover); color: var(--ink); }
-.palette[aria-pressed="true"] { background: var(--chroma-surface-active); color: var(--ink); }
-
-.palette-dots { display: flex; gap: 5px; flex: none; }
-.palette-dots i {
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  display: block;
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 14%, transparent);
-}
-.palette-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.palettes-empty { font-size: 13px; color: var(--muted); padding: 20px 12px; }
-
-/* ----------------------------------------------------- the swatch rows -- */
-
-.dial-colors { display: flex; flex: none; flex-direction: column; gap: 8px; margin-top: 10px; }
-
-.dk-color {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: var(--chroma-row);
-  padding: 0 12px;
-  background: var(--chroma-surface);
-  border-radius: var(--chroma-radius);
-  font-size: 13px;
-  color: var(--muted);
-}
-.dk-color-right { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.dk-hex {
-  width: 8.2ch;
-  border: 0;
-  background: none;
-  text-align: right;
-  font-family: var(--chroma-mono);
-  font-size: 12px;
-  color: var(--muted);
-  padding: 0;
-}
-.dk-hex:focus { color: var(--ink); outline: none; }
-
-input[type="color"] {
-  appearance: none;
-  -webkit-appearance: none;
-  border: 1px solid var(--separator);
-  padding: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 5px;
-  background: none;
-  cursor: pointer;
-  overflow: hidden;
-  transition: transform 0.15s var(--chroma-spring);
-}
-input[type="color"]:hover { transform: scale(1.08); }
-input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-input[type="color"]::-webkit-color-swatch { border: 0; }
-
-/* The padlocks are ours, not DialKit's, so they live in a gutter we make to the
-   right of the panel rather than inside a row DialKit drew. #dial-mount is our
-   container; giving it a right padding insets every row by the width of a lock
-   and leaves somewhere to put one. The only thing this asks of DialKit is a
-   positioning context, which costs it nothing visually. */
-#dial-mount { padding-right: 26px; }
-#dial-mount .dialkit-slider-wrapper { position: relative; }
+/* ------------------------------------------------------------- the locks -- */
+/* The padlocks are ours, not DialKit's, so they live in a gutter to the right
+   of its rows rather than inside a row DialKit drew. The gutter is extra
+   right padding on the panel's scroll box — DialKit's rows keep their shape,
+   they are simply 26px narrower — and each row with a lock becomes the
+   positioning context for its button. This is the one injection the
+   panel-and-dock rule allows: it attaches to a parameter and changes none of
+   DialKit's geometry. */
+.dialkit-panel .dialkit-panel-inner { padding-right: calc(12px + 26px); }
+.dialkit-panel .has-lock { position: relative; }
 
 .prop-lock {
   width: 22px;
@@ -239,57 +108,12 @@ input[type="color"]::-webkit-color-swatch { border: 0; }
 .prop-lock[aria-pressed="true"] { color: var(--accent); }
 .prop-lock:focus-visible { outline: none; color: var(--accent); box-shadow: var(--focus-ring); border-radius: 6px; }
 
-#dial-mount .prop-lock {
+.has-lock .prop-lock {
   position: absolute;
   right: -24px;
   top: 50%;
   transform: translateY(-50%);
 }
-
-/* A colour swatch keeps its lock inline — that row is ours end to end. */
-.lock-row { display: flex; align-items: center; gap: 6px; }
-.lock-row > :first-child { flex: 1; min-width: 0; }
-
-/* ------------------------------------------------- angle chips + locks -- */
-
-.angle-locks { display: grid; flex: none; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 10px; }
-.angle-locks[hidden] { display: none; }
-.angle-locks button {
-  height: 28px;
-  border: 0;
-  cursor: pointer;
-  border-radius: 6px;
-  background: var(--chroma-surface);
-  font: inherit;
-  font-size: 11px;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted);
-  transition: background 0.15s, color 0.15s, transform 0.15s var(--chroma-spring);
-}
-.angle-locks button:hover { color: var(--ink); }
-.angle-locks button[aria-pressed="true"] { background: var(--accent); color: var(--white, #fff); }
-.angle-locks button:active { transform: scale(0.96); }
-
-.locks { display: flex; flex: none; flex-wrap: wrap; gap: 6px; }
-.lock-chip {
-  height: 30px;
-  padding: 0 12px;
-  border: 0;
-  cursor: pointer;
-  border-radius: 15px;
-  background: var(--chroma-surface);
-  font: inherit;
-  font-size: 12px;
-  color: var(--muted);
-  transition: background 0.15s, color 0.15s, transform 0.15s var(--chroma-spring);
-}
-.lock-chip:hover { color: var(--ink); background: var(--chroma-surface-hover); }
-.lock-chip[aria-pressed="true"] {
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 16%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent);
-}
-.lock-chip:active { transform: scale(0.96); }
 
 /* ------------------------------------------------------------- the rest -- */
 
@@ -327,7 +151,4 @@ input[type="color"]::-webkit-color-swatch { border: 0; }
 
 @media (max-width: 900px) {
   .viewport { padding: 0; }
-  /* Collapsed, the drawer is 60px of head — nothing inside it may insist on
-     being taller than that. */
-  .palettes { min-height: 0; max-height: 220px; }
 }
