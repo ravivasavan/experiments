@@ -267,6 +267,12 @@ a { color: inherit; }
     var(--glass-specular),
     var(--glass-shadow-sm);
 }
+/* Compact view actions in an explicitly authorised gallery dock. */
+.tool-pill--icon { width: 44px; padding: 0; justify-content: center; }
+.tool-pill--icon .tool-pill__label {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap;
+}
 .tool-pill--danger:hover { color: var(--accent); }
 .tool-pill[disabled] { opacity: 0.4; cursor: default; }
 /* Restate the resting fill, not the resting geometry — the reset then survives
@@ -401,8 +407,8 @@ a { color: inherit; }
 /* A dock too wide for its box scrolls instead of spilling: centring collapses
    to a start-aligned row the moment the pills stop fitting, the same reason
    the rail's auto margin would. */
-.dock > :first-child { margin-left: auto; }
-.dock > :last-child { margin-right: auto; }
+.dock > :nth-child(1 of :not([hidden])) { margin-left: auto; }
+.dock > :nth-last-child(1 of :not([hidden])) { margin-right: auto; }
 
 /* The dock keeps its 44px pills (the one size exception in the family) but
    wears the chrome's material, not the drawer's glass. */
@@ -410,7 +416,9 @@ a { color: inherit; }
   background: var(--pill-bg);
   backdrop-filter: var(--pill-filter);
   -webkit-backdrop-filter: var(--pill-filter);
-  box-shadow: var(--pill-edge);
+  /* Keep the wash geometry fixed; only its alpha changes on hover. */
+  box-shadow: inset 0 0 0 999px transparent, var(--pill-edge);
+  transition: box-shadow 120ms ease-out;
   color: var(--fg);
 }
 .dock .tool-pill:hover,
@@ -418,6 +426,9 @@ a { color: inherit; }
 .dock .tool-pill:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; }
 .dock .tool-pill:active { box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
 .dock .tool-pill.is-on { color: var(--fg); box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
+
+/* Group starts add 16px to the normal 8px gap without introducing wrappers. */
+.dock > [data-dock-group-start] { margin-left: 16px; }
 
 /* --- the selector --- */
 /* A dock can carry a selector where a verb needs one — the export size beside
@@ -705,8 +716,8 @@ input[type="range"].dial {
   }
   /* Start-aligned once folded: a centred row has nothing to centre against when
      it is already wider than the screen. */
-  .dock > :first-child { margin-left: 0; }
-  .dock > :last-child { margin-right: 0; }
+  .dock > :nth-child(1 of :not([hidden])) { margin-left: 0; }
+  .dock > :nth-last-child(1 of :not([hidden])) { margin-right: 0; }
 
   /* The rail keeps its column — 44px of glass over the artwork is the same
      bargain the panel makes — but stops short of the dock underneath it. */
@@ -753,6 +764,7 @@ input[type="range"].dial {
   .switch__track,
   .switch__track::after,
   .tool-pill,
+  .dock .tool-pill,
   .tool-pill__icon svg,
   .dial::-webkit-slider-thumb { transition: none; }
 }

@@ -55,6 +55,11 @@ chrome, not a second system:
   open/close motion are all DialKit's own, unstyled by us.
 - **Dock** keeps its 44px pills — the one size exception — but wears the
   chrome's material. Position unchanged (bottom, centred).
+  Its first and last **visible** children carry the auto margins, so hiding
+  verbs when a play changes view preserves viewport centring. Use `hidden`
+  on an unavailable pill; the remaining pills still overflow sideways. The
+  existing folded layout keeps its start alignment and clears both margins
+  on these same visible children.
 - **Readout.** A dock may carry one non-button, `<p class="readout">`, for a
   line of status (chroma's composition · palette · zoom, teletext's page ·
   scheme · swatches): the same 44px pill and material as the verbs beside it,
@@ -867,3 +872,24 @@ reason a stage should be the whole viewport with no padding reserved for the
 chrome: chroma's preview bleeds to all four edges and the band would have
 something to blur. It would go in the `prefers-reduced-transparency` list with
 every other glass surface.
+
+## Drift gallery exception (2026-09-22)
+
+Ravi explicitly requested Drift's previous/next and zoom controls in the dock,
+with one Grid/Single morphing toggle in the rail and no Back or Original.
+`.tool-pill--icon` is the shared 44px icon-only variant: its accessible label
+remains in the DOM. Drift's gallery may have three separate `.readout` chips
+(name, image count, zoom), plus Close. Other plays retain the usual rail/dock
+placement, visible verb labels and single readout. The overlay traps focus,
+steps single → gallery → drift on Escape or backdrop activation, and restores
+focus to the source work when closed. The Close verb exits directly.
+
+### Quiet dock hover and spacing between groups
+
+Dock chip hover holds its inset wash at a fixed 999px spread in both resting
+and hover states; only the tint fades over 120ms. Do not interpolate between a
+missing wash and a large spread. The hairline remains in both states.
+`data-dock-group-start` adds a 16px left margin to a non-leading chip, for 24px
+between groups including the normal 8px gap. Drift assigns groups to visible
+chips: filename, previous/count/next, zoom, playback (when present), then Close.
+The name chip always shows the current asset's filename, including in overview.
