@@ -8,7 +8,7 @@
 >
 > `https://github.com/ravivasavan/experiments.git`
 >
-> **The public site is [ravivasavan.com/experiments](https://ravivasavan.com/experiments/).** It is served by the `ravivasavan.com` Cloudflare Worker, on the same connection as the rest of the site. GitHub Pages is the origin the Worker fetches. `play.ravivasavan.com` only redirects.
+> **The public site is [ravivasavan.com/experiments](https://ravivasavan.com/experiments/).** It is served by the `ravivasavan.com` Cloudflare Worker, on the same connection as the rest of the site. GitHub Pages at `ravivasavan.github.io/experiments` is the origin the Worker fetches.
 >
 > **Art to share lives at [ravivasavan.com/play](https://ravivasavan.com/play/).** Drift is also its own experiment at [ravivasavan.com/experiments/20260922/drift](https://ravivasavan.com/experiments/20260922/drift/). The two publishes stay separate.
 
@@ -77,5 +77,4 @@ Each `poc/<slug>/.gitignore` still ignores `node_modules/` and `dist/` for that 
 ## Plumbing
 
 - Origin: GitHub Pages from `main`. The Worker on `ravivasavan.com` fetches it and publishes `/experiments/` and `/play/`.
-- `play.ravivasavan.com` is a redirect, not a site.
 - `.nojekyll` keeps GitHub from running Jekyll over the files
