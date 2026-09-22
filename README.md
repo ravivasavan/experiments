@@ -6,11 +6,13 @@
 >
 > `git@github.com:ravivasavan/experiments.git`
 >
+> `https://github.com/ravivasavan/experiments.git`
+>
 > The website stays at **[play.ravivasavan.com](https://play.ravivasavan.com)**. GitHub Pages deploys `main` from the repository root, and the `CNAME` file is what pins that domain.
 
 Experiments, out in the open.
 
-Every play wears the same chrome: a header, a rail down the left for what changes the view, a dock along the bottom for the verbs, and a dials drawer on the right that minimises into a disc. `assets/CHROME.md` is the contract, and it is worth reading before touching any of it.
+Every play wears the same chrome: a header, a rail down the left for what changes the view, a dock along the bottom for the verbs, and a dials drawer on the right that minimises into a disc. `AGENTS.md` at the root is the taste as rules, for any agent or person working here; `assets/CHROME.md` is the contract underneath it. Read both before touching any of it.
 
 The home page is a horizontal timeline built from `assets/timeline/experiments.json` — the rail itself is never hand-maintained. The one exception is the `<noscript>` fallback in `index.html`, a plain list of links for visitors and crawlers without JS: keep it in step with the JSON when you add, remove or hide an entry.
 
