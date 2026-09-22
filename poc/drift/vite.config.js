@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import { dropGeistMonoImport, dialkitChunks } from '../shared/vite-dialkit.js'
 
 export default defineConfig({
-  base: '/20260922/drift/',
+  base: '/play/',
   plugins: [react(), dropGeistMonoImport()],
   build: {
     outDir: '../../20260922/drift',

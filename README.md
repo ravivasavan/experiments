@@ -8,7 +8,9 @@
 >
 > `https://github.com/ravivasavan/experiments.git`
 >
-> The website stays at **[play.ravivasavan.com](https://play.ravivasavan.com)**. GitHub Pages deploys `main` from the repository root, and the `CNAME` file is what pins that domain.
+> **The public site is [ravivasavan.com/experiments](https://ravivasavan.com/experiments/).** It is served by the `ravivasavan.com` Cloudflare Worker, on the same connection as the rest of the site. GitHub Pages is the origin the Worker fetches. `play.ravivasavan.com` only redirects.
+>
+> **Art to share lives at [ravivasavan.com/play](https://ravivasavan.com/play/).** That is Drift. It is not on the experiments timeline.
 
 Experiments, out in the open.
 
@@ -21,6 +23,16 @@ The `experiments/` directory in this tree is a legacy public URL (`/experiments/
 ## Teletext has one home
 
 The play is [`20260817/teletext/`](20260817/teletext/), built from [`poc/teletext/`](poc/teletext/). The timeline entry uses that date. The 4 August and 10 August folders were redirects to it, and they are gone.
+
+## Where a push shows up
+
+| Public URL | What it is |
+|---|---|
+| `ravivasavan.com/experiments/` | This timeline, and every vibecoded play under it |
+| `ravivasavan.com/experiments/<YYYYMMDD>/<slug>/` | One play |
+| `ravivasavan.com/play/` | Drift, the image and motion share |
+
+Files in this repo stay at the root (`/assets`, `/<YYYYMMDD>/<slug>`). The Worker prefixes them when it serves the page. Drift's production base is `/play/`; the other Vite projects build with an `/experiments/…` base. `play.ravivasavan.com` and `/experiments/20260922/drift/` redirect to `/play/`.
 
 ## Adding an experiment
 
@@ -63,6 +75,6 @@ Each `poc/<slug>/.gitignore` still ignores `node_modules/` and `dist/` for that 
 
 ## Plumbing
 
-- DNS: Cloudflare, `CNAME play.ravivasavan.com → ravivasavan.github.io` (DNS-only so GitHub can provision TLS)
-- Custom domain + HTTPS: repo Settings → Pages
+- Origin: GitHub Pages from `main`. The Worker on `ravivasavan.com` fetches it and publishes `/experiments/` and `/play/`.
+- `play.ravivasavan.com` is a redirect, not a site.
 - `.nojekyll` keeps GitHub from running Jekyll over the files

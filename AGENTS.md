@@ -1,6 +1,6 @@
 # AGENTS.md — how a play is allowed to look
 
-The GitHub repository is **experiments** (it was `ravivasavan/play`). The website and the product stay **play**: [play.ravivasavan.com](https://play.ravivasavan.com), `play.css`, titles of the form `Slug — play`.
+The GitHub repository is **experiments** (it was `ravivasavan/play`). Vibecoded plays are published at [ravivasavan.com/experiments](https://ravivasavan.com/experiments/). Drift, the art share, is [ravivasavan.com/play](https://ravivasavan.com/play/). `play.css` and titles of the form `Slug — play` stay as they are.
 
 Instructions for any agent working in this repo: Claude Code, Codex, Cursor, a
 sub-agent, a human in a hurry. `CLAUDE.md` imports this file; there is one set
@@ -288,7 +288,7 @@ Use the `.glass` class; do not compose it by hand.
 - The mount race: delay the engine script ~1.5s and confirm the panel still
   opens on the engine's state.
 - A deploy is confirmed by grepping the served page for a string unique to the
-  new build (`curl -sS "https://play.ravivasavan.com/…?cb=$RANDOM"`), not by
+  new build (`curl -sS "https://ravivasavan.com/experiments/…?cb=$RANDOM"`), not by
   polling the Pages builds API — it lies.
 - Run CHROME.md §8, the per-page checklist, and mean it.
 

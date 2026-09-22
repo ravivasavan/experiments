@@ -124,10 +124,10 @@ level 1; read it before touching this section.
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>SLUG — play</title>
   <meta name="description" content="ONE SENTENCE, PAGE-SPECIFIC.">
-  <link rel="canonical" href="https://play.ravivasavan.com/YYYYMMDD/SLUG/">
+  <link rel="canonical" href="https://ravivasavan.com/experiments/YYYYMMDD/SLUG/">
   <meta property="og:title" content="SLUG — play">
   <meta property="og:description" content="ONE SENTENCE, PAGE-SPECIFIC.">
-  <meta property="og:url" content="https://play.ravivasavan.com/YYYYMMDD/SLUG/">
+  <meta property="og:url" content="https://ravivasavan.com/experiments/YYYYMMDD/SLUG/">
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary">
   <meta name="theme-color" id="theme-color" content="#fff5f5">
@@ -192,7 +192,7 @@ At the very end of `<body>`, in this order:
   <script src="/assets/play.js" defer></script>
   <script src="https://ravivasavan.com/chrome/v1/chrome.js" defer
           data-surface="play"
-          data-back="https://play.ravivasavan.com"
+          data-back="https://ravivasavan.com/experiments"
           data-back-label="Back to Play"></script>
   <script src="./whatever-this-page-does.js" defer></script>   <!-- or an inline defer block -->
 </body>
