@@ -315,26 +315,6 @@
       "media": [
         {
           "type": "image",
-          "src": "media/bag-close-ups-1.webp",
-          "full": "media/bag-close-ups-1-full.webp",
-          "original": "https://freight.cargo.site/t/original/i/1de78239eb05f6d5e7514ceba9a3e2cc48fa20a197b093fb0faa42ffbb689d89/20200101_OctanePlay_003-PsyPlant_A.jpg",
-          "width": 4000,
-          "height": 4000,
-          "alt": "Bag Close Ups \u00b7 1",
-          "filename": "2026-02-11-BagCloseUps-Renders-001A"
-        },
-        {
-          "type": "image",
-          "src": "media/bag-close-ups-2.webp",
-          "full": "media/bag-close-ups-2-full.webp",
-          "original": "https://freight.cargo.site/t/original/i/20d3e4721e3d0c2d6733195edf4125684d6b010af7df3767be7f956d50a40655/20210102_TranslucentPot_001B.jpg",
-          "width": 2160,
-          "height": 2880,
-          "alt": "Bag Close Ups \u00b7 2",
-          "filename": "2026-02-11-BagCloseUps-Renders-002A"
-        },
-        {
-          "type": "image",
           "src": "media/bag-close-ups-3.webp",
           "full": "media/bag-close-ups-3-full.webp",
           "original": "https://freight.cargo.site/t/original/i/5d2faa3558788fcb4526dd6ba870644e6cb1a080361ffa5bf116a552669f0ee3/20221109-Puffy-Bag-CloseUpA.png",
