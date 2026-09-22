@@ -1,0 +1,422 @@
+{
+  "source": "https://ravivasavan.cargo.site/play",
+  "scraped": "Cargo-scrape-2026-09-22",
+  "projects": [
+    {
+      "id": "op-1-field",
+      "title": "OP-1 Field",
+      "source": "https://ravivasavan.cargo.site/OP-1-Field",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20231016-OP1-Field-174547-Angle0040-4K.webp",
+          "full": "media/20231016-OP1-Field-174547-Angle0040-4K-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/OP-1-Field/20231016_OP1_Field_174547_Angle0040_4K.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "OP-1 Field \u00b7 1",
+          "filename": "20231016-OP1-Field-174547-Angle0040-4K"
+        },
+        {
+          "type": "image",
+          "src": "media/20231016-OP1-Field-193215-Macro0040-4K.webp",
+          "full": "media/20231016-OP1-Field-193215-Macro0040-4K-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/OP-1-Field/20231016_OP1_Field_193215_Macro0040_4K.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "OP-1 Field \u00b7 2",
+          "filename": "20231016-OP1-Field-193215-Macro0040-4K"
+        },
+        {
+          "type": "image",
+          "src": "media/20231016-OP1-Field-201521-Top0040-4K.webp",
+          "full": "media/20231016-OP1-Field-201521-Top0040-4K-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/OP-1-Field/20231016_OP1_Field_201521_Top0040_4K.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "OP-1 Field \u00b7 3",
+          "filename": "20231016-OP1-Field-201521-Top0040-4K"
+        }
+      ]
+    },
+    {
+      "id": "big-bang",
+      "title": "Big Bang",
+      "source": "https://ravivasavan.cargo.site/Big-Bang",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20230504-Big-Bang-0416.webp",
+          "full": "media/20230504-Big-Bang-0416-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Big-Bang/20230504-Big-Bang-0416.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Big Bang \u00b7 1",
+          "filename": "20230504-Big-Bang-0416"
+        }
+      ]
+    },
+    {
+      "id": "twisting-ropes",
+      "title": "Twisting Ropes",
+      "source": "https://ravivasavan.cargo.site/Twisting-Ropes",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20230408-Twisting-Ropes-B0002.webp",
+          "full": "media/20230408-Twisting-Ropes-B0002-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Twisting-Ropes/20230408-Twisting-Ropes-B0002.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Twisting Ropes \u00b7 1",
+          "filename": "20230408-Twisting-Ropes-B0002"
+        },
+        {
+          "type": "image",
+          "src": "media/20230408-Twisting-Ropes-0013.webp",
+          "full": "media/20230408-Twisting-Ropes-0013-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Twisting-Ropes/20230408-Twisting-Ropes0013.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Twisting Ropes \u00b7 2",
+          "filename": "20230408-Twisting-Ropes-0013"
+        }
+      ]
+    },
+    {
+      "id": "cap",
+      "title": "Cap",
+      "source": "https://ravivasavan.cargo.site/Cap",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20230401-Cap-Cushion.webp",
+          "full": "media/20230401-Cap-Cushion-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Cap/20230401-Cap-Cushion.png",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Cap \u00b7 1",
+          "filename": "20230401-Cap-Cushion"
+        }
+      ]
+    },
+    {
+      "id": "trunk-growth",
+      "title": "Trunk Growth",
+      "source": "https://ravivasavan.cargo.site/Trunk-Growth",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20230313-Trunk-Growth-Wide.webp",
+          "full": "media/20230313-Trunk-Growth-Wide-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Trunk-Growth/20230313-Trunk-Growth-Wide.png",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Trunk Growth \u00b7 1",
+          "filename": "20230313-Trunk-Growth-Wide"
+        },
+        {
+          "type": "video",
+          "src": "media/20230313-Trunk-Growth.mp4",
+          "poster": "media/20230313-Trunk-Growth.webp",
+          "full": "media/20230313-Trunk-Growth.mp4",
+          "original": "https://vimeo.com/807482820/1dc574e80b",
+          "width": 1920,
+          "height": 1080,
+          "alt": "Trunk Growth",
+          "filename": "20230313-Trunk-Growth"
+        }
+      ]
+    },
+    {
+      "id": "movas-sign",
+      "title": "Movas Sign",
+      "source": "https://ravivasavan.cargo.site/Movas-Sign",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20230312-Hector-s-Signage-Hardsurface-Angle-a.webp",
+          "full": "media/20230312-Hector-s-Signage-Hardsurface-Angle-a-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Angle_a.jpg",
+          "width": 2160,
+          "height": 2700,
+          "alt": "Movas Sign \u00b7 1",
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Angle-a"
+        },
+        {
+          "type": "image",
+          "src": "media/20230312-Hector-s-Signage-Hardsurface-Detail-a.webp",
+          "full": "media/20230312-Hector-s-Signage-Hardsurface-Detail-a-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Detail_a.jpg",
+          "width": 2160,
+          "height": 2700,
+          "alt": "Movas Sign \u00b7 2",
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Detail-a"
+        },
+        {
+          "type": "image",
+          "src": "media/20230312-Hector-s-Signage-Hardsurface-Details-a.webp",
+          "full": "media/20230312-Hector-s-Signage-Hardsurface-Details-a-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Details_a.jpg",
+          "width": 2160,
+          "height": 2700,
+          "alt": "Movas Sign \u00b7 3",
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Details-a"
+        },
+        {
+          "type": "image",
+          "src": "media/20230312-Hector-s-Signage-Hardsurface-Details-b.webp",
+          "full": "media/20230312-Hector-s-Signage-Hardsurface-Details-b-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Details_b.jpg",
+          "width": 2160,
+          "height": 2700,
+          "alt": "Movas Sign \u00b7 4",
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Details-b"
+        },
+        {
+          "type": "image",
+          "src": "media/20230312-Hector-s-Signage-Hardsurface-Details-c.webp",
+          "full": "media/20230312-Hector-s-Signage-Hardsurface-Details-c-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Details_c.jpg",
+          "width": 2160,
+          "height": 2700,
+          "alt": "Movas Sign \u00b7 5",
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Details-c"
+        },
+        {
+          "type": "image",
+          "src": "media/20230312-Hector-s-Signage-Hardsurface-Front-a.webp",
+          "full": "media/20230312-Hector-s-Signage-Hardsurface-Front-a-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Front_a.jpg",
+          "width": 2160,
+          "height": 2700,
+          "alt": "Movas Sign \u00b7 6",
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Front-a"
+        }
+      ]
+    },
+    {
+      "id": "custom-sideboard",
+      "title": "Custom Sideboard",
+      "source": "https://ravivasavan.cargo.site/Custom-Sideboard",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20230302-TV-Unit-Design-Angle-a.webp",
+          "full": "media/20230302-TV-Unit-Design-Angle-a-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Custom-Sideboard/20230302-TV-Unit-Design_Angle_a.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Custom Sideboard \u00b7 1",
+          "filename": "20230302-TV-Unit-Design-Angle-a"
+        },
+        {
+          "type": "image",
+          "src": "media/20230302-TV-Unit-Design-Caddy-a.webp",
+          "full": "media/20230302-TV-Unit-Design-Caddy-a-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Custom-Sideboard/20230302-TV-Unit-Design_Caddy_a.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Custom Sideboard \u00b7 2",
+          "filename": "20230302-TV-Unit-Design-Caddy-a"
+        },
+        {
+          "type": "image",
+          "src": "media/20230302-TV-Unit-Design-Close-Up-a.webp",
+          "full": "media/20230302-TV-Unit-Design-Close-Up-a-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Custom-Sideboard/20230302-TV-Unit-Design_Close-Up_a.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Custom Sideboard \u00b7 3",
+          "filename": "20230302-TV-Unit-Design-Close-Up-a"
+        },
+        {
+          "type": "image",
+          "src": "media/20230302-TV-Unit-Design-Front-a.webp",
+          "full": "media/20230302-TV-Unit-Design-Front-a-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Custom-Sideboard/20230302-TV-Unit-Design_Front_a.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Custom Sideboard \u00b7 4",
+          "filename": "20230302-TV-Unit-Design-Front-a"
+        }
+      ]
+    },
+    {
+      "id": "weight-of-world-1",
+      "title": "Weight of the World",
+      "source": "https://ravivasavan.cargo.site/Weight-of-the-World",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20221129-Weight-of-the-World-Exp03.webp",
+          "full": "media/20221129-Weight-of-the-World-Exp03-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Weight-of-World-1/20221129-Weight-of-the-World-Exp03.png",
+          "width": 2160,
+          "height": 3840,
+          "alt": "Weight of the World \u00b7 1",
+          "filename": "20221129-Weight-of-the-World-Exp03"
+        }
+      ]
+    },
+    {
+      "id": "doodads-sculpture",
+      "title": "Doodads Sculpture",
+      "source": "https://ravivasavan.cargo.site/Doodads-Sculpture",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20221128-Random-Sculpture.webp",
+          "full": "media/20221128-Random-Sculpture-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Doodads-Sculpture/20221128-Random-Sculpture.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Doodads Sculpture \u00b7 1",
+          "filename": "20221128-Random-Sculpture"
+        }
+      ]
+    },
+    {
+      "id": "surface-ikebana",
+      "title": "Surface Ikebana",
+      "source": "https://ravivasavan.cargo.site/Surface-Ikebana",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20221129-Surface-Ikebana.webp",
+          "full": "media/20221129-Surface-Ikebana-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Surface-Ikebana/20221129-Surface-Ikebana.jpg",
+          "width": 2468,
+          "height": 3840,
+          "alt": "Surface Ikebana \u00b7 1",
+          "filename": "20221129-Surface-Ikebana"
+        }
+      ]
+    },
+    {
+      "id": "flowers-mirrors",
+      "title": "Flowers & Mirrors",
+      "source": "https://ravivasavan.cargo.site/Flowers-Mirrors",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20221109-Flowers-and-Mirrors-002.webp",
+          "full": "media/20221109-Flowers-and-Mirrors-002-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Flowers-Mirrors/20221109-Flowers-and-Mirrors-002.jpg",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Flowers & Mirrors \u00b7 1",
+          "filename": "20221109-Flowers-and-Mirrors-002"
+        }
+      ]
+    },
+    {
+      "id": "bag",
+      "title": "Bag",
+      "source": "https://ravivasavan.cargo.site/Bag",
+      "media": [
+        {
+          "type": "video",
+          "src": "media/20221109-Bag.mp4",
+          "poster": "media/20221109-Bag.webp",
+          "full": "media/20221109-Bag.mp4",
+          "original": "https://vimeo.com/768788839/a95a38a678",
+          "width": 2160,
+          "height": 2160,
+          "alt": "Bag",
+          "filename": "20221109-Bag"
+        }
+      ]
+    },
+    {
+      "id": "bag-close-ups",
+      "title": "Bag Close Ups",
+      "source": "https://ravivasavan.cargo.site/Bag-Close-Ups",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20221109-Puffy-Bag-CloseUpA.webp",
+          "full": "media/20221109-Puffy-Bag-CloseUpA-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Bag-Close-Ups/20221109-Puffy-Bag-CloseUpA.png",
+          "width": 2160,
+          "height": 2160,
+          "alt": "Bag Close Ups \u00b7 1",
+          "filename": "20221109-Puffy-Bag-CloseUpA"
+        },
+        {
+          "type": "image",
+          "src": "media/20221109-Puffy-Bag-CloseUpB.webp",
+          "full": "media/20221109-Puffy-Bag-CloseUpB-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Bag-Close-Ups/20221109-Puffy-Bag-CloseUpB.png",
+          "width": 2160,
+          "height": 2160,
+          "alt": "Bag Close Ups \u00b7 2",
+          "filename": "20221109-Puffy-Bag-CloseUpB"
+        },
+        {
+          "type": "image",
+          "src": "media/20221109-Puffy-Bag-CloseUpC.webp",
+          "full": "media/20221109-Puffy-Bag-CloseUpC-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Bag-Close-Ups/20221109-Puffy-Bag-CloseUpC.png",
+          "width": 2160,
+          "height": 2160,
+          "alt": "Bag Close Ups \u00b7 3",
+          "filename": "20221109-Puffy-Bag-CloseUpC"
+        }
+      ]
+    },
+    {
+      "id": "falling-figure",
+      "title": "Falling Figure",
+      "source": "https://ravivasavan.cargo.site/Falling-Figure",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20220115-LAPhil-FallingFigure-Test0002.webp",
+          "full": "media/20220115-LAPhil-FallingFigure-Test0002-full.webp",
+          "original": "Cargo-scrape-2026-09-22/sources/Falling-Figure/20220115_LAPhil_FallingFigure-Test0002.jpg",
+          "width": 5120,
+          "height": 2880,
+          "alt": "Falling Figure \u00b7 1",
+          "filename": "20220115-LAPhil-FallingFigure-Test0002"
+        }
+      ]
+    },
+    {
+      "id": "koto-faces",
+      "title": "Koto Faces",
+      "source": "https://ravivasavan.cargo.site/Koto-Faces",
+      "media": [
+        {
+          "type": "video",
+          "src": "media/20221109-Koto-Faces.mp4",
+          "poster": "media/20221109-Koto-Faces.webp",
+          "full": "media/20221109-Koto-Faces.mp4",
+          "original": "Cargo-scrape-2026-09-22/sources/Koto-Faces/Comp-1.mp4",
+          "width": 1080,
+          "height": 1920,
+          "alt": "Koto Faces",
+          "filename": "20221109-Koto-Faces"
+        }
+      ]
+    },
+    {
+      "id": "circular-sideboard",
+      "title": "Circular Sideboard",
+      "source": "https://ravivasavan.cargo.site/Circular-Sideboard",
+      "media": [
+        {
+          "type": "video",
+          "src": "media/20231008-Circular-Sidetable.mp4",
+          "poster": "media/20231008-Circular-Sidetable.webp",
+          "full": "media/20231008-Circular-Sidetable.mp4",
+          "original": "https://vimeo.com/872448900/4de1e39907",
+          "width": 1920,
+          "height": 1080,
+          "alt": "Circular Sideboard",
+          "filename": "20231008-Circular-Sidetable"
+        }
+      ]
+    }
+  ]
+}

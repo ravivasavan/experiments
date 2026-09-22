@@ -10,7 +10,7 @@
 >
 > **The public site is [ravivasavan.com/experiments](https://ravivasavan.com/experiments/).** It is served by the `ravivasavan.com` Cloudflare Worker, on the same connection as the rest of the site. GitHub Pages at `ravivasavan.github.io/experiments` is the origin the Worker fetches.
 >
-> **Art to share lives at [ravivasavan.com/play](https://ravivasavan.com/play/).** Drift is also its own experiment at [ravivasavan.com/experiments/20260922/drift](https://ravivasavan.com/experiments/20260922/drift/). The two publishes stay separate.
+> **Art to share lives at [ravivasavan.com/play](https://ravivasavan.com/play/).** That folder is its own copy, graduated from Drift. The experiment, with its dials and dock, stays at [ravivasavan.com/experiments/20260922/drift](https://ravivasavan.com/experiments/20260922/drift/).
 
 Experiments, out in the open.
 
@@ -30,10 +30,10 @@ The play is [`20260817/teletext/`](20260817/teletext/), built from [`poc/teletex
 |---|---|
 | `ravivasavan.com/experiments/` | This timeline, and every vibecoded play under it |
 | `ravivasavan.com/experiments/<YYYYMMDD>/<slug>/` | One play |
-| `ravivasavan.com/experiments/20260922/drift/` | Drift, the experiment |
-| `ravivasavan.com/play/` | The same collection, published on its own for sharing |
+| `ravivasavan.com/experiments/20260922/drift/` | Drift, the experiment. Dialkit and the bottom dock stay here |
+| `ravivasavan.com/play/` | The art share, in `play/`. The same collection, without the experiment's dials or dock |
 
-Files in this repo stay at the root (`/assets`, `/<YYYYMMDD>/<slug>`). The Worker prefixes them when it serves an experiment. `/play/` is rewritten on its own and is not the experiment's URL. Drift's Vite base is `/experiments/20260922/drift/`.
+Files in this repo stay at the root (`/assets`, `/<YYYYMMDD>/<slug>`, `/play`). The Worker prefixes experiment paths when it serves them. `/play/` is the `play/` folder and is not the experiment's URL. Drift's Vite base is `/experiments/20260922/drift/`. The art share is plain files and has no build.
 
 ## Adding an experiment
 

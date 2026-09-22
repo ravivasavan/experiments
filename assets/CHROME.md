@@ -16,7 +16,7 @@ out of the page.**
 
 - Level 1 — the package: a 64px glass avatar pill at the top left that expands
   to the name and "‹ Back to Play", and a menu pill at the top right (About ·
-  Play · theme). Both sit at its `--nav-margin` (40 / 16 / 12 by fold), which is
+  Experiments · Play, alphabetical, with the theme in its own pill). Both sit at its `--nav-margin` (40 / 16 / 12 by fold), which is
   play's `--chrome-top`.
 - A full-width hairline at `--chrome-rule` (144 / 96 / 88) — ours.
 - Level 2 — the experiment's own 44px glass tool pills, split by what they do.
@@ -224,7 +224,7 @@ What it draws: an **avatar pill** at the top left — a 64px glass circle at res
 that expands on hover or keyboard focus to "Ravi Vasavan" and a role line, which
 on an experiment reads "‹ Back to Play" and links to `data-back` (on the landing
 page it is his titles and links home). Touch never expands it. And a **menu
-pill** at the top right — About · Play · theme — whose chip for the current
+pill** at the top right — About · Experiments · Play — whose chip for the current
 surface carries `aria-current="page"`. The theme chip owns the cycle day → night
 → system → circadian, persisted to `localStorage['theme']`: the same key on
 every *.ravivasavan.com surface, so the choice follows the visitor across them.

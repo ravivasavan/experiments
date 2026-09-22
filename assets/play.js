@@ -157,9 +157,19 @@
     /* Say where the view is: the level, where a page has somewhere to print it,
        and the Fit pill lights whenever there is something to go back from — so
        "am I zoomed?" is answerable without a readout at all. */
+    function shownScale() {
+      var media = el.querySelector('img, video');
+      if (!media) return null;
+      var native = parseFloat(media.getAttribute('data-native-width'));
+      if (!native) native = media.naturalWidth || media.videoWidth || 0;
+      var shown = media.getBoundingClientRect().width;
+      if (!native || !shown) return null;
+      return shown / native;
+    }
     function announce() {
       var out = document.querySelector('[data-view-level]');
-      if (out) out.textContent = Math.round(v.z * 100) + '%';
+      var scale = shownScale();
+      if (out) out.textContent = Math.round((scale == null ? v.z : scale) * 100) + '%';
       var off = v.z !== 1 || !!v.x || !!v.y;
       document.querySelectorAll('[data-view="fit"]').forEach(function (b) {
         b.classList.toggle('is-on', off);
