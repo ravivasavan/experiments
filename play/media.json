@@ -9,33 +9,33 @@
       "media": [
         {
           "type": "image",
-          "src": "media/20231016-OP1-Field-174547-Angle0040-4K.webp",
-          "full": "media/20231016-OP1-Field-174547-Angle0040-4K-full.webp",
+          "src": "media/20231016-OP1-Field-Angle0040.webp",
+          "full": "media/20231016-OP1-Field-Angle0040-full.webp",
           "original": "Cargo-scrape-2026-09-22/sources/OP-1-Field/20231016_OP1_Field_174547_Angle0040_4K.jpg",
           "width": 3840,
           "height": 2160,
           "alt": "OP-1 Field \u00b7 1",
-          "filename": "20231016-OP1-Field-174547-Angle0040-4K"
+          "filename": "20231016-OP1-Field-Angle0040"
         },
         {
           "type": "image",
-          "src": "media/20231016-OP1-Field-193215-Macro0040-4K.webp",
-          "full": "media/20231016-OP1-Field-193215-Macro0040-4K-full.webp",
+          "src": "media/20231016-OP1-Field-Macro0040.webp",
+          "full": "media/20231016-OP1-Field-Macro0040-full.webp",
           "original": "Cargo-scrape-2026-09-22/sources/OP-1-Field/20231016_OP1_Field_193215_Macro0040_4K.jpg",
           "width": 3840,
           "height": 2160,
           "alt": "OP-1 Field \u00b7 2",
-          "filename": "20231016-OP1-Field-193215-Macro0040-4K"
+          "filename": "20231016-OP1-Field-Macro0040"
         },
         {
           "type": "image",
-          "src": "media/20231016-OP1-Field-201521-Top0040-4K.webp",
-          "full": "media/20231016-OP1-Field-201521-Top0040-4K-full.webp",
+          "src": "media/20231016-OP1-Field-Top0040.webp",
+          "full": "media/20231016-OP1-Field-Top0040-full.webp",
           "original": "Cargo-scrape-2026-09-22/sources/OP-1-Field/20231016_OP1_Field_201521_Top0040_4K.jpg",
           "width": 3840,
           "height": 2160,
           "alt": "OP-1 Field \u00b7 3",
-          "filename": "20231016-OP1-Field-201521-Top0040-4K"
+          "filename": "20231016-OP1-Field-Top0040"
         }
       ]
     },
