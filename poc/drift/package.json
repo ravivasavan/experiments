@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "verify": "node scripts/verify.mjs && node scripts/verify-drag.mjs && node scripts/verify-gallery.mjs"
+    "verify": "node scripts/verify.mjs && node scripts/verify-drag.mjs && node scripts/verify-gallery.mjs && node scripts/verify-motion.mjs"
   },
   "dependencies": {
     "dialkit": "1.4.3",

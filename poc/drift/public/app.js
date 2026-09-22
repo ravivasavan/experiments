@@ -14,6 +14,7 @@
   let layoutFrame = 0, layoutWidth = 0, layoutHeight = 0, lastStatus = '', loaded = false, manual = false, keyboardMode = false;
   const offsets = new Map();
   let drag = null, suppressClick = null;
+  let mediaMotion = null, galleryScroll = 0;
   const asset = (path) => new URL(path, new URL(window.driftBase, location.href)).href;
   const mod = (n, d) => ((n % d) + d) % d;
   const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
@@ -318,7 +319,46 @@
     }
     grid.replaceChildren(...rows);
   }
+  // Carry the displayed image between its measured thumbnail and full-view
+  // positions. A reversal snapshots the current presentation before cancelling.
+  function mediaSnapshot(element) {
+    const source = mediaMotion?.node || element;
+    if (!source) return null;
+    const bounds = source.getBoundingClientRect();
+    if (!bounds.width || !bounds.height) return null;
+    const radius = parseFloat(getComputedStyle(source).borderTopLeftRadius) || 0;
+    return { node: source.cloneNode(true), bounds, radius: radius * bounds.width / source.offsetWidth };
+  }
+  function stopMediaMotion() {
+    if (!mediaMotion) return;
+    const motion = mediaMotion; mediaMotion = null;
+    motion.animation.cancel(); motion.node.remove();
+    motion.target.style.visibility = '';
+  }
+  reduced.addEventListener('change', stopMediaMotion);
+  function moveMedia(snapshot, target, returning = false) {
+    stopMediaMotion();
+    if (!snapshot || !target || reduced.matches) return;
+    const to = target.getBoundingClientRect(), from = snapshot.bounds;
+    if (!to.width || !to.height) return;
+    const node = snapshot.node;
+    node.removeAttribute('style'); node.removeAttribute('id');
+    node.className = 'drift-transition-media'; node.setAttribute('aria-hidden', 'true');
+    node.style.left = `${to.x}px`; node.style.top = `${to.y}px`;
+    node.style.width = `${to.width}px`; node.style.height = `${to.height}px`;
+    const radius = parseFloat(getComputedStyle(target).borderTopLeftRadius) || 0;
+    node.style.borderRadius = `${radius}px`;
+    viewer.append(node); target.style.visibility = 'hidden';
+    const animation = node.animate([
+      { transform: `translate(${from.x - to.x}px, ${from.y - to.y}px) scale(${from.width / to.width}, ${from.height / to.height})`, borderRadius: `${snapshot.radius * to.width / from.width}px` },
+      { transform: 'none', borderRadius: `${radius}px` },
+    ], { duration: returning ? 180 : 220, easing: 'cubic-bezier(.25,1,.5,1)', fill: 'both' });
+    mediaMotion = { node, target, animation };
+    animation.onfinish = () => { if (mediaMotion?.animation === animation) stopMediaMotion(); };
+  }
   function showGrid(focus = false) {
+    const from = galleryMode === 'single' ? mediaSnapshot($('detail-media').querySelector('img, video')) : null;
+    stopMediaMotion();
     detailVersion++; galleryMode = 'grid';
     $('detail-media').querySelector('video')?.pause(); $('detail-media').replaceChildren();
     document.querySelector('[data-view="fit"]').click();
@@ -329,15 +369,24 @@
       card.setAttribute('aria-label', `Open ${selected.title}, ${index + 1} of ${selected.media.length}`);
       const image = preview(media, true); image.className = 'drift-expanded-media';
       card.append(image);
-      card.addEventListener('click', () => { slide = index; showSlide(card.getBoundingClientRect()); $('gallery-mode').focus({ preventScroll: true }); });
+      card.addEventListener('click', () => { slide = index; showSlide(); $('gallery-mode').focus({ preventScroll: true }); });
       return card;
     });
     $('group-grid').replaceChildren(...cards); sizeGrid();
+    $('group-view').scrollTop = galleryScroll;
+    if (from) {
+      const bounds = cards[slide].getBoundingClientRect();
+      if (bounds.bottom < 0 || bounds.top > innerHeight) cards[slide].scrollIntoView({ block: 'nearest', behavior: 'instant' });
+      moveMedia(from, cards[slide].querySelector('img'), true);
+    }
     viewer.setAttribute('aria-label', `${selected.title} gallery`);
     viewControls();
     if (focus) cards[slide].focus({ preventScroll: true });
   }
-  function showSlide(from) {
+  function showSlide(source = null) {
+    const from = source || (galleryMode === 'grid' ? mediaSnapshot($('group-grid').querySelectorAll('.drift-group-card img')[slide]) : null);
+    if (galleryMode === 'grid') galleryScroll = $('group-view').scrollTop;
+    stopMediaMotion();
     galleryMode = 'single';
     $('group-view').hidden = true; $('detail-stage').hidden = false;
     const media = selected.media[slide], version = ++detailVersion;
@@ -352,22 +401,28 @@
     } else {
       el.alt = media.alt || selected.title;
       const full = new Image(); full.src = asset(media.full);
-      full.onload = () => { if (version === detailVersion) el.src = full.src; };
-      full.onerror = () => { if (version === detailVersion) $('work-name').title = `${media.filename} (preview)`; };
+      // Decode off-DOM and keep the preview until spatial motion settles.
+      // Replacing with the decoded node avoids a blank paint from changing src.
+      full.decode().then(async () => {
+        if (version !== detailVersion || !el.isConnected) return;
+        const motion = mediaMotion;
+        if (motion) {
+          await motion.animation.finished.catch(() => {});
+          if (mediaMotion === motion) stopMediaMotion();
+        }
+        if (version !== detailVersion || !el.isConnected) return;
+        full.className = el.className; full.alt = el.alt; full.draggable = false;
+        full.style.cssText = el.style.cssText;
+        el.replaceWith(full);
+      }).catch(() => { if (version === detailVersion) $('work-name').title = `${media.filename} (preview)`; });
     }
     frame.append(el);
     $('detail-media').replaceChildren(frame); sizeDetail();
-    if (from && !reduced.matches) {
-      const to = frame.getBoundingClientRect();
-      frame.animate([
-        { transform: `translate(${from.x + from.width / 2 - to.x - to.width / 2}px, ${from.y + from.height / 2 - to.y - to.height / 2}px) scale(${from.width / to.width})` },
-        { transform: 'none' },
-      ], { duration: 240, easing: 'cubic-bezier(.2,.8,.2,1)' });
-    }
+    moveMedia(from, el);
     viewer.setAttribute('aria-label', selected.title); viewControls();
   }
   function open(project, index, tile) {
-    const from = tile.getBoundingClientRect();
+    stopMediaMotion(); galleryScroll = 0;
     selected = project; slide = index; returnFocus = tile;
     field.inert = true; viewer.hidden = false; dialog.hidden = false;
     dialog.append(dock); dialog.setAttribute('aria-label', `${project.title} gallery`);
@@ -378,11 +433,12 @@
     $('close').hidden = $('work-name').hidden = $('work-count').hidden = false;
     $('detail-rail').hidden = false;
     $('shuffle').hidden = $('reset').hidden = true;
-    if (project.media.length > 1) showGrid(); else showSlide(from);
+    if (project.media.length > 1) showGrid(); else showSlide(mediaSnapshot(tile.querySelector('img, video')));
     updateVideos(); (project.media.length > 1 ? $('gallery-mode') : $('work-name')).focus({ preventScroll: true });
   }
   function close() {
     if (!selected) return;
+    stopMediaMotion();
     detailVersion++; $('detail-media').querySelector('video')?.pause();
     $('detail-media').replaceChildren(); $('group-grid').replaceChildren(); selected = null;
     viewer.hidden = true;
@@ -490,7 +546,7 @@
       }
     }
   });
-  window.addEventListener('resize', () => { if (!selected) queueLayout(); else if (galleryMode === 'single') sizeDetail(); else sizeGrid(); });
+  window.addEventListener('resize', () => { stopMediaMotion(); if (!selected) queueLayout(); else if (galleryMode === 'single') sizeDetail(); else sizeGrid(); });
   window.addEventListener('blur', () => { finishDrag(true); held = false; });
   document.addEventListener('visibilitychange', () => { lastFrame = 0; takeover(); updateVideos(); });
   reduced.addEventListener('change', () => { if (reduced.matches) playing = false; playbackFace(); updateVideos(); });
