@@ -85,6 +85,20 @@
         "horizon.webp",
         "aperture.webp"
       ]
+    },
+    {
+      "slug": "drift",
+      "name": "Drift",
+      "date": "20260922",
+      "description": "A drifting grid of images, motion studies and things in progress",
+      "status": "live",
+      "tech": "vanilla JS, native scroll, DialKit",
+      "glyph": "grid",
+      "shots": [
+        "day.webp",
+        "night.webp",
+        "gallery.webp"
+      ]
     }
   ]
 }

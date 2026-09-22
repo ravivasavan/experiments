@@ -1,6 +1,6 @@
 # AGENTS.md — how a play is allowed to look
 
-The GitHub repository is **experiments** (it was `ravivasavan/play`). Vibecoded plays are published at [ravivasavan.com/experiments](https://ravivasavan.com/experiments/). Drift, the art share, is [ravivasavan.com/play](https://ravivasavan.com/play/). `play.css` and titles of the form `Slug — play` stay as they are.
+The GitHub repository is **experiments** (it was `ravivasavan/play`). Vibecoded plays are published at [ravivasavan.com/experiments](https://ravivasavan.com/experiments/). Drift the experiment is [ravivasavan.com/experiments/20260922/drift](https://ravivasavan.com/experiments/20260922/drift/). The art share at [ravivasavan.com/play](https://ravivasavan.com/play/) is a separate publish. `play.css` and titles of the form `Slug — play` stay as they are.
 
 Instructions for any agent working in this repo: Claude Code, Codex, Cursor, a
 sub-agent, a human in a hurry. `CLAUDE.md` imports this file; there is one set

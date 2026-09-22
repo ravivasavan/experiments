@@ -10,7 +10,7 @@
 >
 > **The public site is [ravivasavan.com/experiments](https://ravivasavan.com/experiments/).** It is served by the `ravivasavan.com` Cloudflare Worker, on the same connection as the rest of the site. GitHub Pages is the origin the Worker fetches. `play.ravivasavan.com` only redirects.
 >
-> **Art to share lives at [ravivasavan.com/play](https://ravivasavan.com/play/).** That is Drift. It is not on the experiments timeline.
+> **Art to share lives at [ravivasavan.com/play](https://ravivasavan.com/play/).** Drift is also its own experiment at [ravivasavan.com/experiments/20260922/drift](https://ravivasavan.com/experiments/20260922/drift/). The two publishes stay separate.
 
 Experiments, out in the open.
 
@@ -30,9 +30,10 @@ The play is [`20260817/teletext/`](20260817/teletext/), built from [`poc/teletex
 |---|---|
 | `ravivasavan.com/experiments/` | This timeline, and every vibecoded play under it |
 | `ravivasavan.com/experiments/<YYYYMMDD>/<slug>/` | One play |
-| `ravivasavan.com/play/` | Drift, the image and motion share |
+| `ravivasavan.com/experiments/20260922/drift/` | Drift, the experiment |
+| `ravivasavan.com/play/` | The same collection, published on its own for sharing |
 
-Files in this repo stay at the root (`/assets`, `/<YYYYMMDD>/<slug>`). The Worker prefixes them when it serves the page. Drift's production base is `/play/`; the other Vite projects build with an `/experiments/…` base. `play.ravivasavan.com` and `/experiments/20260922/drift/` redirect to `/play/`.
+Files in this repo stay at the root (`/assets`, `/<YYYYMMDD>/<slug>`). The Worker prefixes them when it serves an experiment. `/play/` is rewritten on its own and is not the experiment's URL. Drift's Vite base is `/experiments/20260922/drift/`.
 
 ## Adding an experiment
 
