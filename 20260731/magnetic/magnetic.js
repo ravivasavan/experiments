@@ -18,7 +18,7 @@
      stiffness spring k. Higher snaps harder
      damping   zeta, under 1 so the springs overshoot. 1 is a dead stop
      spread    how far scatter flings them in rotation and scale */
-  const cfg = { tiles: 16, gap: 12, stiffness: 170, damping: 0.78, spread: 1 };
+  const cfg = { tiles: 16, gap: 8, stiffness: 170, damping: 0.78, spread: 1 };
   const rand = (a, b) => a + Math.random() * (b - a);
   const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
@@ -136,7 +136,7 @@
   function makeChrome(barH) {
     return {
       bez: { t: barH, r: 0, b: 0, l: 0 },
-      radius: pick([6, 8, 10, 12]),
+      radius: pick([8, 12]), // 4px grid: radii stay multiples of 4
       tone: pick(['', 'c1', 'c2', 'c3'])
     };
   }

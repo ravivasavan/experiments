@@ -21,7 +21,7 @@ function Controls() {
 
   const controller = useDialKitController('Magnetic', {
     tiles: [opening.tiles ?? 16, 8, 24, 1],
-    gap: [opening.gap ?? 12, 0, 32, 1],
+    gap: [opening.gap ?? 8, 0, 32, 8],
     spring: {
       stiffness: [opening.stiffness ?? 170, 60, 320, 1],
       damping: [opening.damping ?? 0.78, 0.3, 1.2],

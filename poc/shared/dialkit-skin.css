@@ -97,10 +97,12 @@
 }
 /* DialKit bounds its top-left popover's scroll box and lets the top-right one
    grow to its content (and past the panel: the panel is overflow visible), so
-   a long panel ran under the dock. Bound it here: it stops 8px above the
-   dock's 44px pills, whatever the viewport, and scrolls inside. */
+   a long panel ran under the dock. Bound it here: it stops var(--gap) above
+   the dock's var(--tool-size) pills, whatever the viewport, and scrolls
+   inside. Both terms are the shared chrome tokens, read with literal
+   fallbacks since this file loads cross-origin from the ravi package. */
 .dialkit-panel[data-mode="popover"] .dialkit-panel-inner:not([data-collapsed="true"]) {
-  max-height: calc(100vh - var(--chrome-tools) - var(--panel-gap) - 44px - 8px);
+  max-height: calc(100vh - var(--chrome-tools) - var(--panel-gap) - var(--tool-size, 48px) - var(--gap, 8px));
   overflow-y: auto;
 }
 /* DialKit pads its scroll box on three sides and not the fourth, so the last
@@ -110,11 +112,11 @@
 .dialkit-panel[data-mode="popover"] .dialkit-panel-inner:not([data-collapsed="true"]) > .dialkit-folder-root {
   padding-bottom: 12px;
 }
-/* Folded, the dock keeps its 8px pad inside the margin, so the pills sit one
-   pad higher than the desktop rule assumes. */
+/* Folded, the dock keeps its var(--gap) pad inside the margin, so the pills
+   sit one pad higher than the desktop rule assumes. */
 @media (max-width: 900px) {
   .dialkit-panel[data-mode="popover"] .dialkit-panel-inner:not([data-collapsed="true"]) {
-    max-height: calc(100vh - var(--chrome-tools) - var(--panel-gap) - 44px - 8px - 8px);
+    max-height: calc(100vh - var(--chrome-tools) - var(--panel-gap) - var(--tool-size, 48px) - var(--gap, 8px) - var(--gap, 8px));
   }
 }
 
@@ -129,7 +131,7 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 0;
-  border-radius: 14px;
+  border-radius: 16px;
   box-shadow: var(--glass-edge), var(--glass-specular), var(--glass-shadow);
 }
 .dialkit-root .dialkit-select-option[data-selected="true"] {

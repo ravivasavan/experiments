@@ -51,7 +51,7 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  border-radius: 18px;
+  border-radius: 20px;
 }
 
 canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -72,7 +72,7 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
   position: absolute;
   padding: 28px;
   max-width: 480px;
-  line-height: 1.6;
+  line-height: 20px;
   font-size: 13px;
 }
 
@@ -80,16 +80,16 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
 /* The padlocks are ours, not DialKit's, so they live in a gutter to the right
    of its rows rather than inside a row DialKit drew. The gutter is extra
    right padding on the panel's scroll box — DialKit's rows keep their shape,
-   they are simply 26px narrower — and each row with a lock becomes the
+   they are simply 28px narrower — and each row with a lock becomes the
    positioning context for its button. This is the one injection the
    panel-and-dock rule allows: it attaches to a parameter and changes none of
    DialKit's geometry. */
-.dialkit-panel .dialkit-panel-inner { padding-right: calc(12px + 26px); }
+.dialkit-panel .dialkit-panel-inner { padding-right: calc(12px + 28px); }
 .dialkit-panel .has-lock { position: relative; }
 
 .prop-lock {
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   flex: none;
   border: 0;
   padding: 0;
@@ -121,13 +121,13 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 #toast {
   position: fixed;
-  bottom: calc(var(--panel-gap) + 60px);
+  bottom: calc(var(--panel-gap) + var(--tool-size, 48px) + var(--gap, 8px));
   left: 50%;
   transform: translateX(-50%) translateY(12px);
   opacity: 0;
   background: var(--ink);
   color: var(--bg);
-  padding: 10px 16px;
+  padding: 12px 16px;
   border-radius: 999px;
   transition: opacity 0.28s ease, transform 0.28s ease;
   z-index: 600;
@@ -151,4 +151,5 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
 
 @media (max-width: 900px) {
   .viewport { padding: 0; }
+  #toast { bottom: calc(var(--panel-gap) + var(--tool-size, 48px) + var(--gap, 8px) * 2); }
 }

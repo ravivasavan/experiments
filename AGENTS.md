@@ -90,9 +90,10 @@ has no dock. Never build a bar to have somewhere to put things.
 
 ### Dock
 
-- 44px pills — the one size exception in the whole family — on the chrome's
-  material. Bottom edge, centred **on the viewport**, not on the space beside
-  the panel. The panel moves; the verbs do not shuffle to follow it.
+- `--tool-size` (48px) pills — matching the rail's inner disc, no size
+  exception any more — on the chrome's material. Bottom edge, centred **on
+  the viewport**, not on the space beside the panel. The panel moves; the
+  verbs do not shuffle to follow it.
 - Labels stay. Verbs are words: Export, Randomise, Clear, Copy, Reveal. One
   word, sentence case, the word a person would say.
 - Put nothing in a bar but a `.tool-pill` or the one `.readout`. The bars are
@@ -100,8 +101,8 @@ has no dock. Never build a bar to have somewhere to put things.
   rebuild.
 - Overflow scrolls sideways (play.js). It does not shed labels, wrap, or
   shrink.
-- Anything else a play anchors to the bottom edge clears the dock: 44px on
-  `--panel-gap`, plus a gap.
+- Anything else a play anchors to the bottom edge clears the dock: `--tool-size`
+  (48px) on `--panel-gap`, plus a gap.
 
 ### Panel — DialKit as shipped
 
@@ -232,14 +233,45 @@ Use the `.glass` class; do not compose it by hand.
   `--chrome-top` (40 / 16 / 12). Do not introduce a third fold.
 - Grid columns that hold a canvas are `minmax(0, 1fr)`, never bare `1fr`.
 
+## Grid — the site works in 4s
+
+- **The unit is 4px.** Every layout size, padding, margin, radius and
+  line-height is a multiple of 4. A value already on that grid stays; a value
+  that isn't moves to the nearest multiple of 4 (ties go to whichever choice
+  keeps a container-to-container separation at 8, else to the larger).
+  Unitless line-heights become px on the same 4px baseline, nearest the
+  current computed value.
+- **Every separation between two containers is exactly 8px** — pill to pill,
+  rail to the image grid, card to card on both axes, panel to dock clearance.
+  That is the one distance this rule insists on wherever two distinct
+  containers meet; it is not merely "a multiple of 4."
+- **Tokens, defined once** in the shared chrome package
+  (`chrome/v1/chrome.css` `:root`) and consumed everywhere else — this repo
+  included — with a literal fallback, since a play loads that stylesheet
+  cross-origin and has to stay legible if it never arrives: `--grid` (4px),
+  `--gap` (8px, the container-to-container separation), `--tool-size` (48px,
+  every tool/dock pill and the readout). Write `var(--gap, 8px)` and
+  `var(--tool-size, 48px)`, never the bare number, in anything new.
+- **Allowed off the grid:** 1px hairlines, focus rings and their offsets,
+  icon strokes and glyph sizes, blur radii and shadows, DialKit's own metrics
+  (`poc/shared/dialkit-skin.css`'s `--dial-radius` / `--dial-row-height` —
+  do not touch those, see Level 2 above), and centring constants derived from
+  another value (the slider thumb's `-7px`, the switch thumb's `2px` inset).
+- Card media keeps its own aspect ratio — it is never cropped to land on the
+  grid. Round the surrounding pixel geometry (masonry x/y/width/height)
+  to whole numbers instead, so the visible gap between cards stays exactly 8
+  whatever height an image comes in at.
+
 ## Type and glyphs
 
 - Labil Grotesk, from chrome.css, everywhere the site speaks. A play with a
   face of its own (teletext's Bedstead) declares only that one, self-hosted
   from `/assets/fonts/`. **No Google Fonts, no runtime font CDN.** The Vite
   helper strips DialKit's Geist Mono import for exactly this reason.
-- **One glyph size: 16px on the 24 grid**, in a 44px pill (rail and dock).
-  Nothing else is a size. 28, 24 and 14 were in here and are not any more.
+- **One glyph size: 16px on the 24 grid**, in `--tool-size` (48px) pills —
+  dock and readout — or, in the rail, on a 48px inner disc inside the 64px
+  chrome pill. Nothing else is a size. 28, 24 and 14 were in here and are not
+  any more.
 - Lucide glyphs are **normalised so the drawn content spans 18 of the 24
   grid**, on the `<svg>`'s `viewBox` and `stroke-width`, never by editing path
   data. CHROME.md §7 has the formula. Measure with `getBBox()`.
@@ -337,7 +369,7 @@ colour*; on a bespoke drawer that folded slowly: rejected.
 ## Drift gallery exception — requested 2026-09-22
 
 Drift's overlay has one morphing Grid/Single toggle in the rail. Its previous,
-next and zoom actions live in the dock as 44px icon-only `.tool-pill--icon`
+next and zoom actions live in the dock as 48px icon-only `.tool-pill--icon`
 controls, alongside a Close verb and separate name, image-count and zoom
 `.readout` chips. No Back or Original action. This is an explicit exception
 to the rail/dock placement, persistent dock labels and single-readout rules

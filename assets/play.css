@@ -96,7 +96,7 @@ html[data-theme="night"] {
      shadow was never worth either. Keep both tokens so the plays that name them
      go flat too rather than erroring. */
   --glass-shadow: 0 0 rgba(0, 0, 0, 0);
-  /* The same ambience at pill scale — 64px of drop under a 44px control reads
+  /* The same ambience at pill scale — 64px of drop under a 48px control reads
      as a mistake, so the small parts get a shorter throw. */
   --glass-shadow-sm: 0 0 rgba(0, 0, 0, 0);
   --glass-radius: 24px;
@@ -106,14 +106,18 @@ html[data-theme="night"] {
      not used to place anything here — the rule, the rail and the dock are
      positioned off the other three, so a fold only has to restate the four
      numbers and everything stays lined up under the pills. */
-  --chrome-top: 40px;
+  /* --nav-margin is the shared chrome package's token (chrome/v1/chrome.css
+     :root), read live so a fold only has to restate the local fallback —
+     the literal keeps this page readable if the cross-origin package never
+     arrives. */
+  --chrome-top: var(--nav-margin, 40px);
   /* The Tools — rail, dock, panel — are the chrome's family: the rail hangs
      under the avatar pill in its column, the DialKit panel under the menu pill
      on its right margin, each 8px below the pill above it. Every position derives from
      --chrome-top, so a fold restates one number. --chrome-rule is the bottom
      edge of the pills; there is no drawn rule any more. */
   --chrome-rule: calc(var(--chrome-top) + 64px);
-  --chrome-tools: calc(var(--chrome-rule) + 8px);
+  --chrome-tools: calc(var(--chrome-rule) + var(--gap, 8px));
   --chrome-pad: var(--chrome-top);
 
   /* --panel-gap is the Tools' inset from the screen edge: the dock's, and the
@@ -177,7 +181,7 @@ body {
   color: var(--ink);
   font-family: "Labil Grotesk", system-ui, sans-serif;
   font-size: 16px;
-  line-height: 1.3;
+  line-height: 20px;
   transition: background-color 240ms ease, color 240ms ease;
 }
 
@@ -207,7 +211,7 @@ a { color: inherit; }
 }
 
 /* --------------------------------------------- the pill, in both bars --- */
-/* One shape for an experiment's own buttons wherever they sit: 44px of glass,
+/* One shape for an experiment's own buttons wherever they sit: 48px of glass,
    an icon and a word. The dock keeps the word; the rail hides it. */
 
 .tool-pill {
@@ -216,10 +220,10 @@ a { color: inherit; }
   gap: 8px;
   flex: 0 0 auto;
   pointer-events: auto;
-  height: 44px;
+  height: var(--tool-size, 48px);
   padding: 0 16px 0 12px;
   border: 0;
-  border-radius: 22px;
+  border-radius: calc(var(--tool-size, 48px) / 2);
   background: var(--glass-bg);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
@@ -227,7 +231,7 @@ a { color: inherit; }
   color: var(--ink);
   font: inherit;
   font-size: 14px;
-  line-height: 1;
+  line-height: 16px;
   cursor: pointer;
   text-decoration: none;
   transition:
@@ -237,7 +241,7 @@ a { color: inherit; }
 /* The pill is already a pane of glass, so the hover washes that glass and
    lifts its shadow. The header's growing disc is not available here: it reads
    as a second surface arriving, and there is no empty ground for it to arrive
-   on. An inset spread is the whole face, so it is unmistakable at 44px. */
+   on. An inset spread is the whole face, so it is unmistakable at 48px. */
 .tool-pill:hover,
 .tool-pill:focus-visible {
   box-shadow:
@@ -268,7 +272,7 @@ a { color: inherit; }
     var(--glass-shadow-sm);
 }
 /* Compact view actions in an explicitly authorised gallery dock. */
-.tool-pill--icon { width: 44px; padding: 0; justify-content: center; }
+.tool-pill--icon { width: var(--tool-size, 48px); padding: 0; justify-content: center; }
 .tool-pill--icon .tool-pill__label {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
   clip-path: inset(50%); white-space: nowrap;
@@ -304,7 +308,7 @@ a { color: inherit; }
   z-index: var(--z-chrome);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--gap, 8px);
   overscroll-behavior: contain;
   scrollbar-width: none;
   pointer-events: none;
@@ -316,7 +320,7 @@ a { color: inherit; }
 
 /* --- the rail --- */
 .rail {
-  --bar-pad: 8px;
+  --bar-pad: var(--gap, 8px);
   padding: var(--bar-pad);
   top: calc(var(--chrome-tools) - var(--bar-pad));
   left: calc(var(--chrome-top) - var(--bar-pad));
@@ -327,13 +331,13 @@ a { color: inherit; }
 }
 
 /* A rail can hold groups — a radiogroup of modes, the zoom cluster — and a
-   group stacks like the rail itself rather than sitting in it as one block. The
-   zoom cluster closes its own gaps so it reads as one control, and takes a
-   wider gap from whatever is above it. */
-.rail__group { display: flex; flex-direction: column; gap: 8px; }
-.rail__group--zoom { gap: 8px; margin-top: 0; }
+   group stacks like the rail itself rather than sitting in it as one block.
+   Every pill-to-pill separation is the one 8px gap, across a group change too:
+   a group adds no margin of its own. */
+.rail__group { display: flex; flex-direction: column; gap: var(--gap, 8px); }
+.rail__group--zoom { gap: var(--gap, 8px); }
 
-/* Icon only, on the same 44px round-rect as every other tool pill. The label
+/* Icon only, on the same 48px round-rect as every other tool pill. The label
    stays in the markup and stays in the a11y tree — it is just not drawn. */
 /* The rail's pills ARE chrome pills: the avatar's 64px glass circle, the same
    material tokens, the icon centred on a 48px disc that fills on hover (6%)
@@ -390,7 +394,7 @@ a { color: inherit; }
   /* A scroller on one axis clips on both, so a focus ring drawn 2px outside a
      pill was cut at the top and bottom. Pad the box and pull it back by the
      same amount: the pills sit where they did, the ring has room. */
-  --bar-pad: 8px;
+  --bar-pad: var(--gap, 8px);
   padding: var(--bar-pad);
   left: calc(var(--panel-gap) - var(--bar-pad));
   right: calc(var(--panel-gap) - var(--bar-pad));
@@ -410,8 +414,9 @@ a { color: inherit; }
 .dock > :nth-child(1 of :not([hidden])) { margin-left: auto; }
 .dock > :nth-last-child(1 of :not([hidden])) { margin-right: auto; }
 
-/* The dock keeps its 44px pills (the one size exception in the family) but
-   wears the chrome's material, not the drawer's glass. */
+/* The dock's pills are --tool-size (48px), matching the rail's inner disc —
+   there is no size exception in the family any more — but wear the chrome's
+   material, not the drawer's glass. */
 .dock .tool-pill {
   background: var(--pill-bg);
   backdrop-filter: var(--pill-filter);
@@ -427,12 +432,13 @@ a { color: inherit; }
 .dock .tool-pill:active { box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
 .dock .tool-pill.is-on { color: var(--fg); box-shadow: inset 0 0 0 999px color-mix(in srgb, var(--fg) 12%, transparent), var(--pill-edge); }
 
-/* Group starts add 16px to the normal 8px gap without introducing wrappers. */
-.dock > [data-dock-group-start] { margin-left: 16px; }
+/* Group starts are marked (data-dock-group-start) but add no margin: every
+   pill-to-pill separation in the dock is the one 8px gap. */
+.dock > [data-dock-group-start] { margin-left: 0; }
 
 /* --- the selector --- */
 /* A dock can carry a selector where a verb needs one — the export size beside
-   Export, a format beside a save. It is a 44px pill like its neighbours whose
+   Export, a format beside a save. It is a 48px pill like its neighbours whose
    whole face is the native <select>, invisible and on top, so the platform's
    own menu opens and the pill reads as a pill. The label is the current
    choice, written by the play's script; the chevron says it opens. */
@@ -453,19 +459,19 @@ a { color: inherit; }
 
 /* --- the readout --- */
 /* A dock can carry one non-button: a line of status (Chroma's composition and
-   palette, Teletext's page and scheme) on the same 44px pill as the verbs beside it,
+   palette, Teletext's page and scheme) on the same 48px pill as the verbs beside it,
    on the same material, in the muted ink. It is part of the bar, not a caption
    floating near it. */
 .dock .readout {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  height: 44px;
+  gap: 8px;
+  height: var(--tool-size, 48px);
   /* Block margins only: the inline ones are the dock's auto margins that
      centre the row, and a bare margin: 0 here outranked them. */
   margin-block: 0;
   padding: 0 16px;
-  border-radius: 22px;
+  border-radius: calc(var(--tool-size, 48px) / 2);
   font-size: 13px;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
@@ -566,7 +572,7 @@ input[type="range"].dial {
   background: color-mix(in srgb, var(--fg) 6%, transparent);
   border: 0;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
-  border-radius: 10px;
+  border-radius: 12px;
   height: 40px;
   padding: 0 12px;
   width: 100%;
@@ -574,18 +580,18 @@ input[type="range"].dial {
 .select {
   -webkit-appearance: none;
   appearance: none;
-  padding-right: 34px;
+  padding-right: 36px;
   background-image: var(--chevron);
   background-repeat: no-repeat;
-  background-position: right 10px center;
+  background-position: right 12px center;
   background-size: 14px 14px;
   cursor: pointer;
 }
 .textarea {
   height: auto;
   min-height: 116px;
-  padding: 10px 12px;
-  line-height: 1.45;
+  padding: 12px;
+  line-height: 20px;
   resize: vertical;
 }
 .input:focus-visible,
@@ -622,7 +628,7 @@ input[type="range"].dial {
   position: relative;
   width: 36px;
   height: 20px;
-  border-radius: 10px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--fg) 14%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 8%, transparent);
   transition: background-color 200ms ease;
@@ -655,15 +661,15 @@ input[type="range"].dial {
   justify-content: center;
   gap: 8px;
   height: 36px;
-  padding: 0 14px;
+  padding: 0 16px;
   border: 0;
-  border-radius: 10px;
+  border-radius: 12px;
   background: color-mix(in srgb, var(--fg) 6%, transparent);
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--fg) 10%, transparent);
   color: var(--ink);
   font: inherit;
   font-size: 14px;
-  line-height: 1;
+  line-height: 16px;
   cursor: pointer;
   /* .btn is a filled form control and tints like .select and .input rather than
      growing a surface like the pills — it has no inner face to grow. What it
@@ -701,7 +707,7 @@ input[type="range"].dial {
 
 @media (max-width: 900px) {
   :root {
-    --chrome-top: 16px;
+    --chrome-top: var(--nav-margin, 16px);
     --chrome-pad: 16px;
   }
 
@@ -719,18 +725,21 @@ input[type="range"].dial {
   .dock > :nth-child(1 of :not([hidden])) { margin-left: 0; }
   .dock > :nth-last-child(1 of :not([hidden])) { margin-right: 0; }
 
-  /* The rail keeps its column — 44px of glass over the artwork is the same
-     bargain the panel makes — but stops short of the dock underneath it. */
+  /* The rail keeps its column — 48px of glass over the artwork is the same
+     bargain the panel makes — but stops short of the dock underneath it.
+     The two terms are the dock's own box (its pill plus the pad on both
+     sides) and the tool-size clearance beyond it, both re-derived from the
+     tokens rather than restated as bare pixels. */
   .rail {
     left: calc(var(--chrome-pad) - var(--bar-pad));
-    max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) * 2 - 60px - 44px);
+    max-height: calc(100% - var(--chrome-tools) - var(--panel-gap) * 2 - (var(--tool-size, 48px) + var(--gap, 8px) * 2) - var(--tool-size, 48px));
   }
 
 }
 
 @media (max-width: 640px) {
   :root {
-    --chrome-top: 12px;
+    --chrome-top: var(--nav-margin, 12px);
     --chrome-pad: 12px;
     --panel-gap: 12px;
   }

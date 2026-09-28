@@ -108,7 +108,7 @@
       white-space: nowrap;
     }
     .week__range { display: block; }
-    .week__label { display: block; margin-top: 10px; opacity: 0.6; }
+    .week__label { display: block; margin-top: 12px; opacity: 0.6; }
 
     .rule {
       position: absolute;
@@ -124,8 +124,8 @@
     /* the exact day an experiment was filed */
     .dot {
       position: absolute;
-      width: 9px;
-      height: 9px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--orange);
       box-shadow: 0 0 0 3px var(--bg);
@@ -153,7 +153,7 @@
     .entry__desc {
       margin: 16px 0 0;
       max-width: 300px;
-      line-height: 1.5;
+      line-height: 24px; /* 4px baseline: the old 1.5 at 16px */
       opacity: 0.85;
       text-wrap: pretty;
     }
@@ -167,16 +167,16 @@
     .entry__status {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       background: var(--separator);
-      padding: 5px 8px;
+      padding: 4px 8px;
       border-radius: 4px;
       font-size: 12px;
     }
     .entry__status::before {
       content: '';
-      width: 6px;
-      height: 6px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--dot, currentColor);
     }
@@ -193,7 +193,7 @@
     }
     .shot {
       position: absolute;
-      width: 210px;
+      width: 212px;
       height: auto;
       border-radius: 8px;
       outline: 1px solid color-mix(in srgb, var(--fg) 8%, transparent);
@@ -220,7 +220,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 12px;
       color: color-mix(in srgb, var(--fg) 50%, transparent);
       pointer-events: none;
       z-index: 40;

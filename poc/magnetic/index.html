@@ -134,8 +134,8 @@
     #hint {
       position: fixed;
       /* Clear of the dock, which centres on the same bottom edge: --panel-gap
-         plus the 44px pill plus a gap. */
-      bottom: 76px;
+         plus the tool pill plus a gap. */
+      bottom: calc(var(--panel-gap, 40px) + var(--tool-size, 48px) + var(--gap, 8px));
       left: 0;
       right: 0;
       text-align: center;
@@ -146,6 +146,10 @@
       transition: opacity 0.6s ease;
     }
     #hint.gone { opacity: 0; }
+
+    @media (max-width: 900px) {
+      #hint { bottom: calc(var(--panel-gap, 16px) + var(--tool-size, 48px) + var(--gap, 8px) * 2); }
+    }
 
     #file { display: none; }
   </style>

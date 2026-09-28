@@ -56,11 +56,11 @@ html, body { height: 100%; overflow: hidden; }
   z-index: var(--z-chrome);
   left: var(--panel-gap);
   right: var(--panel-gap);
-  /* Clear of the dock: its 44px pills plus the 8px focus-ring pad it keeps
+  /* Clear of the dock: its 48px pills plus the 8px focus-ring pad it keeps
      inside the margin, which is the same sum dialkit-skin.css uses to stop
      the panel above them. */
-  bottom: calc(var(--panel-gap) + 44px + 8px);
-  padding: 10px;
+  bottom: calc(var(--panel-gap) + var(--tool-size, 48px) + var(--gap, 8px));
+  padding: 8px;
   border-radius: 16px;
   background: var(--pill-bg);
   backdrop-filter: var(--pill-filter);
@@ -76,18 +76,18 @@ html, body { height: 100%; overflow: hidden; }
   background: color-mix(in srgb, var(--fg) 5%, transparent);
   font-family: "Bedstead", ui-monospace, monospace;
   font-size: 15px;
-  line-height: 1.5;
+  line-height: 24px;
 }
 
 /* --------------------------------------------------- the readout's dots -- */
 /* The scheme's five colours are a painting of the chosen scheme, not five
    controls — a readout. teletext.js still paints them into #swatches; #swatches
    is simply a span in the dock's readout now, so they are dots sized for a
-   44px pill rather than bars in a drawer. */
+   48px pill rather than bars in a drawer. */
 .dock .readout #swatches {
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 }
 .dock .readout #swatches .swatch {
   width: 8px;
@@ -122,6 +122,6 @@ html, body { height: 100%; overflow: hidden; }
   .text-bar {
     left: var(--chrome-pad);
     right: var(--chrome-pad);
-    bottom: calc(var(--panel-gap) + 44px + 8px + 8px);
+    bottom: calc(var(--panel-gap) + var(--tool-size, 48px) + var(--gap, 8px) + var(--gap, 8px));
   }
 }

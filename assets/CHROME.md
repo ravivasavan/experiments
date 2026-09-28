@@ -18,12 +18,13 @@ out of the page.**
   to the name and "‹ Back to Play", and a menu pill at the top right (About ·
   Experiments · Play, alphabetical, with the theme in its own pill). Both sit at its `--nav-margin` (40 / 16 / 12 by fold), which is
   play's `--chrome-top`.
-- A full-width hairline at `--chrome-rule` (144 / 96 / 88) — ours.
-- Level 2 — the experiment's own 44px glass tool pills, split by what they do.
-  The **rail** runs down the left from `--chrome-tools` (160 / 112 / 104) and
-  holds what changes the view: modes, zoom, step back. Icon only. The **dock**
-  floats at the bottom edge and holds the verbs: upload, export, shuffle,
-  clear, plus the selectors and readout that belong beside them. Labels kept.
+- A full-width hairline at `--chrome-rule` (104 / 80 / 76) — ours.
+- Level 2 — the experiment's own glass tool pills, split by what they do.
+  The **rail** runs down the left from `--chrome-tools` (112 / 88 / 84) and
+  holds what changes the view: modes, zoom, step back. Icon only, 64px chrome
+  pills whose inner disc is 48px. The **dock** floats at the bottom edge and
+  holds the verbs: upload, export, shuffle, clear, plus the selectors and
+  readout that belong beside them — `--tool-size` (48px) pills. Labels kept.
 - The settings panel is **DialKit's own popover**, exactly as it ships — its
   bubble, its drag, its open/close motion — pinned under the menu pill by one
   rule in `poc/shared/dialkit-skin.css`. A page adds no positioning CSS of its
@@ -53,8 +54,9 @@ chrome, not a second system:
   `poc/shared/dialkit-skin.css` (`top: --chrome-tools`, `right: --panel-gap +
   --nav-right-comp`) and bounded to stop 8px above the dock. Bubble, drag,
   open/close motion are all DialKit's own, unstyled by us.
-- **Dock** keeps its 44px pills — the one size exception — but wears the
-  chrome's material. Position unchanged (bottom, centred).
+- **Dock** keeps `--tool-size` (48px) pills — matching the rail's inner disc,
+  no size exception any more — but wears the chrome's material. Position
+  unchanged (bottom, centred).
   Its first and last **visible** children carry the auto margins, so hiding
   verbs when a play changes view preserves viewport centring. Use `hidden`
   on an unavailable pill; the remaining pills still overflow sideways. The
@@ -62,7 +64,7 @@ chrome, not a second system:
   on these same visible children.
 - **Readout.** A dock may carry one non-button, `<p class="readout">`, for a
   line of status (chroma's composition · palette · zoom, teletext's page ·
-  scheme · swatches): the same 44px pill and material as the verbs beside it,
+  scheme · swatches): the same 48px pill and material as the verbs beside it,
   in the muted ink. Lives in play.css, not in a play's own CSS. §5.
 - **Centred, full stop.** The artwork centres on the viewport's own centre — no
   top padding for the chrome, no floor under the pills, no bottom padding for
@@ -77,7 +79,8 @@ chrome, not a second system:
   rendered pixels under the pill row. The theme always decides the colours.
 
 Geometry numbers older sections quote (rule 144, tools 160 / 96, 112) are
-superseded: everything derives from `--chrome-top` (40 / 16 / 12).
+superseded: everything derives from `--chrome-top` (40 / 16 / 12), which gives
+`--chrome-rule` 104 / 80 / 76 and `--chrome-tools` 112 / 88 / 84.
 
 ## Layout: the content is the whole viewport, the panel overlays it
 
@@ -256,10 +259,12 @@ experiment. The landing page has no rule.
 ### Geometry — why nothing under the line had to move
 
 The package's `--nav-margin` steps 40 → 16 (≤900) → 12 (≤640) and its pills are
-64px, which is exactly the fold play already had: `--chrome-top` 40/16/12,
-`--chrome-rule` 144/96/88 (`margin + 64 + margin`) and `--chrome-tools`
-160/112/104 line up underneath at every width. `--chrome-top` is now only the
-package's margin restated — play.css positions nothing with it.
+64px, which is exactly the fold play already had: `--chrome-top` reads
+`var(--nav-margin, …)` at each fold (40/16/12 as the literal fallback),
+`--chrome-rule` is `--chrome-top + 64px` (104/80/76) and `--chrome-tools` is
+`--chrome-rule + var(--gap, 8px)` (112/88/84), lining up underneath at every
+width. `--chrome-top` is now only the package's margin restated — play.css
+positions nothing with it.
 
 ### The palette, if chrome.css never arrives
 
@@ -278,7 +283,7 @@ also published `--ink`, `--muted` and `--field`.
 ## 3. Level 2 — the rail and the dock
 
 The experiment's own buttons, split by what they do rather than piled into one
-row above the artwork. Both are `.tool-pill`s — same 44px glass, same icon and
+row above the artwork. Both are `.tool-pill`s — same 48px glass, same icon and
 word — and both are glass over the artwork that reserves no room.
 
 **The rail** takes what changes *what you are looking at*: view modes, zoom, the
@@ -334,7 +339,7 @@ Folded (≤900) the dock keeps its own bottom edge; it does not lift over
 anything, because there is nothing fixed under it any more — DialKit's bubble
 sits wherever DialKit puts it, independent of the dock's geometry. The rail
 keeps its column. Anything else of yours anchored to the bottom edge has to
-clear the dock: 44px of pill on `--panel-gap`, plus a gap.
+clear the dock: `--tool-size` (48px) of pill on `--panel-gap`, plus a gap.
 
 ## 4. The panel — DialKit as shipped
 
@@ -376,8 +381,9 @@ popover ships its own bubble, its own drag, its own open/close motion, and
 var(--nav-right-comp, 0px))` — the same margin-plus-scrollbar-compensation term
 the menu pill uses, so the two right edges line up — and `z-index:
 var(--z-sheet)` (450, under the chrome's 500). The panel's own inner scroll box
-is bounded there too, to stop 8px above the dock's 44px pills (16px on ≤900
-folds, where the dock keeps an 8px pad inside the margin). A play's own CSS
+is bounded there too, to stop `--gap` (8px) above the dock's `--tool-size`
+(48px) pills (16px on ≤900 folds, where the dock keeps an 8px pad inside the
+margin). A play's own CSS
 never touches `.dialkit-panel` or `.dialkit-panel-inner` for position, size or
 z-index — only the skin does, in the one file every play links.
 
@@ -422,7 +428,7 @@ Everything that is not a DialKit-native parameter control lives here (or in
 the rail, for a view tool — §3): verbs, the selectors that belong to a verb,
 free multi-line text, file input, and the readout.
 
-**The selector pill** is a 44px pill whose whole face is the native `<select>`
+**The selector pill** is a 48px pill whose whole face is the native `<select>`
 — invisible, laid on top — so the platform's own menu opens and the pill still
 reads as a pill. The label is the current choice, kept in step by the play's
 own script; the chevron just says it opens.
@@ -440,7 +446,7 @@ own script; the chevron just says it opens.
 </label>
 ```
 
-**The readout** is a dock's one non-button: a line of status on the same 44px
+**The readout** is a dock's one non-button: a line of status on the same 48px
 pill and material as the verbs beside it, in the muted ink, `<span
 class="readout__sep">·</span>` between parts.
 
@@ -542,12 +548,13 @@ them. (§2, *The palette, if chrome.css never arrives*.)
 
 | | container | glyph | what it is |
 |---|---|---|---|
-| `.tool-pill` | 44 | 16 | level 2 — rail and dock |
+| `.rail .tool-pill` | 64 (48 inner disc) | 16 | level 2 — rail |
+| `.dock .tool-pill` | 48 (`--tool-size`) | 16 | level 2 — dock and readout |
 
 There is no shared `.panel-icon` size any more: the popover's own chrome
 (minimise, close, folder toggles) is DialKit's to draw, at whatever size it
 draws it. A per-row adornment injected into the panel (§4) is sized by the
-play that adds it — chroma's `.prop-lock` is 22px, defined in `chroma.css`,
+play that adds it — chroma's `.prop-lock` is 24px, defined in `chroma.css`,
 not in play.css.
 
 Every glyph is 16px on the 24 grid — the chrome package's pills are drawn to the
@@ -877,7 +884,7 @@ every other glass surface.
 
 Ravi explicitly requested Drift's previous/next and zoom controls in the dock,
 with one Grid/Single morphing toggle in the rail and no Back or Original.
-`.tool-pill--icon` is the shared 44px icon-only variant: its accessible label
+`.tool-pill--icon` is the shared 48px icon-only variant: its accessible label
 remains in the DOM. Drift's gallery may have three separate `.readout` chips
 (name, image count, zoom), plus Close. Other plays retain the usual rail/dock
 placement, visible verb labels and single readout. The overlay traps focus,
@@ -889,7 +896,7 @@ focus to the source work when closed. The Close verb exits directly.
 Dock chip hover holds its inset wash at a fixed 999px spread in both resting
 and hover states; only the tint fades over 120ms. Do not interpolate between a
 missing wash and a large spread. The hairline remains in both states.
-`data-dock-group-start` adds a 16px left margin to a non-leading chip, for 24px
-between groups including the normal 8px gap. Drift assigns groups to visible
+`data-dock-group-start` marks the first chip of a group but adds no margin:
+every separation between two dock pills is the one 8px gap, groups included. Drift assigns groups to visible
 chips: filename, previous/count/next, zoom, playback (when present), then Close.
 The name chip always shows the current asset's filename, including in overview.

@@ -836,10 +836,10 @@
       resMenu.style.left = `${box.left}px`;
       if (below < 180) {
         resMenu.style.top = 'auto';
-        resMenu.style.bottom = `${window.innerHeight - box.top + 4}px`;
+        resMenu.style.bottom = `${window.innerHeight - box.top + 8}px`;
       } else {
         resMenu.style.bottom = 'auto';
-        resMenu.style.top = `${box.bottom + 4}px`;
+        resMenu.style.top = `${box.bottom + 8}px`;
       }
       resMenu.hidden = false;
       resTrigger.setAttribute('aria-expanded', 'true');

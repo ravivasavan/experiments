@@ -18,14 +18,13 @@ body { overflow: hidden; }
 .drift-detail-media { width: 100%; height: 100%; display: grid; place-items: center; pointer-events: none; }
 .drift-detail-card { max-width: 90vw; }
 .drift-group { position: absolute; inset: 0; overflow: auto; overscroll-behavior: contain; }
-.drift-group-grid { --drift-gallery-gap: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--drift-gallery-gap); width: min(1120px, 90vw); min-height: 100%; margin: auto; padding-block: 24px; }
+.drift-group-grid { --drift-gallery-gap: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--drift-gallery-gap); width: min(1120px, 90vw); min-height: 100%; margin: auto; padding-block: 24px; }
 .drift-group-row { display: flex; flex: none; gap: var(--drift-gallery-gap); }
 .drift-expanded-media { display: block; width: 100%; height: 100%; object-fit: contain; pointer-events: none; user-select: none; }
 .drift-group-card { border-radius: calc(var(--glass-radius) - 12px); display: block; min-width: 0; cursor: zoom-in; border: 0; padding: 0; background: none; transition: opacity 140ms ease-out; }
 .drift-group-card:focus-visible { opacity: 0.72; outline: 2px solid var(--fg); outline-offset: 4px; }
 @media (hover: hover) and (pointer: fine) { .drift-group-card:hover { opacity: 0.72; } }
 .drift-group-card:active { opacity: 0.6; }
-@media (max-width: 640px) { .drift-group-grid { --drift-gallery-gap: 12px; } }
 @media (prefers-reduced-transparency: reduce) { .drift-card.glass, .drift-viewer.glass { background: var(--bg); backdrop-filter: none; -webkit-backdrop-filter: none; } }
 .drift-detail-media .drift-failed { color: var(--muted); }
 @media (prefers-reduced-motion: reduce) {

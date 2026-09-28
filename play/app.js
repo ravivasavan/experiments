@@ -21,6 +21,12 @@
   const asset = (path) => new URL(path, new URL(window.driftBase, location.href)).href;
   const mod = (n, d) => ((n % d) + d) % d;
   const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+  // Level-1 tokens (--gap) and this play's own --card-inset are read live so a
+  // failed cross-origin chrome load still falls back to the right literal.
+  const readToken = (name, fallback) => {
+    const value = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+    return Number.isFinite(value) ? value : fallback;
+  };
 
   function random(seed) {
     return () => {
@@ -130,6 +136,7 @@
     finishDrag(true);
     const oldProgress = period ? mod(field.scrollTop, period) / period : 0;
     const rng = random(state.seed), mobile = innerWidth <= 640;
+    const inset = readToken('--card-inset', 12);
     layoutWidth = field.clientWidth; layoutHeight = field.clientHeight;
     const cell = field.clientWidth / 24, row = 24;
     const gap = 24 + state.spacing * 0.65;
@@ -143,7 +150,7 @@
       const index = Math.floor(rng() * project.media.length), media = project.media[index];
       const ratio = media.width / media.height;
       const span = Math.round((mobile ? 17 + rng() * 5 : 7 + rng() * 5) * state.size / 100);
-      const width = Math.min(clamp(span * cell, mobile ? 220 : 250, field.clientWidth - 24), layoutHeight * 0.58 * ratio + 24);
+      const width = Math.min(clamp(span * cell, mobile ? 220 : 250, field.clientWidth - 2 * inset), layoutHeight * 0.58 * ratio + 2 * inset);
       // Match the media box to its inset width so rounding clips the pixels,
       // not invisible letterboxing around an oversized contain box.
       const label = media.filename || project.title;
@@ -151,10 +158,10 @@
       const probe = document.createElement('div'); probe.className = 'drift-card drift-measure';
       probe.style.width = `${width}px`; probe.append(cardHeading(label, type)); collection.append(probe);
       const headingHeight = Math.ceil(probe.firstElementChild.getBoundingClientRect().height); probe.remove();
-      const mediaHeight = (width - 24) / ratio;
-      const height = mediaHeight + headingHeight + 12;
+      const mediaHeight = (width - 2 * inset) / ratio;
+      const height = mediaHeight + headingHeight + inset;
       const previous = placements.at(-1);
-      let xs = Array.from({ length: Math.max(1, Math.floor((field.clientWidth - width - 24) / cell) + 1) }, (_, col) => col * cell + 12);
+      let xs = Array.from({ length: Math.max(1, Math.floor((field.clientWidth - width - 2 * inset) / cell) + 1) }, (_, col) => col * cell + inset);
       if (previous && !mobile) {
         const separated = xs.filter(x => Math.abs(x + width / 2 - previous.x - previous.width / 2) >= field.clientWidth * 0.28);
         if (separated.length) xs = separated;
@@ -163,7 +170,7 @@
       const paired = i % 4 === 1;
       if (paired) {
         const direction = previous.x + previous.width / 2 < field.clientWidth / 2 ? 1 : -1;
-        x = clamp(previous.x + direction * Math.min(previous.width, width) * 0.45, 12, field.clientWidth - width - 12);
+        x = clamp(previous.x + direction * Math.min(previous.width, width) * 0.45, inset, field.clientWidth - width - inset);
       }
       let y = previous ? previous.y + layoutHeight * (0.28 + rng() * 0.34 + state.spacing / 400) : 0;
       if (paired) y = previous.y + previous.height * 0.62;
@@ -226,13 +233,18 @@
     scrollPosition = 0;
     observer.disconnect();
     tiles.forEach((t) => t.querySelector('video')?.pause());
-    const gap = innerWidth <= 640 ? 12 : 16;
+    const gap = readToken('--gap', 8);
+    const inset = readToken('--card-inset', 12);
     const columns = innerWidth <= 640 ? 1 : innerWidth <= 900 ? 2 : 4;
     const switcher = $('layout-mode').getBoundingClientRect();
-    const top = switcher.top;
-    const left = switcher.right + gap;
+    const top = Math.round(switcher.top);
+    const left = Math.round(switcher.right + gap);
     const rightEdge = chromeRight();
-    const colW = (rightEdge - left - gap * (columns - 1)) / columns;
+    // Integer column edges so every inter-column gap is exactly `gap`; the
+    // nominal width is only used to space the edges, columns then take
+    // whatever whole-pixel width falls between their two edges (±1px).
+    const nominalColW = (rightEdge - left - gap * (columns - 1)) / columns;
+    const edges = Array.from({ length: columns + 1 }, (_, i) => Math.round(left + i * (nominalColW + gap)));
     const heights = Array.from({ length: columns }, () => top);
     const fragment = document.createDocumentFragment();
     tiles = [];
@@ -241,14 +253,15 @@
       const ratio = media.width / media.height;
       const label = media.filename || project.title;
       const type = project.media.length > 1 ? `${project.media.length} images` : mediaType(media);
+      let column = 0;
+      for (let i = 1; i < columns; i++) if (heights[i] < heights[column]) column = i;
+      const x = edges[column];
+      const colW = edges[column + 1] - gap - x;
       const probe = document.createElement('div'); probe.className = 'drift-card drift-measure';
       probe.style.width = `${colW}px`; probe.append(cardHeading(label, type)); collection.append(probe);
       const headingHeight = Math.ceil(probe.firstElementChild.getBoundingClientRect().height); probe.remove();
-      const mediaHeight = (colW - 24) / ratio;
-      const height = mediaHeight + headingHeight + 12;
-      let column = 0;
-      for (let i = 1; i < columns; i++) if (heights[i] < heights[column]) column = i;
-      const x = left + column * (colW + gap);
+      const mediaHeight = Math.round((colW - 2 * inset) / ratio);
+      const height = mediaHeight + headingHeight + inset;
       const y = heights[column];
       heights[column] = y + height + gap;
       const tile = document.createElement('button');
