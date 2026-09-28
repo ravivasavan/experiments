@@ -114,6 +114,11 @@ function Controls() {
     radiance: [read('glow', 65), 0, 100, 1],
     grain: [read('grain', 8), 0, 100, 1],
     seed: [read('seed', 42), 0, 999999, 1],
+    position: {
+      locked: $('pan-locked').checked,
+      horizontal: [read('pan-x', 0), -100, 100, 0.1],
+      vertical: [read('pan-y', 0), -100, 100, 0.1],
+    },
     palette: {
       story: {
         type: 'select',
@@ -141,12 +146,27 @@ function Controls() {
         composition: String(s.mode),
         diffusion: s.flow, scale: s.scale, angle: s.rotation,
         radiance: s.glow, grain: s.grain, seed: s.seed,
+        position: { locked: s.panLocked, horizontal: s.panX, vertical: s.panY },
         palette,
       })
     }
     document.addEventListener('chroma:sync', onSync)
     return () => document.removeEventListener('chroma:sync', onSync)
   }, [])
+
+  useEffect(() => {
+    const locked = $('pan-locked')
+    if (locked.checked !== v.position.locked) {
+      locked.checked = v.position.locked
+      locked.dispatchEvent(new Event('change', { bubbles: true }))
+    }
+    for (const [id, value] of [['pan-x', v.position.horizontal], ['pan-y', v.position.vertical]]) {
+      const input = $(id)
+      if (Number(input.value) === value) continue
+      input.value = value
+      input.dispatchEvent(new Event('input', { bubbles: true }))
+    }
+  }, [v.position.locked, v.position.horizontal, v.position.vertical])
 
   const mounted = useRef(false)
   const prevStory = useRef(v.palette.story)

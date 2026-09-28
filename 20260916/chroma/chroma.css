@@ -153,3 +153,9 @@ canvas { display: block; width: 100%; height: 100%; object-fit: cover; }
   .viewport { padding: 0; }
   #toast { bottom: calc(var(--panel-gap) + var(--tool-size, 48px) + var(--gap, 8px) * 2); }
 }
+
+/* Direct composition panning leaves the wallpaper frame and shared view alone. */
+#art { touch-action: none; cursor: grab; }
+#art.is-positioning { cursor: grabbing; }
+#art.is-position-locked { cursor: default; }
+#art:focus-visible { outline: 2px solid var(--fg); outline-offset: -4px; }

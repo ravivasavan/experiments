@@ -28,20 +28,20 @@
   ];
   const lockKeys = ['mode', 'palette', 'color0', 'color1', 'color2', 'color3', 'flow', 'scale', 'rotation', 'glow', 'grain', 'seed'];
   const defaultLocks = Object.fromEntries(lockKeys.map(key => [key, false]));
-  const defaults = { mode: 1, palette: 0, colors: [...palettes[0].colors], flow: 60, scale: 55, rotation: 0, glow: 65, grain: 8, seed: 42, resolution: '7680x4320', locks: { ...defaultLocks } };
+  const defaults = { mode: 1, palette: 0, colors: [...palettes[0].colors], flow: 60, scale: 55, rotation: 0, glow: 65, grain: 8, seed: 42, resolution: '7680x4320', panX: 0, panY: 0, panLocked: false, locks: { ...defaultLocks } };
   let state = structuredClone(defaults), renderer, frame, toastTimer, exporting = false, paletteQuery = '', paintedQuery = null, customName = 'Custom';
   const modes = ['Field', 'Aperture', 'Horizon'];
   const sliders = ['flow', 'scale', 'rotation', 'glow', 'grain'];
   const LOCK_ICON = `<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path class="shackle-open" d="M5 7.5V5.2A3 3 0 0 1 10.7 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path class="shackle-shut" d="M5 7.5V5a3 3 0 0 1 6 0v2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><rect x="3.5" y="7.4" width="9" height="6.8" rx="1.6" stroke="currentColor" stroke-width="1.5"/></svg>`;
   const vertex = `attribute vec2 position; void main(){gl_Position=vec4(position,0.,1.);}`;
   const fragment = `precision highp float;
-    uniform vec2 resolution;
+    uniform vec2 resolution, offset;
     uniform float seed, flow, zoom, rotation, glow, grain, mode;
     uniform vec3 c0,c1,c2,c3;
     float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7))+seed*.127)*43758.5453);}
     float box(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return min(max(q.x,q.y),0.)+length(max(q,0.))-r;}
     void main(){
-      vec2 uv=gl_FragCoord.xy/resolution;
+      vec2 uv=gl_FragCoord.xy/resolution-offset;
       vec2 p=(uv-.5)*vec2(resolution.x/resolution.y,1.);
       p=mat2(cos(rotation),-sin(rotation),sin(rotation),cos(rotation))*p;
       float s=seed*.01371;
@@ -106,7 +106,7 @@
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
     const position = gl.getAttribLocation(program, 'position');
     gl.enableVertexAttribArray(position); gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-    const uniforms = Object.fromEntries(['resolution','seed','flow','zoom','rotation','glow','grain','mode','c0','c1','c2','c3'].map(name => [name, gl.getUniformLocation(program, name)]));
+    const uniforms = Object.fromEntries(['resolution','offset','seed','flow','zoom','rotation','glow','grain','mode','c0','c1','c2','c3'].map(name => [name, gl.getUniformLocation(program, name)]));
     return {
       draw(width, height, settings = state) {
         if (gl.isContextLost()) throw new Error('Graphics connection lost. Please wait for recovery.');
@@ -115,6 +115,7 @@
         if (canvas.width !== width || canvas.height !== height) { canvas.width = width; canvas.height = height; }
         if (gl.drawingBufferWidth !== width || gl.drawingBufferHeight !== height) throw new Error('The browser could not allocate this image. Choose a smaller resolution.');
         gl.viewport(0,0,width,height); gl.uniform2f(uniforms.resolution,width,height);
+        gl.uniform2f(uniforms.offset,settings.panX / 100,-settings.panY / 100);
         for (const name of ['flow','glow','grain']) gl.uniform1f(uniforms[name],settings[name]/100);
         gl.uniform1f(uniforms.zoom,settings.scale/100); gl.uniform1f(uniforms.rotation,settings.rotation*Math.PI/180);
         gl.uniform1f(uniforms.seed,settings.seed); gl.uniform1f(uniforms.mode,settings.mode);
@@ -179,7 +180,7 @@
         // The panel shows the palette and the colours too now, so it has to
         // hear about them when Randomise, a recipe or an import moves them.
         palette: state.palette, colors: [...state.colors], paletteName: paletteName(),
-        resolution: state.resolution
+        resolution: state.resolution, panX: state.panX, panY: state.panY, panLocked: state.panLocked
       }
     }));
   }
@@ -474,6 +475,7 @@
       setValueLabel(name);
       paintDialSlider(name);
     }
+    syncPosition();
     $('seed').value = state.seed;
     $('resolution').value = state.resolution;
     announceSync();
@@ -559,6 +561,10 @@
     if (input.locks && typeof input.locks === 'object') {
       for (const key of lockKeys) if (typeof input.locks[key] === 'boolean') valid.locks[key] = input.locks[key];
     }
+    for (const key of ['panX', 'panY']) {
+      if (Number.isFinite(input[key])) valid[key] = clampPosition(input[key]);
+    }
+    if (typeof input.panLocked === 'boolean') valid.panLocked = input.panLocked;
     return valid;
   }
 
@@ -618,6 +624,71 @@
       schedule();
       toast('Preview restored.');
     } catch (error) { $('render-error').textContent = error.message; }
+  });
+
+  // Composition coordinates are percentages of the wallpaper, not screen
+  // pixels: the same recipe frames identically in preview, PNG and shared URLs.
+  const art = $('art');
+  let positionDrag = null;
+  function clampPosition(value) { return Math.round(Math.max(-100, Math.min(100, value)) * 10000) / 10000; }
+  function syncPosition() {
+    $('pan-x').value = state.panX; $('pan-y').value = state.panY;
+    $('pan-locked').checked = state.panLocked;
+    $('art').classList.toggle('is-position-locked', state.panLocked);
+  }
+  function position(x, y, announce = true) {
+    state.panX = clampPosition(x); state.panY = clampPosition(y);
+    syncPosition(); schedule();
+    if (announce) announceSync();
+  }
+  for (const [id, key] of [['pan-x', 'panX'], ['pan-y', 'panY']]) {
+    $(id).addEventListener('input', () => {
+      const value = Number($(id).value);
+      if (!Number.isFinite(value)) return;
+      position(key === 'panX' ? value : state.panX, key === 'panY' ? value : state.panY);
+    });
+  }
+  $('pan-locked').addEventListener('change', () => {
+    const locked = $('pan-locked').checked;
+    finishPosition(); state.panLocked = locked;
+    syncPosition(); save(); announceSync();
+  });
+  art.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || !event.isPrimary) return;
+    event.stopPropagation(); event.preventDefault();
+    if (positionDrag || state.panLocked || exporting) return;
+    const bounds = art.getBoundingClientRect();
+    positionDrag = { id: event.pointerId, x: event.clientX, y: event.clientY,
+      startX: state.panX, startY: state.panY, width: bounds.width, height: bounds.height };
+    art.setPointerCapture(event.pointerId); art.classList.add('is-positioning');
+    art.focus({ preventScroll: true });
+  });
+  art.addEventListener('pointermove', event => {
+    if (!positionDrag || event.pointerId !== positionDrag.id) return;
+    const d = positionDrag;
+    position(d.startX + (event.clientX - d.x) / d.width * 100,
+      d.startY + (event.clientY - d.y) / d.height * 100, false);
+  });
+  function finishPosition(cancel = false) {
+    if (!positionDrag) return;
+    const d = positionDrag; positionDrag = null;
+    if (art.hasPointerCapture(d.id)) art.releasePointerCapture(d.id);
+    art.classList.remove('is-positioning');
+    if (cancel) position(d.startX, d.startY, false);
+    announceSync();
+  }
+  art.addEventListener('pointerup', event => { if (event.pointerId === positionDrag?.id) finishPosition(); });
+  art.addEventListener('pointercancel', event => { if (event.pointerId === positionDrag?.id) finishPosition(true); });
+  art.addEventListener('lostpointercapture', () => finishPosition());
+  addEventListener('blur', () => finishPosition());
+  addEventListener('resize', () => finishPosition());
+  art.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && positionDrag) { event.preventDefault(); finishPosition(true); return; }
+    const delta = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[event.key];
+    if (!delta || state.panLocked) return;
+    event.preventDefault(); event.stopPropagation();
+    const step = event.shiftKey ? 1 : 0.1;
+    position(state.panX + delta[0] * step, state.panY + delta[1] * step);
   });
 
   for (const name of sliders) {
@@ -690,6 +761,7 @@
     sync();
   });
   $('reset').addEventListener('click', () => {
+    finishPosition();
     state = structuredClone(defaults);
     paletteQuery = '';
     paintedQuery = null;

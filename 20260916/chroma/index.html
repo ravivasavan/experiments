@@ -49,7 +49,7 @@
   <link rel="stylesheet" href="https://ravivasavan.com/chrome/v1/chrome.css">
   <link rel="stylesheet" href="/assets/play.css">
   <link rel="stylesheet" href="./chroma.css">
-  <script type="module" crossorigin src="/experiments/20260916/chroma/assets/index-BcRWxElC.js"></script>
+  <script type="module" crossorigin src="/experiments/20260916/chroma/assets/index-DdCoZMUb.js"></script>
   <link rel="modulepreload" crossorigin href="/experiments/20260916/chroma/assets/react-Dk8-RHi1.js">
   <link rel="modulepreload" crossorigin href="/experiments/20260916/chroma/assets/dialkit-CdY9f2jN.js">
   <link rel="stylesheet" crossorigin href="/experiments/20260916/chroma/assets/dialkit-yOvin6q7.css">
@@ -84,8 +84,8 @@
        the drawer. #stage stays the preview box itself: app.js measures it to
        size the render buffer, and asks it to go fullscreen. -->
   <main class="viewport" aria-label="Wallpaper preview">
-    <div id="stage" class="stage" data-pan="free">
-      <canvas id="art" aria-label="Generated abstract wallpaper"></canvas>
+    <div id="stage" class="stage" data-pan>
+      <canvas id="art" tabindex="0" aria-label="Generated abstract wallpaper; drag or use arrow keys to position"></canvas>
       <div id="render-error" hidden></div>
     </div>
   </main>
@@ -138,6 +138,9 @@
        the swatches are painted in here by app.js too; the panel reads them for
        its select and its colour controls. -->
   <div class="bridge" hidden aria-hidden="true">
+        <input id="pan-x" type="number" min="-100" max="100" step="any" value="0" tabindex="-1">
+        <input id="pan-y" type="number" min="-100" max="100" step="any" value="0" tabindex="-1">
+        <input id="pan-locked" type="checkbox" tabindex="-1">
 
         <div id="modes" class="rail__group" hidden role="radiogroup" aria-label="Composition">
       <span class="segmented-thumb" id="mode-thumb" hidden></span>
