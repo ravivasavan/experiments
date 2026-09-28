@@ -44,8 +44,8 @@ Never:
   `<link rel="preload">` of the same URL is fine)
 - set `scrollbar-gutter: stable` (chrome.js measures the scrollbar and sets
   `--nav-right-comp`; a gutter fights it)
-- name anything of yours `nav-id`, `nav-menu`, `nav-theme`, `nav-chip`,
-  `nav-dial`
+- name anything of yours `nav-id`, `nav-menu`, `nav-more`, `nav-veil`,
+  `nav-theme`, `nav-chip`, `nav-dial`
 - put page content at z-index 450 or above. Bands: content < 450 ·
   `--z-sheet` 450 (the panel) · `--z-chrome` 500 (rail, dock, nav)
 - draw the `.chrome-rule`. It is `display: none`; drop it from templates as

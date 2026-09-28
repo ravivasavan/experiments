@@ -218,9 +218,17 @@
     arrive();
   }
   function chromeRight() {
-    let theme = document.querySelector('.nav-theme');
+    // The right chrome's edge: the theme pill, or on phones the four-dot disc
+    // that folds the menu and theme together in its place (the theme pill is
+    // then inside the hidden sheet).
+    const edge = (doc) => {
+      const more = doc.querySelector('.nav-more');
+      if (more && more.getBoundingClientRect().width) return more;
+      return doc.querySelector('.nav-theme');
+    };
+    let theme = edge(document);
     try {
-      if (!theme && window.parent && window.parent !== window) theme = window.parent.document.querySelector('.nav-theme');
+      if (!theme && window.parent && window.parent !== window) theme = edge(window.parent.document);
     } catch (e) {}
     if (theme) return theme.getBoundingClientRect().right;
     const margin = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--chrome-top')) || 40;

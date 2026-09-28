@@ -139,7 +139,7 @@
   // Fit the artwork around the real floating controls, without moving any
   // chrome. Shared play.js still owns the user's zoom/translation transform.
   let fitFrame, fittedAspect;
-  const fitObstacles = '[data-chrome] .nav-id, [data-chrome] .nav-menu, [data-chrome] .nav-theme, .rail, .dock, .dialkit-panel';
+  const fitObstacles = '[data-chrome] .nav-id, [data-chrome] .nav-menu, [data-chrome] .nav-more, [data-chrome] .nav-theme, .rail, .dock, .dialkit-panel';
   function requestFit() {
     if (fitFrame) return;
     fitFrame = requestAnimationFrame(() => { fitFrame = 0; fitArtwork(); });
