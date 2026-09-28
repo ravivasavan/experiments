@@ -216,6 +216,11 @@ Use the `.glass` class; do not compose it by hand.
 
 ## Layout — the content is the whole viewport
 
+**Chroma exception (Ravi, 2026-09-28):** initial view and Fit contain the entire
+wallpaper clear of the visible chrome, rail, dock and DialKit panel. Measure
+those controls; keep their layout unchanged. Manual preview zoom/pan remains
+user-controlled. This exception does not change other plays.
+
 - The artwork centres on **the viewport's own centre**. No top padding for
   the chrome, no floor under the rail, no bottom padding for the dock, no
   `padding-right` for the panel. The Tools lie over it.

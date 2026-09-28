@@ -40,28 +40,31 @@
     uniform vec3 c0,c1,c2,c3;
     float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7))+seed*.127)*43758.5453);}
     float box(vec2 p,vec2 b,float r){vec2 q=abs(p)-b+r;return min(max(q.x,q.y),0.)+length(max(q,0.))-r;}
+    // Extend descending rates beyond 100 without crossing zero. The original
+    // 0–100 curve is unchanged; the continuation also preserves its slope.
+    float falloff(float a,float b,float t){return t<=1.?mix(a,b,t):b/(1.+(t-1.)*(a/b-1.));}
     void main(){
       vec2 uv=gl_FragCoord.xy/resolution-offset;
       vec2 p=(uv-.5)*vec2(resolution.x/resolution.y,1.);
       p=mat2(cos(rotation),-sin(rotation),sin(rotation),cos(rotation))*p;
       float s=seed*.01371;
-      p*=mix(1.45,.7,zoom);
+      p*=falloff(1.45,.7,zoom);
       float diffuse=mix(.035,.23,flow);
       float vertical=clamp(uv.y,0.,1.);
       vec3 col=mix(c0,c1,smoothstep(0.,1.,vertical));
       if(mode<.5){
         float wave=p.y+.23*sin(p.x*1.7+s)+.1*cos(p.x*2.6-s);
         col=mix(c0,c1,smoothstep(-.55,.4,wave));
-        float warm=exp(-dot(p*vec2(.72,1.3),p*vec2(.72,1.3))*mix(7.,1.6,flow));
+        float warm=exp(-dot(p*vec2(.72,1.3),p*vec2(.72,1.3))*falloff(7.,1.6,flow));
         col=mix(col,c2,warm*.88);
-        float core=exp(-dot(p,p)*mix(18.,5.,flow));
+        float core=exp(-dot(p,p)*falloff(18.,5.,flow));
         col=mix(col,c3,core*(.35+glow*.5));
         col=mix(col,c1,(1.-smoothstep(-.65,-.1,p.y))*.2);
       }else if(mode<1.5){
         float aspect=resolution.x/resolution.y;
         vec2 bounds=vec2(min(aspect*.30,.58),.29);
         float d=box(p,bounds,.035+flow*.065);
-        float halo=exp(-max(d,0.)*mix(16.,5.,flow));
+        float halo=exp(-max(d,0.)*falloff(16.,5.,flow));
         col=mix(col,mix(c1,c2,.38),halo*.65);
         float aperture=1.-smoothstep(-diffuse*.7,diffuse*.45,d);
         vec3 light=mix(c2,c3,smoothstep(-.35,.32,p.y));
@@ -69,7 +72,7 @@
         float center=exp(-dot(p*vec2(.7,1.2),p*vec2(.7,1.2))*3.5);
         light+=vec3(1.,.82,.68)*center*glow*.1;
         col=mix(col,light,aperture);
-        float surround=exp(-abs(d)*mix(28.,10.,flow));
+        float surround=exp(-abs(d)*falloff(28.,10.,flow));
         col+=c2*surround*glow*.055;
       }else{
         float line=p.y;
@@ -133,6 +136,58 @@
     toastTimer = setTimeout(() => $('toast').classList.remove('show'), 2800);
   }
   function dimensions() { return state.resolution.split('x').map(Number); }
+  // Fit the artwork around the real floating controls, without moving any
+  // chrome. Shared play.js still owns the user's zoom/translation transform.
+  let fitFrame, fittedAspect;
+  const fitObstacles = '[data-chrome] .nav-id, [data-chrome] .nav-menu, [data-chrome] .nav-theme, .rail, .dock, .dialkit-panel';
+  function requestFit() {
+    if (fitFrame) return;
+    fitFrame = requestAnimationFrame(() => { fitFrame = 0; fitArtwork(); });
+  }
+  function fitArtwork() {
+    const stage = $('stage');
+    const [w, h] = dimensions(), aspect = w / h;
+    if (document.fullscreenElement || (stage.classList.contains('is-zoomed') && aspect === fittedAspect)) return;
+    const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 8;
+    const vw = document.documentElement.clientWidth, vh = innerHeight;
+    let spaces = [{ left: gap, top: gap, right: vw - gap, bottom: vh - gap }];
+    for (const el of document.querySelectorAll(fitObstacles)) {
+      const r = el.getBoundingClientRect();
+      if (!r.width || !r.height || getComputedStyle(el).visibility === 'hidden') continue;
+      const o = { left: r.left - gap, top: r.top - gap, right: r.right + gap, bottom: r.bottom + gap };
+      spaces = spaces.flatMap(s => {
+        if (o.right <= s.left || o.left >= s.right || o.bottom <= s.top || o.top >= s.bottom) return [s];
+        return [
+          { ...s, right: Math.min(s.right, o.left) },
+          { ...s, left: Math.max(s.left, o.right) },
+          { ...s, bottom: Math.min(s.bottom, o.top) },
+          { ...s, top: Math.max(s.top, o.bottom) }
+        ].filter(r => r.right > r.left && r.bottom > r.top);
+      });
+      // Keep maximal empty rectangles, including alternatives below the rail
+      // or panel. A short panel need not consume a whole permanent column.
+      spaces = spaces.filter((r, i, all) => !all.some((s, j) => j !== i &&
+        s.left <= r.left && s.top <= r.top && s.right >= r.right && s.bottom >= r.bottom &&
+        (j < i || s.left < r.left || s.top < r.top || s.right > r.right || s.bottom > r.bottom)));
+    }
+    const candidates = [];
+    for (const s of spaces) {
+      const width = Math.min(s.right - s.left, (s.bottom - s.top) * aspect), height = width / aspect;
+      const left = Math.max(s.left, Math.min((vw - width) / 2, s.right - width));
+      const top = Math.max(s.top, Math.min((vh - height) / 2, s.bottom - height));
+      const area = width * height, distance = Math.hypot(left + width / 2 - vw / 2, top + height / 2 - vh / 2);
+      candidates.push({ left, top, width, height, area, distance });
+    }
+    // Prefer a centred view over a negligible size gain in a distant corner.
+    const largest = Math.max(...candidates.map(r => r.area));
+    const best = candidates.filter(r => r.area >= largest * .98).sort((a, b) => a.distance - b.distance)[0];
+    if (!best) return;
+    fittedAspect = aspect;
+    for (const key of ['left', 'top', 'width', 'height']) {
+      const value = `${best[key].toFixed(3)}px`;
+      if (stage.style.getPropertyValue(`--fit-${key}`) !== value) stage.style.setProperty(`--fit-${key}`, value);
+    }
+  }
   function save() { try { localStorage.setItem('chroma-v2', JSON.stringify(state)); } catch { /* Settings still work when storage is unavailable. */ } }
   function snapAngle(value) { return Math.round(value / ANGLE_LOCK) * ANGLE_LOCK; }
   function lockHorizon(value) { return state.mode === 2 ? snapAngle(value) : value; }
@@ -539,6 +594,7 @@
     });
     const [w, h] = dimensions(), gcd = (a, b) => b ? gcd(b, a % b) : a, divisor = gcd(w, h);
     document.documentElement.style.setProperty('--preview-aspect', `${w} / ${h}`);
+    requestFit();
     $('size-label').textContent = `${w} × ${h} · ${w / divisor}:${h / divisor}`;
     $('composition-label').textContent = `${modes[state.mode]} · ${String(state.seed).padStart(4, '0')}`;
     applyChrome();
@@ -550,7 +606,7 @@
     const valid = structuredClone(defaults);
     for (const key of [...sliders, 'seed', 'mode', 'palette']) {
       const min = key === 'rotation' ? -180 : key === 'palette' ? -1 : 0;
-      const max = key === 'rotation' ? 180 : key === 'seed' ? 999999 : key === 'mode' ? 2 : key === 'palette' ? palettes.length - 1 : 100;
+      const max = key === 'rotation' ? 180 : key === 'seed' ? 999999 : key === 'mode' ? 2 : key === 'palette' ? palettes.length - 1 : key === 'scale' ? 300 : key === 'flow' ? 200 : 100;
       if (Number.isFinite(input[key])) valid[key] = Math.round(Math.min(max, Math.max(min, input[key])));
     }
     if (valid.mode === 2) valid.rotation = snapAngle(valid.rotation);
@@ -936,6 +992,28 @@
   sliders.forEach(bindDialSlider);
   new ResizeObserver(() => { schedule(); placeModeThumb(); }).observe($('stage'));
   new ResizeObserver(placeModeThumb).observe($('modes'));
+  // Observe only control geometry, not canvas redraws or our own stage styles.
+  const fitResize = new ResizeObserver(requestFit);
+  const fitObserved = new WeakSet();
+  const fitMutations = new MutationObserver(requestFit);
+  function watchFitControls() {
+    document.querySelectorAll(fitObstacles).forEach(el => {
+      if (!fitObserved.has(el)) {
+        fitObserved.add(el);
+        fitResize.observe(el);
+        fitMutations.observe(el, { attributes: true, subtree: true, attributeFilter: ['style', 'class', 'data-collapsed'] });
+      }
+    });
+    requestFit();
+  }
+  // DialKit portals into body, outside React's #root; discover late mounts there.
+  new MutationObserver(watchFitControls).observe(document.body, { childList: true, subtree: true });
+  new MutationObserver(requestFit).observe($('stage'), { attributes: true, attributeFilter: ['class'] });
+  document.querySelector('[data-view="fit"]').addEventListener('click', requestFit);
+  addEventListener('resize', requestFit);
+  document.addEventListener('fullscreenchange', requestFit);
+  document.fonts.ready.then(requestFit);
+  watchFitControls();
   sync();
 
   /* The padlocks live on DialKit's own dial rows now, and React injects them

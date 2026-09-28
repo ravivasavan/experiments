@@ -84,6 +84,11 @@ superseded: everything derives from `--chrome-top` (40 / 16 / 12), which gives
 
 ## Layout: the content is the whole viewport, the panel overlays it
 
+**Chroma exception (2026-09-28):** Ravi requested an unobscured initial/Fit
+view. Chroma fits its wallpaper around measured visible controls, preserving
+aspect ratio and manual preview zoom/pan. Chrome, Tools and other plays keep
+their existing layout. The default rule below applies to other plays.
+
 **No page reserves room for the panel.** The experiment's artwork is centred on
 the *viewport's* centre and its canvases and backgrounds run edge to edge; the
 glass lies on top and covers a corner of it. That is deliberate, and DialKit's

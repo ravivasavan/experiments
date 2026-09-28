@@ -108,8 +108,8 @@ function Controls() {
 
   const controller = useDialKitController('Chroma', {
     composition: { type: 'select', options: COMPOSITIONS, default: readMode() },
-    diffusion: [read('flow', 60), 0, 100, 1],
-    scale: [read('scale', 55), 0, 100, 1],
+    diffusion: [read('flow', 60), 0, 200, 1],
+    scale: [read('scale', 55), 0, 300, 1],
     angle: [read('rotation', 0), -180, 180, 1],
     radiance: [read('glow', 65), 0, 100, 1],
     grain: [read('grain', 8), 0, 100, 1],
