@@ -385,7 +385,9 @@ corners; only full-view media has square corners. Shared chrome is unchanged.
 
 Depth (`poc/depth/`, `/20260930/depth/`) is unlisted: no timeline entry,
 glyph, noscript line or shots, and the page is `noindex`. Its icon lineup is a
-single column of labelled cards beside the rail, each icon at its true size, and
+single column of labelled cards beside the rail, each icon at its true size —
+including a mock Discord sidebar whose other servers are well-known marks from
+Simple Icons (CC0), a preview only and never exported — and
 the square canvas centres in the room between that column and the panel rather
 than on the viewport. A 3D-package gizmo is drawn over the d on the canvas, in
 Local orientation and through the d's own camera, X red, Y green, Z blue:
