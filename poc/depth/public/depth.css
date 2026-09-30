@@ -70,6 +70,12 @@
 .gimbal__halo { stroke: var(--bg); stroke-width: 5; opacity: 0.9; }
 .gimbal__ring { stroke: var(--axis); stroke-width: 2.5; }
 .gimbal__hit { stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
+.gimbal__hit--fill { fill: transparent; pointer-events: all; }
+.gimbal__tip { fill: var(--axis); stroke: var(--bg); stroke-width: 1.5; }
+.gimbal__plane { fill: color-mix(in srgb, var(--axis) 35%, transparent); stroke: var(--axis); stroke-width: 1.5; }
+.gimbal g[data-handle]:hover .gimbal__plane,
+.gimbal g[data-handle].is-active .gimbal__plane { fill: color-mix(in srgb, var(--axis) 60%, transparent); }
+#mark[data-tool="move"] { cursor: move; }
 .gimbal g:hover .gimbal__ring,
 .gimbal g.is-active .gimbal__ring { stroke-width: 4; }
 .gimbal g:hover .gimbal__back,

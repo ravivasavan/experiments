@@ -28,12 +28,23 @@
   var D = [[42, 18], [36, 18], [36, 27], [6, 27], [6, 15], [42, 15], [42, 0], [36, 0], [36, 9], [0, 9], [0, 33], [42, 33]];
   var D_W = 42, D_H = 33;
 
+  /* The same contour at any thickness: the outline stays 42 × 33 and the
+     ascender 9 tall, the rules move inward, and the slit keeps half a rule.
+     At 6 it is the wordmark's own d. */
+  function dShape(w) {
+    w = Math.max(1, Math.min(9, w));
+    var sl = w / 2;
+    var X = { 0: 0, 6: w, 36: D_W - w, 42: D_W };
+    var Y = { 0: 0, 9: 9, 15: 9 + w, 18: 9 + w + sl, 27: D_H - w, 33: D_H };
+    return D.map(function (p) { return [X[p[0]], Y[p[1]]]; });
+  }
+
   /* The mark, measured. The frame is 402 wide with a 12-unit rule. */
   var FRAME_W = 402;
   var DEFAULTS = {
-    rx: -57.3, ry: -28.9, rz: -15.7, depth: 65, gimbal: true,
+    dWeight: 6, rx: -57.3, ry: -28.9, rz: -15.7, depth: 65, gimbal: true, tool: 'rotate',
     size: 62, x: 0, y: 0,
-    frameOn: true, weight: 12,
+    frameOn: true, weight: 12, frameRatio: 'fill', frameW: 100, frameH: 100,
     square: true, proportion: 2.91,
     field: '#ff4133', ink: '#0c1115', background: true,
     corner: 22,
@@ -86,16 +97,31 @@
      by three times its own weight. The d is sized against the canvas width — half of it at
      least, and as much more as you like, running off the edges. The canvas is
      the export's viewBox and the square every icon is cut from. */
+  /* The frame's own shape, inside the canvas less three times its weight:
+     Fill takes all of that room, a ratio is the largest box of that shape
+     that fits, and Freeform is a width and height as shares of the room. */
+  var RATIOS = { '1:1': 1, '4:3': 4 / 3, '3:4': 3 / 4, '3:2': 3 / 2, '16:9': 16 / 9, '9:16': 9 / 16, 'mark': 402 / 138 };
+  function frameBox(W, H, t) {
+    var aw = W - 6 * t, ah = H - 6 * t, w = aw, h = ah;
+    if (state.frameRatio === 'free') {
+      w = aw * Math.max(5, Math.min(100, state.frameW)) / 100;
+      h = ah * Math.max(5, Math.min(100, state.frameH)) / 100;
+    } else if (RATIOS[state.frameRatio]) {
+      var r = RATIOS[state.frameRatio];
+      w = Math.min(aw, ah * r); h = w / r;
+    }
+    return { x: (W - w) / 2, y: (H - h) / 2, w: w, h: h };
+  }
+
   function composition() {
     var W = FRAME_W, H = state.square ? W : W / Math.max(0.5, state.proportion);
     // Keep a frame whose inset would swallow it at least a tenth of the canvas.
     var t = state.frameOn ? Math.max(0, Math.min(state.weight, Math.min(W, H) * 0.9 / 8)) : 0;
-    var inset = 3 * t;
-    var fr = { x: inset, y: inset, w: W - 2 * inset, h: H - 2 * inset };
+    var fr = frameBox(W, H, t);
     var k = (Math.max(50, state.size) / 100) * W / D_W;
     var cx = W / 2 + (state.x / 100) * W;
-    var cy = H / 2 + (state.y / 100) * H;
-    var pts = D.map(function (p) { return project(p, state, k, cx, cy); });
+    var cy = H / 2 - (state.y / 100) * H;   // Y up, like the rotation
+    var pts = dShape(state.dWeight).map(function (p) { return project(p, state, k, cx, cy); });
     return { frame: fr, t: t, pts: pts, box: { x: 0, y: 0, w: W, h: H }, cx: cx, cy: cy };
   }
 
@@ -403,6 +429,10 @@
     { key: 'rz', colour: '#2890ff' }
   ];
   var gimbalEl = $('gimbal');
+  var MOVE = [
+    { key: 'x', colour: '#ff3352', dir: [1, 0] },
+    { key: 'y', colour: '#8bdc00', dir: [0, -1] }
+  ];
 
   function gimbalAxes() {
     var z = [0, 0, 1];
@@ -421,6 +451,7 @@
   function paintGimbal(c) {
     gimbalEl.style.display = state.gimbal ? '' : 'none';
     if (!state.gimbal) return;
+    if (state.tool === 'move') return paintMove(c);
     var r = Math.min(c.box.w, c.box.h) * 0.3;
     var axes = gimbalAxes(), out = '';
     gimbalGeom = { cx: c.cx, cy: c.cy, r: r, axes: axes };
@@ -441,6 +472,31 @@
     });
     gimbalEl.innerHTML = out;
   }
+  /* Cinema 4D's move gizmo, seen from the front: an X arrow, a Y arrow and
+     the XY plane handle between them. Z would point straight at you — there
+     is nothing to grab — so the d's distance is Perspective and Size. */
+  function paintMove(c) {
+    var L = Math.min(c.box.w, c.box.h) * 0.26, out = '';
+    var head = L * 0.16, wing = L * 0.07, q = L * 0.3;
+    gimbalGeom = { cx: c.cx, cy: c.cy, r: L };
+    out += '<g data-handle="xy" style="--axis:#2890ff">' +
+      '<path class="gimbal__plane" d="M' + n(c.cx) + ' ' + n(c.cy) + 'h' + n(q) + 'v' + n(-q) + 'h' + n(-q) + 'Z"/>' +
+      '<path class="gimbal__hit gimbal__hit--fill" d="M' + n(c.cx) + ' ' + n(c.cy) + 'h' + n(q) + 'v' + n(-q) + 'h' + n(-q) + 'Z"/></g>';
+    MOVE.forEach(function (m) {
+      var ex = c.cx + m.dir[0] * L, ey = c.cy + m.dir[1] * L;
+      var bx = c.cx + m.dir[0] * (L - head), by = c.cy + m.dir[1] * (L - head);
+      var px = -m.dir[1] * wing, py = m.dir[0] * wing;
+      var shaft = 'M' + n(c.cx) + ' ' + n(c.cy) + 'L' + n(bx) + ' ' + n(by);
+      var tip = 'M' + n(ex) + ' ' + n(ey) + 'L' + n(bx + px) + ' ' + n(by + py) + 'L' + n(bx - px) + ' ' + n(by - py) + 'Z';
+      out += '<g data-handle="' + m.key + '" style="--axis:' + m.colour + '">' +
+        '<path class="gimbal__halo" d="' + shaft + '"/>' +
+        '<path class="gimbal__ring" d="' + shaft + '"/>' +
+        '<path class="gimbal__tip" d="' + tip + '"/>' +
+        '<path class="gimbal__hit" d="' + shaft + tip + '"/></g>';
+    });
+    gimbalEl.innerHTML = out;
+  }
+
   function ringPoint(uv, r, t) {
     var u = uv[0], v = uv[1], c = Math.cos(t) * r, s = Math.sin(t) * r;
     return [u[0] * c + v[0] * s, u[1] * c + v[1] * s, u[2] * c + v[2] * s];
@@ -489,9 +545,9 @@
 
   /* --------------------------------------------------------------- inputs -- */
 
-  var NUM = ['rx', 'ry', 'rz', 'depth', 'size', 'x', 'y', 'proportion', 'weight', 'corner'];
+  var NUM = ['rx', 'ry', 'rz', 'depth', 'size', 'dWeight', 'x', 'y', 'proportion', 'weight', 'frameW', 'frameH', 'corner'];
   var CHECK = { background: 'background', square: 'square', frameOn: 'frame-on' };
-  var INPUT_ID = { x: 'pos-x', y: 'pos-y', depth: 'perspective' };
+  var INPUT_ID = { x: 'pos-x', y: 'pos-y', depth: 'perspective', frameW: 'frame-w', frameH: 'frame-h', dWeight: 'd-weight' };
   function inputFor(k) { return $(INPUT_ID[k] || k); }
 
   function sync() {
@@ -506,9 +562,16 @@
     $('field').value = state.field;
     $('ink').value = state.ink;
     for (var k in CHECK) $(CHECK[k]).checked = !!state[k];
+    $('frame-ratio').value = state.frameRatio;
     var gb = $('show-gimbal');
     gb.classList.toggle('is-on', !!state.gimbal);
     gb.setAttribute('aria-pressed', String(!!state.gimbal));
+    document.querySelectorAll('.rail [data-tool]').forEach(function (b) {
+      var on = b.getAttribute('data-tool') === state.tool;
+      b.classList.toggle('is-on', on);
+      b.setAttribute('aria-pressed', String(on));
+    });
+    svg.dataset.tool = state.tool;
   }
 
   function changed(fromPanel) {
@@ -533,6 +596,12 @@
       state[k] = v;
       changed(true);
     });
+  });
+  $('frame-ratio').addEventListener('change', function () {
+    var v = $('frame-ratio').value;
+    if (v === state.frameRatio) return;
+    state.frameRatio = v;
+    changed(true);
   });
   Object.keys(CHECK).forEach(function (k) {
     var el = $(CHECK[k]);
@@ -569,6 +638,24 @@
     changed(false);
   });
 
+  function setTool(t) {
+    if (state.tool === t && state.gimbal) return;
+    state.tool = t;
+    state.gimbal = true;
+    changed(false);
+  }
+  document.querySelectorAll('.rail [data-tool]').forEach(function (b) {
+    b.addEventListener('click', function () { setTool(b.getAttribute('data-tool')); });
+  });
+  window.addEventListener('keydown', function (e) {
+    if (e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+    var t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+    var k = e.key.toLowerCase();
+    if (k === 'e') setTool('move');
+    else if (k === 'r') setTool('rotate');
+  });
+
   /* Flatten lays the d back in the wordmark's plane — the pose the icons can
      pixel-snap. Size, frame and colour stay as they are. */
   $('flatten').addEventListener('click', function () {
@@ -585,9 +672,11 @@
   });
 
   /* -------------------------------------------------- turning it by hand -- */
-  /* Drag a gimbal ring to turn that one angle. Drag anywhere else on the mark
-     to orbit: sideways is Y, up and down is X. The arrow keys do X and Y a
-     degree at a time and [ ] do Z (Shift for ten). Panning is still
+  /* Two tools, on Cinema 4D's keys: E is Move, R is Rotate. Rotate: drag a
+     gimbal ring to turn that one angle, or anywhere else to orbit — sideways
+     is Y, up and down is X; the arrow keys do X and Y a degree at a time and
+     [ ] do Z. Move: drag an arrow to move along it, the plane handle or the
+     canvas to move freely; the arrow keys nudge. Shift steps by ten. Panning is still
      play.js's, on the middle button or with space held. */
 
   function wrap(v) { v = ((v + 180) % 360 + 360) % 360 - 180; return v === -180 ? 180 : v; }
@@ -605,9 +694,14 @@
   svg.addEventListener('pointerdown', function (e) {
     if (e.button !== 0 || e.defaultPrevented) return;
     var ring = e.target.closest && e.target.closest('[data-axis]');
+    var handle = e.target.closest && e.target.closest('[data-handle]');
     var at = toCanvas(e);
-    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, at: at, rx: state.rx, ry: state.ry, rz: state.rz };
-    if (ring && gimbalGeom) {
+    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, at: at, rx: state.rx, ry: state.ry, rz: state.rz, px: state.x, py: state.y };
+    if (state.tool === 'move') {
+      // Off the gizmo, a drag on the canvas moves freely in XY.
+      drag.handle = handle ? handle.getAttribute('data-handle') : 'xy';
+      if (handle) handle.classList.add('is-active');
+    } else if (ring && gimbalGeom) {
       drag.axis = Number(ring.getAttribute('data-axis'));
       drag.tangent = ringTangent(drag.axis, at[0], at[1]);
       ring.classList.add('is-active');
@@ -617,7 +711,12 @@
   });
   svg.addEventListener('pointermove', function (e) {
     if (!drag || e.pointerId !== drag.id) return;
-    if (drag.axis != null) {
+    if (drag.handle) {
+      var b = composition().box, cur = toCanvas(e);
+      var mx = (cur[0] - drag.at[0]) / b.w * 100, my = -(cur[1] - drag.at[1]) / b.h * 100;
+      if (drag.handle !== 'y') state.x = round1(drag.px + mx);
+      if (drag.handle !== 'x') state.y = round1(drag.py + my);
+    } else if (drag.axis != null) {
       var now = toCanvas(e), t = drag.tangent, r = gimbalGeom.r;
       var d = [now[0] - drag.at[0], now[1] - drag.at[1]];
       // Along the ring's own direction at the grab point; a ring seen edge-on
@@ -641,7 +740,13 @@
   });
   svg.addEventListener('keydown', function (e) {
     var step = e.shiftKey ? 10 : 1, hit = true;
-    if (e.key === 'ArrowLeft') state.ry = wrap(state.ry - step);
+    if (state.tool === 'move') {
+      if (e.key === 'ArrowLeft') state.x = round1(state.x - step);
+      else if (e.key === 'ArrowRight') state.x = round1(state.x + step);
+      else if (e.key === 'ArrowUp') state.y = round1(state.y + step);
+      else if (e.key === 'ArrowDown') state.y = round1(state.y - step);
+      else hit = false;
+    } else if (e.key === 'ArrowLeft') state.ry = wrap(state.ry - step);
     else if (e.key === 'ArrowRight') state.ry = wrap(state.ry + step);
     else if (e.key === 'ArrowUp') state.rx = wrap(state.rx - step);
     else if (e.key === 'ArrowDown') state.rx = wrap(state.rx + step);

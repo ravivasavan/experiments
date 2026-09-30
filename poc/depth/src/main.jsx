@@ -18,11 +18,14 @@ const WIRING = {
   'rotation.y': 'ry',
   'rotation.z': 'rz',
   'rotation.perspective': 'perspective',
-  'd.size': 'size',
-  'd.horizontal': 'pos-x',
-  'd.vertical': 'pos-y',
-  'artboard.ratio': 'proportion',
+  'position.x': 'pos-x',
+  'position.y': 'pos-y',
+  'lettermark.size': 'size',
+  'lettermark.thickness': 'd-weight',
+  'artboard.proportion': 'proportion',
   'frame.weight': 'weight',
+  'frame.width': 'frame-w',
+  'frame.height': 'frame-h',
   'icon.corner': 'corner',
 }
 
@@ -51,12 +54,20 @@ function driveCheck(id, value) {
   el.dispatchEvent(new Event('change', { bubbles: true }))
 }
 
+function driveSelect(id, value) {
+  const el = $(id)
+  if (!el || el.value === value) return
+  el.value = value
+  el.dispatchEvent(new Event('change', { bubbles: true }))
+}
+
 function shape(s) {
   return {
     rotation: { x: s.rx, y: s.ry, z: s.rz, perspective: s.depth },
-    d: { size: s.size, horizontal: s.x, vertical: s.y },
-    frame: { visible: s.frameOn, weight: s.weight },
-    artboard: { square: s.square, ratio: s.proportion },
+    position: { x: s.x, y: s.y },
+    lettermark: { size: s.size, thickness: s.dWeight },
+    frame: { visible: s.frameOn, ratio: s.frameRatio, width: s.frameW, height: s.frameH, weight: s.weight },
+    artboard: { square: s.square, proportion: s.proportion },
     colour: { field: s.field, ink: s.ink, background: s.background },
     icon: { corner: s.corner },
   }
@@ -66,24 +77,44 @@ function Controls() {
   const s = useRef(window.depth.state()).current
 
   const controller = useDialKitController('Depth', {
+    position: {
+      x: [s.x, -100, 100, 0.1],
+      y: [s.y, -100, 100, 0.1],
+    },
     rotation: {
       x: [s.rx, -180, 180, 0.1],
       y: [s.ry, -180, 180, 0.1],
       z: [s.rz, -180, 180, 0.1],
       perspective: [s.depth, 0, 100, 1],
     },
-    d: {
+    lettermark: {
       size: [s.size, 50, 400, 0.5],
-      horizontal: [s.x, -100, 100, 0.1],
-      vertical: [s.y, -100, 100, 0.1],
+      thickness: [s.dWeight, 1, 9, 0.1],
     },
     frame: {
       visible: s.frameOn,
+      ratio: {
+        type: 'select',
+        options: [
+          { value: 'fill', label: 'Fill' },
+          { value: '1:1', label: '1:1' },
+          { value: '4:3', label: '4:3' },
+          { value: '3:4', label: '3:4' },
+          { value: '3:2', label: '3:2' },
+          { value: '16:9', label: '16:9' },
+          { value: '9:16', label: '9:16' },
+          { value: 'mark', label: 'Logomark · 2.91:1' },
+          { value: 'free', label: 'Freeform' },
+        ],
+        default: s.frameRatio,
+      },
+      width: [s.frameW, 5, 100, 0.5],
+      height: [s.frameH, 5, 100, 0.5],
       weight: [s.weight, 1, 40, 0.5],
     },
     artboard: {
       square: s.square,
-      ratio: [s.proportion, 1, 4, 0.01],
+      proportion: [s.proportion, 1, 4, 0.01],
     },
     colour: {
       field: { type: 'color', default: s.field },
@@ -105,7 +136,7 @@ function Controls() {
 
   const deps = [
     ...Object.keys(WIRING).map((k) => get(v, k)),
-    v.colour.field, v.colour.ink, v.colour.background, v.frame.visible, v.artboard.square,
+    v.colour.field, v.colour.ink, v.colour.background, v.frame.visible, v.frame.ratio, v.artboard.square,
   ]
   const mounted = useRef(false)
   useEffect(() => {
@@ -115,6 +146,7 @@ function Controls() {
     driveColor('ink', v.colour.ink)
     driveCheck('background', v.colour.background)
     driveCheck('frame-on', v.frame.visible)
+    driveSelect('frame-ratio', v.frame.ratio)
     driveCheck('square', v.artboard.square)
   }, deps)
 

@@ -387,8 +387,10 @@ Depth (`poc/depth/`, `/20260930/depth/`) is unlisted: no timeline entry,
 glyph, noscript line or shots, and the page is `noindex`. Its icon lineup is a
 single column of labelled cards beside the rail, each icon at its true size, and
 the square canvas centres in the room between that column and the panel rather
-than on the viewport. A Blender-style gimbal (X red, Y green, Z blue, Gimbal
-orientation) is drawn over the d on the canvas and its rings are draggable; the
-rail's Gimbal pill shows or hides it. The gimbal is never part of an export.
-Rotation is Euler XYZ with X right, Y up, Z toward the viewer. These exceptions
-are limited to Depth; shared chrome is unchanged.
+than on the viewport. A 3D-package gizmo is drawn over the d on the canvas —
+Move (X/Y arrows and the XY plane handle) or Rotate (rings in Gimbal
+orientation), X red, Y green, Z blue — switched by Cinema 4D's keys, E and R,
+or the rail's Move and Rotate pills; the Gizmo pill shows or hides it. The
+gizmo is never part of an export. Rotation is Euler XYZ with X right, Y up,
+Z toward the viewer. These exceptions are limited to Depth; shared chrome is
+unchanged.
