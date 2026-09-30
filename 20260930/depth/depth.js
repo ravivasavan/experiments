@@ -877,8 +877,8 @@
   /* A throw that lands near something finished, for you to take the last
      mile. The ranges are the logomark's neighbourhood: mostly the d laid back
      like the mark, sometimes nearly face-on, never edge-on (its face keeps at
-     least a third of its area toward you). The d is then scaled to sit well
-     in the frame (or the canvas, with no frame) and centred, give or take a
+     least a third of its area toward you). The d is then scaled against the
+     frame — free to run past it — or the canvas, and centred, give or take a
      little. Thickness stays near the wordmark's, the frame stays a plain
      rule. Colour, the artboard and the icon corner are yours and are left. */
 
@@ -903,13 +903,13 @@
       // Fit: size is linear in the projection, so measure once and scale.
       c.size = 62; c.x = 0; c.y = 0;
       state = c;
-      // Fit against the inside of the frame when there is one — a laid-back
-      // d may break it a little, the way the mark's tail does; a face-on d
-      // stays clear of it — or against the canvas when there is none.
+      // Fit against the inside of the frame when there is one, and let the
+      // lettermark run past it — the mark's tail does — or against the
+      // canvas when there is none.
       var comp = composition(), box = comp.box, bx = bounds(comp.pts), fr = comp.frame, t = comp.t;
       var room = c.frameOn ? { w: fr.w - 2 * t, h: fr.h - 2 * t } : box;
       var fill = Math.max(bx.w / room.w, bx.h / room.h);
-      var target = !c.frameOn ? rand(0.66, 0.88) : face ? rand(0.6, 0.8) : rand(0.8, 0.98);
+      var target = !c.frameOn ? rand(0.66, 0.88) : face ? rand(0.7, 1.1) : rand(0.85, 1.2);
       var size = 62 * target / fill;
       if (size < 50 || size > 180) continue;
       c.size = size;
