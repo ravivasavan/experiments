@@ -8,7 +8,7 @@ import '../../shared/dialkit-skin.css'
    colours and the icon's parameters; the verbs, the export format and the
    readout are the dock's. depth.js listens to the inputs in the page's
    .bridge; every drive below compares before it writes, so what comes back
-   through depth:sync (a drag on the mark or the gimbal, Flatten, Reset) echoes into the panel without
+   through depth:sync (a drag on the mark or the gizmo, Reset) echoes into the panel without
    a loop. */
 
 const $ = (id) => document.getElementById(id)

@@ -656,14 +656,6 @@
     else if (k === 'r') setTool('rotate');
   });
 
-  /* Flatten lays the d back in the wordmark's plane — the pose the icons can
-     pixel-snap. Size, frame and colour stay as they are. */
-  $('flatten').addEventListener('click', function () {
-    if (!state.rx && !state.ry && !state.rz) return;
-    state.rx = 0; state.ry = 0; state.rz = 0;
-    changed(false);
-  });
-
   /* Reset puts every parameter back — position, lettermark, frame, artboard,
      colour, icon — and lays the d flat: the wordmark's own d, square to you.
      The export format, the tool in hand and whether its gizmo shows are how
