@@ -44,7 +44,7 @@
   var DEFAULTS = {
     dWeight: 6, rx: -57.3, ry: -28.9, rz: -15.7, depth: 65, gimbal: true, tool: 'rotate',
     size: 62, x: 0, y: 0,
-    frameOn: true, weight: 12, frameRatio: 'fill', frameW: 100, frameH: 100,
+    frameOn: true, weight: 12, frameMargin: 36, frameRatio: 'fill', frameW: 100, frameH: 100,
     square: true, proportion: 2.91,
     field: '#ff4133', ink: '#0c1115', background: true,
     corner: 22,
@@ -93,16 +93,17 @@
   }
 
   /* The canvas is fixed: 402 wide (the mark's own width, so the rule is still
-     12), square or at its ratio. The frame always stands off the canvas edge
-     by three times its own weight. The d is sized against the canvas width — half of it at
+     12), square or at its ratio. The frame stands off the canvas edge by its
+     own margin, set apart from its weight. The d is sized against the canvas width — half of it at
      least, and as much more as you like, running off the edges. The canvas is
      the export's viewBox and the square every icon is cut from. */
-  /* The frame's own shape, inside the canvas less three times its weight:
-     Fill takes all of that room, a ratio is the largest box of that shape
+  /* The frame's own shape, inside the canvas less its margin (its own
+     number, in the same canvas units as the weight): Fill takes all of that room, a ratio is the largest box of that shape
      that fits, and Freeform is a width and height as shares of the room. */
   var RATIOS = { '1:1': 1, '4:3': 4 / 3, '3:4': 3 / 4, '3:2': 3 / 2, '16:9': 16 / 9, '9:16': 9 / 16, 'mark': 402 / 138 };
   function frameBox(W, H, t) {
-    var aw = W - 6 * t, ah = H - 6 * t, w = aw, h = ah;
+    var m = Math.max(0, Math.min(state.frameMargin, Math.min(W, H) / 2 - 2 * t - 1));
+    var aw = W - 2 * m, ah = H - 2 * m, w = aw, h = ah;
     if (state.frameRatio === 'free') {
       w = aw * Math.max(5, Math.min(100, state.frameW)) / 100;
       h = ah * Math.max(5, Math.min(100, state.frameH)) / 100;
@@ -116,7 +117,7 @@
   function composition() {
     var W = FRAME_W, H = state.square ? W : W / Math.max(0.5, state.proportion);
     // Keep a frame whose inset would swallow it at least a tenth of the canvas.
-    var t = state.frameOn ? Math.max(0, Math.min(state.weight, Math.min(W, H) * 0.9 / 8)) : 0;
+    var t = state.frameOn ? Math.max(0, Math.min(state.weight, Math.min(W, H) / 4)) : 0;
     var fr = frameBox(W, H, t);
     var k = (Math.max(50, state.size) / 100) * W / D_W;
     var cx = W / 2 + (state.x / 100) * W;
@@ -545,9 +546,9 @@
 
   /* --------------------------------------------------------------- inputs -- */
 
-  var NUM = ['rx', 'ry', 'rz', 'depth', 'size', 'dWeight', 'x', 'y', 'proportion', 'weight', 'frameW', 'frameH', 'corner'];
+  var NUM = ['rx', 'ry', 'rz', 'depth', 'size', 'dWeight', 'x', 'y', 'proportion', 'weight', 'frameMargin', 'frameW', 'frameH', 'corner'];
   var CHECK = { background: 'background', square: 'square', frameOn: 'frame-on' };
-  var INPUT_ID = { x: 'pos-x', y: 'pos-y', depth: 'perspective', frameW: 'frame-w', frameH: 'frame-h', dWeight: 'd-weight' };
+  var INPUT_ID = { x: 'pos-x', y: 'pos-y', depth: 'perspective', frameMargin: 'frame-margin', frameW: 'frame-w', frameH: 'frame-h', dWeight: 'd-weight' };
   function inputFor(k) { return $(INPUT_ID[k] || k); }
 
   function sync() {
