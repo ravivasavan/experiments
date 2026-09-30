@@ -380,3 +380,15 @@ controls, alongside a Close verb and separate name, image-count and zoom
 to the rail/dock placement, persistent dock labels and single-readout rules
 above, limited to Drift's gallery. Gallery thumbnails keep their rounded
 corners; only full-view media has square corners. Shared chrome is unchanged.
+
+## Depth exceptions — requested 2026-09-30
+
+Depth (`poc/depth/`, `/20260930/depth/`) is unlisted: no timeline entry,
+glyph, noscript line or shots, and the page is `noindex`. Its icon lineup is a
+single column of labelled cards beside the rail, each icon at its true size, and
+the square canvas centres in the room between that column and the panel rather
+than on the viewport. A Blender-style gimbal (X red, Y green, Z blue, Gimbal
+orientation) is drawn over the d on the canvas and its rings are draggable; the
+rail's Gimbal pill shows or hides it. The gimbal is never part of an export.
+Rotation is Euler XYZ with X right, Y up, Z toward the viewer. These exceptions
+are limited to Depth; shared chrome is unchanged.

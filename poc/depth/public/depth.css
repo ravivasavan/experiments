@@ -1,0 +1,151 @@
+/* ---------------------------------------------------------------------------
+   Depth — page-specific only.
+
+   Tokens, rail, dock, selector pill, readout and glass come from play.css; the
+   panel is DialKit's popover, skinned by dialkit-skin.css. What is left here
+   is the canvas and the column of icon cards beside the rail.
+
+   Depth exception (Ravi, 2026-09-30): the icon lineup is a column of labelled
+   cards to the right of the rail, and the canvas centres in the room between
+   that column and the panel rather than on the viewport. */
+
+:root {
+  /* The lineup's left edge: the rail's 64px pills, then the one gap. */
+  --lineup-left: calc(var(--chrome-top, 40px) + 64px + var(--gap, 8px));
+  --lineup-w: 224px;
+  --dock-room: calc(var(--chrome-top, 40px) + var(--tool-size, 48px) + 16px);
+}
+
+.viewport {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  /* The canvas centres between the lineup and the panel. */
+  padding: var(--chrome-tools, 112px) calc(360px + var(--chrome-top, 40px))
+           var(--dock-room) calc(var(--lineup-left) + var(--lineup-w) + 24px);
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------ the canvas -- */
+
+.mark-box {
+  --aspect: 1;
+  width: min(100%, calc((100vh - var(--chrome-tools, 112px) - var(--dock-room)) * var(--aspect)), 1200px);
+  aspect-ratio: var(--aspect);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.mark-box.is-bare {
+  /* No field in the export: show what is transparent as a hairline box. */
+  outline: 1px solid var(--separator);
+  outline-offset: -1px;
+}
+
+#mark {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+#mark.is-turning { cursor: grabbing; }
+#mark:focus-visible { outline: 2px solid var(--fg); outline-offset: 4px; border-radius: 20px; }
+.mark-box.is-bare #mark-field { fill: transparent; }
+
+/* The gimbal: Blender's axis colours over a halo of the page's own ground, so
+   the red ring still reads on the red field. Hairline widths hold at any zoom. */
+.gimbal path { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.gimbal__back { stroke: var(--axis); stroke-width: 1.5; opacity: 0.35; }
+.gimbal__halo { stroke: var(--bg); stroke-width: 5; opacity: 0.9; }
+.gimbal__ring { stroke: var(--axis); stroke-width: 2.5; }
+.gimbal__hit { stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
+.gimbal g:hover .gimbal__ring,
+.gimbal g.is-active .gimbal__ring { stroke-width: 4; }
+.gimbal g:hover .gimbal__back,
+.gimbal g.is-active .gimbal__back { opacity: 0.6; }
+
+/* ------------------------------------------------------------ the lineup -- */
+
+.lineup {
+  position: fixed;
+  left: var(--lineup-left);
+  top: var(--chrome-tools, 112px);
+  bottom: var(--dock-room);
+  width: var(--lineup-w);
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap, 8px);
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.lineup::-webkit-scrollbar { display: none; }
+
+.card {
+  margin: 0;
+  flex: none;
+  padding: 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--fg) 4%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.card figcaption {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.card__row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--gap, 8px);
+}
+
+.card canvas { display: block; flex: none; }
+.card canvas[data-icon="180"] { width: 180px; height: 180px; }
+.card canvas[data-icon="128"] { width: 128px; height: 128px; }
+.card canvas[data-icon="96"] { width: 96px; height: 96px; }
+.card canvas[data-icon="64"] { width: 64px; height: 64px; }
+.card canvas[data-icon="48"] { width: 48px; height: 48px; }
+.card canvas[data-icon="32"] { width: 32px; height: 32px; }
+.card canvas[data-icon="16"] { width: 16px; height: 16px; }
+
+/* iOS's own corner, near enough to judge the d against. */
+.tile--squircle { border-radius: 22.37%; }
+.tile--circle { border-radius: 50%; }
+.tile--pixels { image-rendering: pixelated; }
+
+/* ------------------------------------------------------------ the folds -- */
+/* Below 900 there is no room beside the rail: the canvas comes first, the
+   cards follow it in one column, and the viewport scrolls. */
+@media (max-width: 900px) {
+  .viewport {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: var(--gap, 8px);
+    overflow-y: auto;
+    padding: var(--chrome-tools, 88px) var(--chrome-top, 16px) var(--dock-room);
+  }
+  .stage { height: auto; flex: none; }
+  .mark-box { width: min(100%, 480px); }
+  .lineup {
+    position: static;
+    width: min(100%, 480px);
+    overflow: visible;
+    flex: none;
+  }
+  .card { align-items: center; }
+}
