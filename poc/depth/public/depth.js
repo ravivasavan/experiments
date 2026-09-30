@@ -664,10 +664,15 @@
     changed(false);
   });
 
+  /* Reset puts every parameter back — position, lettermark, frame, artboard,
+     colour, icon — and lays the d flat: the wordmark's own d, square to you.
+     The export format, the tool in hand and whether its gizmo shows are how
+     you are working, not the artwork, so they stay. */
   $('reset').addEventListener('click', function () {
-    var keep = state.format;
+    var keep = { format: state.format, tool: state.tool, gimbal: state.gimbal };
     state = JSON.parse(JSON.stringify(DEFAULTS));
-    state.format = keep;
+    state.rx = 0; state.ry = 0; state.rz = 0;
+    Object.assign(state, keep);
     changed(false);
   });
 
