@@ -44,10 +44,13 @@
 
   /* The mark, measured. The frame is 402 wide with a 12-unit rule. */
   var FRAME_W = 402;
+  /* The house composition, set by Ravi on 2026-09-30: the logomark's lean
+     with a longer ascender, heavier rules and a strong camera, frameless,
+     running off the canvas. The page opens on it and Reset returns to it. */
   var DEFAULTS = {
-    dWeight: 6, ascender: 9, z: 0, rx: -57.3, ry: -28.9, rz: -15.7, depth: 65, gimbal: true, tool: 'rotate',
-    size: 62, x: 0, y: 0,
-    frameOn: true, weight: 12, frameMargin: 36, frameRatio: 'fill', frameW: 100, frameH: 100,
+    dWeight: 8, ascender: 30, z: -2.3, rx: -52.7, ry: -31.5, rz: -19.6, depth: 100, gimbal: true, tool: 'rotate',
+    size: 84, x: 9.7, y: 24.8,
+    frameOn: false, weight: 11.4, frameMargin: 46.2, frameRatio: 'fill', frameW: 100, frameH: 100,
     square: true, proportion: 2.91,
     field: '#ff4133', ink: '#0c1115', background: true,
     corner: 22,
@@ -427,6 +430,7 @@
   function exportNow() {
     var f = state.format;
     if (f === 'svg') return save_(new Blob([markSVG().svg], { type: 'image/svg+xml' }), 'depthcore-d.svg');
+    if (f === 'json') return save_(new Blob([toJSON()], { type: 'application/json' }), 'depthcore-d.json');
     if (f === 'png-2048' || f === 'png-4096') {
       var w = f === 'png-4096' ? 4096 : 2048;
       return markPNG(w).then(function (b) { save_(b, 'depthcore-d-' + w + '.png'); });
@@ -687,7 +691,7 @@
 
   var copyLabel = $('copy-label'), copyTimer = 0;
   $('copy').addEventListener('click', function () {
-    var text = /^(zip|ico|favicon-svg)$/.test(state.format) ? faviconSVG() : markSVG().svg;
+    var text = state.format === 'json' ? toJSON() : /^(zip|ico|favicon-svg)$/.test(state.format) ? faviconSVG() : markSVG().svg;
     var done = function () {
       copyLabel.textContent = 'Copied';
       clearTimeout(copyTimer);
@@ -719,16 +723,78 @@
     else if (k === 'r') setTool('rotate');
   });
 
-  /* Reset puts every parameter back — position, lettermark, frame, artboard,
-     colour, icon — and lays the d flat: the wordmark's own d, square to you.
-     The export format, the tool in hand and whether its gizmo shows are how
-     you are working, not the artwork, so they stay. */
+  /* Reset puts every parameter back to the house composition. The export
+     format, the tool in hand and whether its gizmo shows are how you are
+     working, not the artwork, so they stay. */
   $('reset').addEventListener('click', function () {
     var keep = { format: state.format, tool: state.tool, gimbal: state.gimbal };
     state = JSON.parse(JSON.stringify(DEFAULTS));
-    state.rx = 0; state.ry = 0; state.rz = 0;
     Object.assign(state, keep);
     changed(false);
+  });
+
+  /* ------------------------------------------------------------------ json -- */
+  /* The artwork as plain data: the panel's own groups and names, nothing of
+     DialKit's and nothing about how you were looking at it. Import reads
+     that shape, and DialKit's flat copy ("position.x": 9.7) too, so a copy
+     out of the panel goes straight back in. Anything missing takes the
+     house default; anything out of range is brought back into it. */
+
+  var FIELDS = [
+    ['position.x', 'x', -100, 100], ['position.y', 'y', -100, 100], ['position.z', 'z', -150, 40],
+    ['rotation.x', 'rx', -180, 180], ['rotation.y', 'ry', -180, 180], ['rotation.z', 'rz', -180, 180],
+    ['rotation.perspective', 'depth', 0, 100],
+    ['lettermark.size', 'size', 50, 400], ['lettermark.thickness', 'dWeight', 1, 9], ['lettermark.ascender', 'ascender', 3, 45],
+    ['frame.visible', 'frameOn', 'bool'], ['frame.ratio', 'frameRatio', 'ratio'],
+    ['frame.width', 'frameW', 5, 100], ['frame.height', 'frameH', 5, 100],
+    ['frame.weight', 'weight', 1, 40], ['frame.margin', 'frameMargin', 0, 160],
+    ['artboard.square', 'square', 'bool'], ['artboard.proportion', 'proportion', 1, 4],
+    ['colour.field', 'field', 'colour'], ['colour.ink', 'ink', 'colour'], ['colour.background', 'background', 'bool'],
+    ['icon.corner', 'corner', 0, 50]
+  ];
+  var FRAME_RATIOS = ['fill', '1:1', '4:3', '3:4', '3:2', '16:9', '9:16', 'mark', 'free'];
+
+  function toJSON() {
+    var out = {};
+    FIELDS.forEach(function (f) {
+      var parts = f[0].split('.');
+      out[parts[0]] = out[parts[0]] || {};
+      out[parts[0]][parts[1]] = state[f[1]];
+    });
+    return JSON.stringify(out, null, 2) + '\n';
+  }
+
+  function fromJSON(text) {
+    var data = JSON.parse(text);
+    if (!data || typeof data !== 'object') throw new Error('not an object');
+    var next = JSON.parse(JSON.stringify(DEFAULTS)), hits = 0;
+    FIELDS.forEach(function (f) {
+      var parts = f[0].split('.'), v = f[0] in data ? data[f[0]] : (data[parts[0]] || {})[parts[1]];
+      if (v === undefined) return;
+      if (f[2] === 'bool') { if (typeof v !== 'boolean') return; }
+      else if (f[2] === 'colour') { if (typeof v !== 'string' || !/^#[0-9a-f]{6}$/i.test(v)) return; v = v.toLowerCase(); }
+      else if (f[2] === 'ratio') { if (FRAME_RATIOS.indexOf(v) < 0) return; }
+      else { v = Number(v); if (!isFinite(v)) return; v = Math.max(f[2], Math.min(f[3], v)); }
+      next[f[1]] = v;
+      hits++;
+    });
+    if (!hits) throw new Error('no Depth parameters in it');
+    next.format = state.format; next.tool = state.tool; next.gimbal = state.gimbal;
+    state = next;
+    changed(false);
+  }
+
+  var importInput = $('import-file'), importLabel = $('import-label'), importTimer = 0;
+  $('import').addEventListener('click', function () { importInput.value = ''; importInput.click(); });
+  importInput.addEventListener('change', function () {
+    var file = importInput.files && importInput.files[0];
+    if (!file) return;
+    file.text().then(fromJSON).catch(function (e) {
+      console.warn('depth: that file is not a Depth composition —', e.message);
+      importLabel.textContent = 'Invalid';
+      clearTimeout(importTimer);
+      importTimer = setTimeout(function () { importLabel.textContent = 'Import'; }, 1600);
+    });
   });
 
   /* -------------------------------------------------- turning it by hand -- */
@@ -945,6 +1011,8 @@
     defaults: DEFAULTS,
     markSVG: function () { return markSVG().svg; },
     faviconSVG: faviconSVG,
+    toJSON: toJSON,
+    fromJSON: fromJSON,
     iconGeom: iconGeom
   };
   document.dispatchEvent(new Event('depth:ready'));
