@@ -8,7 +8,7 @@ import '../../shared/dialkit-skin.css'
    colours and the icon's parameters; the verbs, the export format and the
    readout are the dock's. depth.js listens to the inputs in the page's
    .bridge; every drive below compares before it writes, so what comes back
-   through depth:sync (a drag on the mark or the gizmo, Reset) echoes into the panel without
+   through depth:sync (a drag on the mark or the gizmo, Randomise, Reset) echoes into the panel without
    a loop. */
 
 const $ = (id) => document.getElementById(id)
@@ -20,6 +20,7 @@ const WIRING = {
   'rotation.perspective': 'perspective',
   'position.x': 'pos-x',
   'position.y': 'pos-y',
+  'position.z': 'pos-z',
   'lettermark.size': 'size',
   'lettermark.thickness': 'd-weight',
   'artboard.proportion': 'proportion',
@@ -65,7 +66,7 @@ function driveSelect(id, value) {
 function shape(s) {
   return {
     rotation: { x: s.rx, y: s.ry, z: s.rz, perspective: s.depth },
-    position: { x: s.x, y: s.y },
+    position: { x: s.x, y: s.y, z: s.z },
     lettermark: { size: s.size, thickness: s.dWeight },
     frame: { visible: s.frameOn, ratio: s.frameRatio, width: s.frameW, height: s.frameH, weight: s.weight, margin: s.frameMargin },
     artboard: { square: s.square, proportion: s.proportion },
@@ -81,6 +82,7 @@ function Controls() {
     position: {
       x: [s.x, -100, 100, 0.1],
       y: [s.y, -100, 100, 0.1],
+      z: [s.z, -150, 40, 0.1],
     },
     rotation: {
       x: [s.rx, -180, 180, 0.1],

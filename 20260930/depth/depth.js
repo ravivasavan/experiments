@@ -42,7 +42,7 @@
   /* The mark, measured. The frame is 402 wide with a 12-unit rule. */
   var FRAME_W = 402;
   var DEFAULTS = {
-    dWeight: 6, rx: -57.3, ry: -28.9, rz: -15.7, depth: 65, gimbal: true, tool: 'rotate',
+    dWeight: 6, z: 0, rx: -57.3, ry: -28.9, rz: -15.7, depth: 65, gimbal: true, tool: 'rotate',
     size: 62, x: 0, y: 0,
     frameOn: true, weight: 12, frameMargin: 36, frameRatio: 'fill', frameW: 100, frameH: 100,
     square: true, proportion: 2.91,
@@ -85,21 +85,59 @@
     return [x, y, z];
   }
 
+  /* Position Z moves the d along the camera's axis, in d-units; with no
+     perspective it changes nothing. The camera never lets a point reach it. */
+  function perspectiveW(z) {
+    var f = focal(state.depth);
+    return f > 0 ? f / Math.max(f * 0.15, f - z) : 1;
+  }
+
   function project(p, pose, k, cx, cy) {
     var v = rotate([p[0] - D_W / 2, -(p[1] - D_H / 2), 0], pose);
-    var f = focal(pose.depth);
-    var w = f > 0 ? f / (f - v[2]) : 1;
+    var w = perspectiveW(v[2] + (pose.z || 0));
     return [cx + k * v[0] * w, cy - k * v[1] * w];
   }
 
-  /* The canvas is fixed: 402 wide (the mark's own width, so the rule is still
-     12), square or at its ratio. The frame stands off the canvas edge by its
-     own margin, set apart from its weight. The d is sized against the canvas width — half of it at
-     least, and as much more as you like, running off the edges. The canvas is
-     the export's viewBox and the square every icon is cut from. */
+  /* ------------------------------------------------------------- matrices -- */
+  /* The rotation as a matrix, R = Rz · Ry · Rx, and back to XYZ Euler. The
+     gizmos turn the d about its own axes, which is a matrix product; the
+     panel shows the angles that product comes to. */
+  function eulerMatrix(a) {
+    var x = a.rx * R, y = a.ry * R, z = a.rz * R;
+    var cx = Math.cos(x), sx = Math.sin(x), cy = Math.cos(y), sy = Math.sin(y), cz = Math.cos(z), sz = Math.sin(z);
+    return [
+      [cz * cy, cz * sy * sx - sz * cx, cz * sy * cx + sz * sx],
+      [sz * cy, sz * sy * sx + cz * cx, sz * sy * cx - cz * sx],
+      [-sy, cy * sx, cy * cx]
+    ];
+  }
+  function matrixEuler(m) {
+    var y = Math.asin(Math.max(-1, Math.min(1, -m[2][0]))), x, z;
+    if (Math.abs(m[2][0]) < 0.99999) { x = Math.atan2(m[2][1], m[2][2]); z = Math.atan2(m[1][0], m[0][0]); }
+    else { x = Math.atan2(-m[1][2], m[1][1]); z = 0; }
+    return { rx: x / R, ry: y / R, rz: z / R };
+  }
+  function mul(a, b) {
+    var o = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+    for (var i = 0; i < 3; i++) for (var j = 0; j < 3; j++) o[i][j] = a[i][0] * b[0][j] + a[i][1] * b[1][j] + a[i][2] * b[2][j];
+    return o;
+  }
+  function axisMatrix(i, t) {
+    var c = Math.cos(t), s = Math.sin(t);
+    if (i === 0) return [[1, 0, 0], [0, c, -s], [0, s, c]];
+    if (i === 1) return [[c, 0, s], [0, 1, 0], [-s, 0, c]];
+    return [[c, -s, 0], [s, c, 0], [0, 0, 1]];
+  }
+  function column(m, i) { return [m[0][i], m[1][i], m[2][i]]; }
+  function setRotation(m) {
+    var e = matrixEuler(m);
+    state.rx = round1(e.rx); state.ry = round1(e.ry); state.rz = round1(e.rz);
+  }
+
   /* The frame's own shape, inside the canvas less its margin (its own
-     number, in the same canvas units as the weight): Fill takes all of that room, a ratio is the largest box of that shape
-     that fits, and Freeform is a width and height as shares of the room. */
+     number, in the same canvas units as the weight): Fill takes all of that
+     room, a ratio is the largest box of that shape that fits, and Freeform is
+     a width and height as shares of the room. */
   var RATIOS = { '1:1': 1, '4:3': 4 / 3, '3:4': 3 / 4, '3:2': 3 / 2, '16:9': 16 / 9, '9:16': 9 / 16, 'mark': 402 / 138 };
   function frameBox(W, H, t) {
     var m = Math.max(0, Math.min(state.frameMargin, Math.min(W, H) / 2 - 2 * t - 1));
@@ -114,6 +152,10 @@
     return { x: (W - w) / 2, y: (H - h) / 2, w: w, h: h };
   }
 
+  /* The canvas is fixed: 402 wide (the mark's own width, so the rule is still
+     12), square or at its ratio. The d is sized against the canvas width —
+     half of it at least, and as much more as you like, running off the edges.
+     The canvas is the export's viewBox and the square every icon is cut from. */
   function composition() {
     var W = FRAME_W, H = state.square ? W : W / Math.max(0.5, state.proportion);
     // Keep a frame whose inset would swallow it at least a tenth of the canvas.
@@ -123,7 +165,7 @@
     var cx = W / 2 + (state.x / 100) * W;
     var cy = H / 2 - (state.y / 100) * H;   // Y up, like the rotation
     var pts = dShape(state.dWeight).map(function (p) { return project(p, state, k, cx, cy); });
-    return { frame: fr, t: t, pts: pts, box: { x: 0, y: 0, w: W, h: H }, cx: cx, cy: cy };
+    return { frame: fr, t: t, pts: pts, box: { x: 0, y: 0, w: W, h: H }, cx: cx, cy: cy, k: k };
   }
 
   function n(v) { return String(Math.round(v * 1000) / 1000); }
@@ -415,105 +457,116 @@
     return b;
   }
 
-  /* ----------------------------------------------------------- the gimbal -- */
-  /* Blender's rotate gizmo in Gimbal orientation: one ring per Euler angle,
-     each about the axis that angle actually turns around. For XYZ that is Z
-     about the world, Y about Z's result, and X about both — so the X ring
-     follows the d and the Z ring never moves. Red, green, blue, as every 3D
-     package draws them; the half of each ring behind the d is faint. Grab a
-     ring and drag along it to turn that one angle. The gimbal is the page's,
-     never the export's. */
+  /* ------------------------------------------------------------ the gizmos -- */
+  /* Drawn the way a 3D package draws them: on the d's own axes (Local
+     orientation), through the same camera as the d, X red, Y green, Z blue.
+     Rotate is a ring about each local axis plus a view ring around the lot;
+     Move is a cone-tipped arrow down each local axis, a plane handle for each
+     pair, and a free handle at the centre. Whatever faces away from you is
+     faint and drawn first. The gizmo is the page's, never the export's. */
 
-  var AXES = [
-    { key: 'rx', colour: '#ff3352' },
-    { key: 'ry', colour: '#8bdc00' },
-    { key: 'rz', colour: '#2890ff' }
-  ];
+  var COLOURS = ['#ff3352', '#8bdc00', '#2890ff'];
   var gimbalEl = $('gimbal');
-  var MOVE = [
-    { key: 'x', colour: '#ff3352', dir: [1, 0] },
-    { key: 'y', colour: '#8bdc00', dir: [0, -1] }
-  ];
+  var gizmo = null;
 
-  function gimbalAxes() {
-    var z = [0, 0, 1];
-    var y = rotate([0, 1, 0], { rx: 0, ry: 0, rz: state.rz });
-    var x = rotate([1, 0, 0], { rx: 0, ry: state.ry, rz: state.rz });
-    return [x, y, z];
-  }
   function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
-  function unit(a) { var l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / l, a[1] / l, a[2] / l]; }
-  function ringBasis(a) {
-    var u = unit(cross(a, Math.abs(a[1]) < 0.9 ? [0, 1, 0] : [1, 0, 0]));
-    return [u, cross(a, u)];
+  function add(a, b) { return [a[0] + b[0], a[1] + b[1], a[2] + b[2]]; }
+  function scale(a, s) { return [a[0] * s, a[1] * s, a[2] * s]; }
+
+  // A point in d-units about the d's centre, to canvas units and view depth.
+  function toView(v) {
+    var c = gizmo.c, z = v[2] + (state.z || 0), w = perspectiveW(z);
+    return [c.cx + c.k * v[0] * w, c.cy - c.k * v[1] * w, v[2]];
+  }
+  function pathOf(pts, close) {
+    return 'M' + pts.map(function (p) { return n(p[0]) + ' ' + n(p[1]); }).join('L') + (close ? 'Z' : '');
+  }
+  function hull(pts) {
+    var p = pts.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    var turn = function (o, a, b) { return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]); };
+    var lo = [], hi = [];
+    p.forEach(function (q) { while (lo.length > 1 && turn(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); });
+    p.slice().reverse().forEach(function (q) { while (hi.length > 1 && turn(hi[hi.length - 2], hi[hi.length - 1], q) <= 0) hi.pop(); hi.push(q); });
+    return lo.slice(0, -1).concat(hi.slice(0, -1));
+  }
+  function pxToCanvas() {
+    var vb = svg.viewBox.baseVal;
+    return vb && svg.clientWidth ? vb.width / svg.clientWidth : 1;
   }
 
-  var gimbalGeom = null;
   function paintGimbal(c) {
     gimbalEl.style.display = state.gimbal ? '' : 'none';
-    if (!state.gimbal) return;
-    if (state.tool === 'move') return paintMove(c);
-    var r = Math.min(c.box.w, c.box.h) * 0.3;
-    var axes = gimbalAxes(), out = '';
-    gimbalGeom = { cx: c.cx, cy: c.cy, r: r, axes: axes };
-    axes.forEach(function (a, i) {
-      var uv = ringBasis(a), front = '', back = '';
-      for (var j = 0; j < 72; j++) {
-        var t0 = j / 72 * 2 * Math.PI, t1 = (j + 1) / 72 * 2 * Math.PI;
-        var p0 = ringPoint(uv, r, t0), p1 = ringPoint(uv, r, t1);
-        var seg = 'M' + n(c.cx + p0[0]) + ' ' + n(c.cy - p0[1]) + 'L' + n(c.cx + p1[0]) + ' ' + n(c.cy - p1[1]);
-        if (p0[2] + p1[2] >= 0) front += seg; else back += seg;
+    if (!state.gimbal) { gizmo = null; return; }
+    var M = eulerMatrix(state);
+    var r = Math.min(D_W * 0.62, 0.34 * Math.min(c.box.w, c.box.h) / c.k);
+    gizmo = { c: c, M: M, axes: [column(M, 0), column(M, 1), column(M, 2)], r: r };
+    gimbalEl.innerHTML = state.tool === 'move' ? moveGizmo() : rotateGizmo();
+  }
+
+  function ringPoint(i, t) {
+    var u = gizmo.axes[(i + 1) % 3], v = gizmo.axes[(i + 2) % 3], r = gizmo.r;
+    return add(scale(u, r * Math.cos(t)), scale(v, r * Math.sin(t)));
+  }
+
+  function rotateGizmo() {
+    var back = '', fronts = '', N = 96;
+    for (var i = 0; i < 3; i++) {
+      var b = '', f = '', all = [];
+      for (var j = 0; j < N; j++) {
+        var p0 = ringPoint(i, j / N * 2 * Math.PI), p1 = ringPoint(i, (j + 1) / N * 2 * Math.PI);
+        var s0 = toView(p0), s1 = toView(p1);
+        var seg = 'M' + n(s0[0]) + ' ' + n(s0[1]) + 'L' + n(s1[0]) + ' ' + n(s1[1]);
+        if (p0[2] + p1[2] >= 0) f += seg; else b += seg;
+        all.push(s0);
       }
-      var all = front + back;
-      out += '<g data-axis="' + i + '" style="--axis:' + AXES[i].colour + '">' +
-        '<path class="gimbal__back" d="' + back + '"/>' +
-        '<path class="gimbal__halo" d="' + front + '"/>' +
-        '<path class="gimbal__ring" d="' + front + '"/>' +
-        '<path class="gimbal__hit" d="' + all + '"/></g>';
-    });
-    gimbalEl.innerHTML = out;
-  }
-  /* Cinema 4D's move gizmo, seen from the front: an X arrow, a Y arrow and
-     the XY plane handle between them. Z would point straight at you — there
-     is nothing to grab — so the d's distance is Perspective and Size. */
-  function paintMove(c) {
-    var L = Math.min(c.box.w, c.box.h) * 0.26, out = '';
-    var head = L * 0.16, wing = L * 0.07, q = L * 0.3;
-    gimbalGeom = { cx: c.cx, cy: c.cy, r: L };
-    out += '<g data-handle="xy" style="--axis:#2890ff">' +
-      '<path class="gimbal__plane" d="M' + n(c.cx) + ' ' + n(c.cy) + 'h' + n(q) + 'v' + n(-q) + 'h' + n(-q) + 'Z"/>' +
-      '<path class="gimbal__hit gimbal__hit--fill" d="M' + n(c.cx) + ' ' + n(c.cy) + 'h' + n(q) + 'v' + n(-q) + 'h' + n(-q) + 'Z"/></g>';
-    MOVE.forEach(function (m) {
-      var ex = c.cx + m.dir[0] * L, ey = c.cy + m.dir[1] * L;
-      var bx = c.cx + m.dir[0] * (L - head), by = c.cy + m.dir[1] * (L - head);
-      var px = -m.dir[1] * wing, py = m.dir[0] * wing;
-      var shaft = 'M' + n(c.cx) + ' ' + n(c.cy) + 'L' + n(bx) + ' ' + n(by);
-      var tip = 'M' + n(ex) + ' ' + n(ey) + 'L' + n(bx + px) + ' ' + n(by + py) + 'L' + n(bx - px) + ' ' + n(by - py) + 'Z';
-      out += '<g data-handle="' + m.key + '" style="--axis:' + m.colour + '">' +
-        '<path class="gimbal__halo" d="' + shaft + '"/>' +
-        '<path class="gimbal__ring" d="' + shaft + '"/>' +
-        '<path class="gimbal__tip" d="' + tip + '"/>' +
-        '<path class="gimbal__hit" d="' + shaft + tip + '"/></g>';
-    });
-    gimbalEl.innerHTML = out;
-  }
-
-  function ringPoint(uv, r, t) {
-    var u = uv[0], v = uv[1], c = Math.cos(t) * r, s = Math.sin(t) * r;
-    return [u[0] * c + v[0] * s, u[1] * c + v[1] * s, u[2] * c + v[2] * s];
-  }
-
-  /* Where on ring `i` the pointer landed, and which way that angle moves the
-     ring there, in canvas units on screen. */
-  function ringTangent(i, px, py) {
-    var g = gimbalGeom, a = g.axes[i], uv = ringBasis(a), best = null;
-    for (var j = 0; j < 72; j++) {
-      var p = ringPoint(uv, g.r, j / 72 * 2 * Math.PI);
-      var d = Math.hypot(g.cx + p[0] - px, g.cy - p[1] - py) - (p[2] >= 0 ? 0.01 : 0);
-      if (!best || d < best.d) best = { d: d, p: p };
+      back += '<path class="gimbal__back" style="--axis:' + COLOURS[i] + '" d="' + b + '"/>';
+      fronts += '<g data-axis="' + i + '" style="--axis:' + COLOURS[i] + '">' +
+        '<path class="gimbal__halo" d="' + f + '"/><path class="gimbal__ring" d="' + f + '"/>' +
+        '<path class="gimbal__hit" d="' + pathOf(all, true) + '"/></g>';
     }
-    var t = cross(a, best.p);
-    return [t[0], -t[1]];
+    var c = gizmo.c, rv = gizmo.r * c.k * perspectiveW(state.z || 0) * 1.14;
+    var view = '<g data-axis="view"><circle class="gimbal__view" cx="' + n(c.cx) + '" cy="' + n(c.cy) + '" r="' + n(rv) + '"/>' +
+      '<circle class="gimbal__hit" cx="' + n(c.cx) + '" cy="' + n(c.cy) + '" r="' + n(rv) + '"/></g>';
+    return back + view + fronts;
+  }
+
+  function moveGizmo() {
+    var L = gizmo.r, head = L * 0.22, rc = L * 0.075, parts = [];
+    for (var i = 0; i < 3; i++) {
+      var a = gizmo.axes[i], u = gizmo.axes[(i + 1) % 3], v = gizmo.axes[(i + 2) % 3];
+      var base = scale(a, L - head), tip = toView(scale(a, L)), ring = [];
+      for (var j = 0; j < 16; j++) {
+        var t = j / 16 * 2 * Math.PI;
+        ring.push(toView(add(base, add(scale(u, rc * Math.cos(t)), scale(v, rc * Math.sin(t))))));
+      }
+      var cone = hull(ring.concat([tip]));
+      var shaft = pathOf([toView([0, 0, 0]), toView(base)]);
+      parts.push({
+        z: a[2] * L * 0.6,
+        svg: '<g data-handle="axis" data-i="' + i + '" style="--axis:' + COLOURS[i] + '"' + (a[2] < -0.2 ? ' class="is-far"' : '') + '>' +
+          '<path class="gimbal__halo" d="' + shaft + '"/><path class="gimbal__ring" d="' + shaft + '"/>' +
+          '<path class="gimbal__tip" d="' + pathOf(cone, true) + '"/>' +
+          '<path class="gimbal__hit" d="' + shaft + pathOf(cone, true) + '"/>' +
+          '<path class="gimbal__hit gimbal__hit--fill" d="' + pathOf(cone, true) + '"/></g>'
+      });
+    }
+    // Plane handles, coloured by the axis they are square to.
+    [[0, 1, 2], [1, 2, 0], [0, 2, 1]].forEach(function (pl) {
+      var a = gizmo.axes[pl[0]], b = gizmo.axes[pl[1]], q0 = L * 0.3, q1 = L * 0.48;
+      var quad = [[q0, q0], [q1, q0], [q1, q1], [q0, q1]].map(function (q) { return add(scale(a, q[0]), scale(b, q[1])); });
+      var zAvg = quad.reduce(function (s, p) { return s + p[2]; }, 0) / 4;
+      var d = pathOf(quad.map(toView), true);
+      parts.push({
+        z: zAvg,
+        svg: '<g data-handle="plane" data-i="' + pl[0] + '" data-j="' + pl[1] + '" style="--axis:' + COLOURS[pl[2]] + '">' +
+          '<path class="gimbal__plane" d="' + d + '"/><path class="gimbal__hit gimbal__hit--fill" d="' + d + '"/></g>'
+      });
+    });
+    parts.sort(function (p, q) { return p.z - q.z; });
+    var c = toView([0, 0, 0]), rr = 6 * pxToCanvas();
+    return parts.map(function (p) { return p.svg; }).join('') +
+      '<g data-handle="free"><circle class="gimbal__free" cx="' + n(c[0]) + '" cy="' + n(c[1]) + '" r="' + n(rr) + '"/>' +
+      '<circle class="gimbal__hit gimbal__hit--fill" cx="' + n(c[0]) + '" cy="' + n(c[1]) + '" r="' + n(rr * 1.6) + '"/></g>';
   }
 
   /* The icons are drawn at the pixels a screen will actually show them at:
@@ -546,9 +599,9 @@
 
   /* --------------------------------------------------------------- inputs -- */
 
-  var NUM = ['rx', 'ry', 'rz', 'depth', 'size', 'dWeight', 'x', 'y', 'proportion', 'weight', 'frameMargin', 'frameW', 'frameH', 'corner'];
+  var NUM = ['rx', 'ry', 'rz', 'depth', 'size', 'dWeight', 'z', 'x', 'y', 'proportion', 'weight', 'frameMargin', 'frameW', 'frameH', 'corner'];
   var CHECK = { background: 'background', square: 'square', frameOn: 'frame-on' };
-  var INPUT_ID = { x: 'pos-x', y: 'pos-y', depth: 'perspective', frameMargin: 'frame-margin', frameW: 'frame-w', frameH: 'frame-h', dWeight: 'd-weight' };
+  var INPUT_ID = { x: 'pos-x', y: 'pos-y', z: 'pos-z', depth: 'perspective', frameMargin: 'frame-margin', frameW: 'frame-w', frameH: 'frame-h', dWeight: 'd-weight' };
   function inputFor(k) { return $(INPUT_ID[k] || k); }
 
   function sync() {
@@ -670,15 +723,19 @@
   });
 
   /* -------------------------------------------------- turning it by hand -- */
-  /* Two tools, on Cinema 4D's keys: E is Move, R is Rotate. Rotate: drag a
-     gimbal ring to turn that one angle, or anywhere else to orbit — sideways
-     is Y, up and down is X; the arrow keys do X and Y a degree at a time and
-     [ ] do Z. Move: drag an arrow to move along it, the plane handle or the
-     canvas to move freely; the arrow keys nudge. Shift steps by ten. Panning is still
+  /* Two tools, on Cinema 4D's keys: E is Move, R is Rotate.
+     Rotate: drag a ring to turn the d about that one local axis, the outer
+     ring to roll it about your line of sight, or anywhere else to orbit it
+     (sideways about the view's Y, up and down about its X). The arrow keys
+     and [ ] step the X, Y and Z angles.
+     Move: drag an arrow to slide along that local axis, a plane handle to
+     slide in that plane, the centre or the canvas to move in the picture
+     plane; the arrow keys nudge. Shift steps by ten. Panning is still
      play.js's, on the middle button or with space held. */
 
   function wrap(v) { v = ((v + 180) % 360 + 360) % 360 - 180; return v === -180 ? 180 : v; }
   function round1(v) { return Math.round(v * 10) / 10; }
+  var Z_MIN = -150, Z_MAX = 40;
 
   // Screen pixels to canvas units.
   function toCanvas(e) {
@@ -687,45 +744,95 @@
     var q = pt.matrixTransform(m);
     return [q.x, q.y];
   }
+  function dot2(a, b) { return a[0] * b[0] + a[1] * b[1]; }
+
+  // How far one d-unit along `a` moves on screen, in canvas units.
+  function screenStep(a, c, w) { return [c.k * w * a[0], -c.k * w * a[1]]; }
 
   var drag = null;
   svg.addEventListener('pointerdown', function (e) {
     if (e.button !== 0 || e.defaultPrevented) return;
-    var ring = e.target.closest && e.target.closest('[data-axis]');
-    var handle = e.target.closest && e.target.closest('[data-handle]');
-    var at = toCanvas(e);
-    drag = { id: e.pointerId, x: e.clientX, y: e.clientY, at: at, rx: state.rx, ry: state.ry, rz: state.rz, px: state.x, py: state.y };
+    var g = e.target.closest && e.target.closest('[data-axis], [data-handle]');
+    var c = composition();
+    drag = {
+      id: e.pointerId, x: e.clientX, y: e.clientY, at: toCanvas(e),
+      M: eulerMatrix(state), c: c, w: perspectiveW(state.z || 0),
+      px: state.x, py: state.y, pz: state.z || 0,
+      axes: gizmo ? gizmo.axes : null, r: gizmo ? gizmo.r : 0
+    };
     if (state.tool === 'move') {
-      // Off the gizmo, a drag on the canvas moves freely in XY.
-      drag.handle = handle ? handle.getAttribute('data-handle') : 'xy';
-      if (handle) handle.classList.add('is-active');
-    } else if (ring && gimbalGeom) {
-      drag.axis = Number(ring.getAttribute('data-axis'));
-      drag.tangent = ringTangent(drag.axis, at[0], at[1]);
-      ring.classList.add('is-active');
+      drag.kind = g && g.hasAttribute('data-handle') ? g.getAttribute('data-handle') : 'free';
+      if (g && drag.kind !== 'free') {
+        drag.i = Number(g.getAttribute('data-i'));
+        if (g.hasAttribute('data-j')) drag.j = Number(g.getAttribute('data-j'));
+      }
+    } else if (g && g.hasAttribute('data-axis') && gizmo) {
+      var ax = g.getAttribute('data-axis');
+      if (ax === 'view') {
+        drag.kind = 'roll';
+        drag.a0 = Math.atan2(-(drag.at[1] - c.cy), drag.at[0] - c.cx);
+      } else {
+        drag.kind = 'ring';
+        drag.i = Number(ax);
+        // Where on the ring the pointer landed, and which way the ring runs
+        // there on screen, per radian.
+        var best = null;
+        for (var j = 0; j < 96; j++) {
+          var t = j / 96 * 2 * Math.PI, p = ringPoint(drag.i, t), sp = toView(p);
+          var d = Math.hypot(sp[0] - drag.at[0], sp[1] - drag.at[1]) - (p[2] >= 0 ? 0.5 : 0);
+          if (!best || d < best.d) best = { d: d, t: t };
+        }
+        var s0 = toView(ringPoint(drag.i, best.t)), s1 = toView(ringPoint(drag.i, best.t + 0.01));
+        drag.tangent = [(s1[0] - s0[0]) / 0.01, (s1[1] - s0[1]) / 0.01];
+      }
+    } else {
+      drag.kind = 'orbit';
     }
+    if (g) g.classList.add('is-active');
     svg.setPointerCapture(e.pointerId);
     svg.classList.add('is-turning');
   });
+
   svg.addEventListener('pointermove', function (e) {
     if (!drag || e.pointerId !== drag.id) return;
-    if (drag.handle) {
-      var b = composition().box, cur = toCanvas(e);
-      var mx = (cur[0] - drag.at[0]) / b.w * 100, my = -(cur[1] - drag.at[1]) / b.h * 100;
-      if (drag.handle !== 'y') state.x = round1(drag.px + mx);
-      if (drag.handle !== 'x') state.y = round1(drag.py + my);
-    } else if (drag.axis != null) {
-      var now = toCanvas(e), t = drag.tangent, r = gimbalGeom.r;
-      var d = [now[0] - drag.at[0], now[1] - drag.at[1]];
-      // Along the ring's own direction at the grab point; a ring seen edge-on
-      // has almost none, so it is floored rather than left to run away.
-      var len2 = Math.max(t[0] * t[0] + t[1] * t[1], 0.09 * r * r);
-      var k = AXES[drag.axis].key;
-      state[k] = round1(wrap(drag[k] + (d[0] * t[0] + d[1] * t[1]) / len2 / R));
+    var now = toCanvas(e), d = [now[0] - drag.at[0], now[1] - drag.at[1]];
+    var c = drag.c, b = c.box, unitPx = c.k * drag.w, delta = null;
+    if (drag.kind === 'free') {
+      state.x = round1(drag.px + d[0] / b.w * 100);
+      state.y = round1(drag.py - d[1] / b.h * 100);
+    } else if (drag.kind === 'axis') {
+      var a = drag.axes[drag.i], s = screenStep(a, c, drag.w);
+      // An arrow pointing at you has almost no length on screen; floor it so
+      // a drag along it still moves at a sane rate.
+      var len2 = Math.max(dot2(s, s), 0.09 * unitPx * unitPx);
+      delta = scale(a, dot2(d, s) / len2);
+    } else if (drag.kind === 'plane') {
+      var ai = drag.axes[drag.i], aj = drag.axes[drag.j];
+      var si = screenStep(ai, c, drag.w), sj = screenStep(aj, c, drag.w);
+      var det = si[0] * sj[1] - si[1] * sj[0], u, v;
+      if (Math.abs(det) > 0.05 * unitPx * unitPx) {
+        u = (d[0] * sj[1] - d[1] * sj[0]) / det;
+        v = (si[0] * d[1] - si[1] * d[0]) / det;
+      } else {
+        u = dot2(d, si) / Math.max(dot2(si, si), 0.09 * unitPx * unitPx);
+        v = dot2(d, sj) / Math.max(dot2(sj, sj), 0.09 * unitPx * unitPx);
+      }
+      delta = add(scale(ai, u), scale(aj, v));
+    } else if (drag.kind === 'ring') {
+      var t = drag.tangent, fl = 0.3 * drag.r * unitPx;
+      var phi = dot2(d, t) / Math.max(dot2(t, t), fl * fl);
+      setRotation(mul(drag.M, axisMatrix(drag.i, phi)));
+    } else if (drag.kind === 'roll') {
+      var a1 = Math.atan2(-(now[1] - c.cy), now[0] - c.cx);
+      setRotation(mul(axisMatrix(2, a1 - drag.a0), drag.M));
     } else {
-      var dx = e.clientX - drag.x, dy = e.clientY - drag.y, s = 0.4;
-      state.ry = round1(wrap(drag.ry + dx * s));
-      state.rx = round1(wrap(drag.rx + dy * s));
+      var k = 0.4 * R;
+      setRotation(mul(mul(axisMatrix(1, (e.clientX - drag.x) * k), axisMatrix(0, (e.clientY - drag.y) * k)), drag.M));
+    }
+    if (delta) {
+      state.x = round1(drag.px + delta[0] * unitPx / b.w * 100);
+      state.y = round1(drag.py + delta[1] * unitPx / b.h * 100);
+      state.z = round1(Math.max(Z_MIN, Math.min(Z_MAX, drag.pz + delta[2])));
     }
     changed(false);
   });
@@ -734,6 +841,7 @@
       if (!drag || e.pointerId !== drag.id) return;
       drag = null;
       svg.classList.remove('is-turning');
+      gimbalEl.querySelectorAll('.is-active').forEach(function (g) { g.classList.remove('is-active'); });
     });
   });
   svg.addEventListener('keydown', function (e) {
@@ -755,6 +863,62 @@
     e.preventDefault();
     changed(false);
   });
+
+  /* ------------------------------------------------------------ randomise -- */
+  /* A throw that lands near something finished, for you to take the last
+     mile. The ranges are the logomark's neighbourhood: mostly the d laid back
+     like the mark, sometimes nearly face-on, never edge-on (its face keeps at
+     least a third of its area toward you). The d is then scaled to sit well
+     in the frame (or the canvas, with no frame) and centred, give or take a
+     little. Thickness stays near the wordmark's, the frame stays a plain
+     rule. Colour, the artboard and the icon corner are yours and are left. */
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function randomise() {
+    var keep = JSON.parse(JSON.stringify(state)), best = null;
+    for (var tries = 0; tries < 60 && !best; tries++) {
+      var face = Math.random() < 0.22;
+      var c = JSON.parse(JSON.stringify(keep));
+      c.rx = face ? rand(-24, 20) : rand(-68, -40);
+      c.ry = face ? rand(-30, 30) : rand(-34, 34);
+      c.rz = face ? rand(-12, 12) : rand(-32, 32);
+      c.depth = rand(45, 85);
+      c.z = 0;
+      c.dWeight = rand(5, 7.5);
+      c.frameOn = Math.random() < 0.85;
+      c.weight = rand(8, 16);
+      c.frameMargin = rand(24, 52);
+      c.frameRatio = keep.square && Math.random() < 0.25 ? (Math.random() < 0.5 ? '4:3' : '3:4') : 'fill';
+      var normalZ = eulerMatrix(c)[2][2];
+      if (normalZ < 0.33 || (!face && normalZ > 0.85)) continue;
+      // Fit: size is linear in the projection, so measure once and scale.
+      c.size = 62; c.x = 0; c.y = 0;
+      state = c;
+      // Fit against the inside of the frame when there is one — a laid-back
+      // d may break it a little, the way the mark's tail does; a face-on d
+      // stays clear of it — or against the canvas when there is none.
+      var comp = composition(), box = comp.box, bx = bounds(comp.pts), fr = comp.frame, t = comp.t;
+      var room = c.frameOn ? { w: fr.w - 2 * t, h: fr.h - 2 * t } : box;
+      var fill = Math.max(bx.w / room.w, bx.h / room.h);
+      var target = !c.frameOn ? rand(0.66, 0.88) : face ? rand(0.6, 0.8) : rand(0.8, 0.98);
+      var size = 62 * target / fill;
+      if (size < 50 || size > 180) continue;
+      c.size = size;
+      comp = composition(); bx = bounds(comp.pts);
+      c.x = -((bx.x + bx.w / 2) - box.w / 2) / box.w * 100 + rand(-3, 3);
+      c.y = ((bx.y + bx.h / 2) - box.h / 2) / box.h * 100 + rand(-3, 3);
+      best = c;
+    }
+    state = best || keep;
+    ['rx', 'ry', 'rz', 'depth', 'size', 'x', 'y', 'dWeight', 'weight', 'frameMargin'].forEach(function (k) { state[k] = round1(state[k]); });
+    changed(false);
+  }
+  function bounds(pts) {
+    var x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    pts.forEach(function (p) { x0 = Math.min(x0, p[0]); x1 = Math.max(x1, p[0]); y0 = Math.min(y0, p[1]); y1 = Math.max(y1, p[1]); });
+    return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  }
+  $('shuffle').addEventListener('click', randomise);
 
   var resizeTimer = 0;
   window.addEventListener('resize', function () {
