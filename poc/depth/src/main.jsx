@@ -23,6 +23,7 @@ const WIRING = {
   'position.z': 'pos-z',
   'lettermark.size': 'size',
   'lettermark.thickness': 'd-weight',
+  'lettermark.ascender': 'ascender',
   'artboard.proportion': 'proportion',
   'frame.weight': 'weight',
   'frame.margin': 'frame-margin',
@@ -67,7 +68,7 @@ function shape(s) {
   return {
     rotation: { x: s.rx, y: s.ry, z: s.rz, perspective: s.depth },
     position: { x: s.x, y: s.y, z: s.z },
-    lettermark: { size: s.size, thickness: s.dWeight },
+    lettermark: { size: s.size, thickness: s.dWeight, ascender: s.ascender },
     frame: { visible: s.frameOn, ratio: s.frameRatio, width: s.frameW, height: s.frameH, weight: s.weight, margin: s.frameMargin },
     artboard: { square: s.square, proportion: s.proportion },
     colour: { field: s.field, ink: s.ink, background: s.background },
@@ -93,6 +94,7 @@ function Controls() {
     lettermark: {
       size: [s.size, 50, 400, 0.5],
       thickness: [s.dWeight, 1, 9, 0.1],
+      ascender: [s.ascender, 3, 45, 0.5],
     },
     frame: {
       visible: s.frameOn,

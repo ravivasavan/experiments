@@ -66,7 +66,12 @@
 /* The gimbal: Blender's axis colours over a halo of the page's own ground, so
    the red ring still reads on the red field. Hairline widths hold at any zoom. */
 .gimbal :where(path) { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; }
-.gimbal__back { stroke: var(--axis); stroke-width: 1.5; opacity: 0.35; }
+.gimbal__back { stroke: var(--axis); stroke-width: 2; opacity: 0.55; }
+.gimbal__underhalo { stroke: var(--bg); stroke-width: 4; opacity: 0.45; }
+/* Joined segment to segment, the front half must not cap each piece: round
+   caps on a halo read as the ring stopping. */
+.gimbal .gimbal__halo--butt,
+.gimbal .gimbal__ring--butt { stroke-linecap: butt; }
 .gimbal__halo { stroke: var(--bg); stroke-width: 5; opacity: 0.9; }
 .gimbal__ring { stroke: var(--axis); stroke-width: 2.5; }
 .gimbal__hit { fill: none; stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
@@ -96,8 +101,7 @@
 #mark[data-tool="move"] { cursor: move; }
 .gimbal g:hover .gimbal__ring,
 .gimbal g.is-active .gimbal__ring { stroke-width: 4; }
-.gimbal g:hover .gimbal__back,
-.gimbal g.is-active .gimbal__back { opacity: 0.6; }
+
 
 /* ------------------------------------------------------------ the lineup -- */
 

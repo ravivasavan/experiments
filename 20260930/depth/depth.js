@@ -26,23 +26,26 @@
   /* --------------------------------------------------------------- the d -- */
   /* The wordmark's d, in its own units. y runs down. */
   var D = [[42, 18], [36, 18], [36, 27], [6, 27], [6, 15], [42, 15], [42, 0], [36, 0], [36, 9], [0, 9], [0, 33], [42, 33]];
-  var D_W = 42, D_H = 33;
+  var D_W = 42;
 
-  /* The same contour at any thickness: the outline stays 42 × 33 and the
-     ascender 9 tall, the rules move inward, and the slit keeps half a rule.
-     At 6 it is the wordmark's own d. */
-  function dShape(w) {
+  /* The same contour at any thickness and any ascender: the bowl stays
+     42 × 24, the rules move inward, the slit keeps half a rule, and the
+     ascender grows up from the bowl. At 6 and 9 it is the wordmark's own d. */
+  var BOWL = 24;
+  function dHeight(a) { return Math.max(3, Math.min(45, a)) + BOWL; }
+  function dShape(w, a) {
     w = Math.max(1, Math.min(9, w));
-    var sl = w / 2;
+    a = Math.max(3, Math.min(45, a));
+    var sl = w / 2, h = a + BOWL;
     var X = { 0: 0, 6: w, 36: D_W - w, 42: D_W };
-    var Y = { 0: 0, 9: 9, 15: 9 + w, 18: 9 + w + sl, 27: D_H - w, 33: D_H };
+    var Y = { 0: 0, 9: a, 15: a + w, 18: a + w + sl, 27: h - w, 33: h };
     return D.map(function (p) { return [X[p[0]], Y[p[1]]]; });
   }
 
   /* The mark, measured. The frame is 402 wide with a 12-unit rule. */
   var FRAME_W = 402;
   var DEFAULTS = {
-    dWeight: 6, z: 0, rx: -57.3, ry: -28.9, rz: -15.7, depth: 65, gimbal: true, tool: 'rotate',
+    dWeight: 6, ascender: 9, z: 0, rx: -57.3, ry: -28.9, rz: -15.7, depth: 65, gimbal: true, tool: 'rotate',
     size: 62, x: 0, y: 0,
     frameOn: true, weight: 12, frameMargin: 36, frameRatio: 'fill', frameW: 100, frameH: 100,
     square: true, proportion: 2.91,
@@ -93,7 +96,8 @@
   }
 
   function project(p, pose, k, cx, cy) {
-    var v = rotate([p[0] - D_W / 2, -(p[1] - D_H / 2), 0], pose);
+    // The pivot is the middle of the whole d, ascender and all.
+    var v = rotate([p[0] - D_W / 2, -(p[1] - dHeight(pose.ascender) / 2), 0], pose);
     var w = perspectiveW(v[2] + (pose.z || 0));
     return [cx + k * v[0] * w, cy - k * v[1] * w];
   }
@@ -164,7 +168,7 @@
     var k = (Math.max(50, state.size) / 100) * W / D_W;
     var cx = W / 2 + (state.x / 100) * W;
     var cy = H / 2 - (state.y / 100) * H;   // Y up, like the rotation
-    var pts = dShape(state.dWeight).map(function (p) { return project(p, state, k, cx, cy); });
+    var pts = dShape(state.dWeight, state.ascender).map(function (p) { return project(p, state, k, cx, cy); });
     return { frame: fr, t: t, pts: pts, box: { x: 0, y: 0, w: W, h: H }, cx: cx, cy: cy, k: k };
   }
 
@@ -511,18 +515,23 @@
   function rotateGizmo() {
     var back = '', fronts = '', N = 96;
     for (var i = 0; i < 3; i++) {
-      var b = '', f = '', all = [];
+      var f = '', all = [], wasOn = false;
       for (var j = 0; j < N; j++) {
         var p0 = ringPoint(i, j / N * 2 * Math.PI), p1 = ringPoint(i, (j + 1) / N * 2 * Math.PI);
         var s0 = toView(p0), s1 = toView(p1);
-        var seg = 'M' + n(s0[0]) + ' ' + n(s0[1]) + 'L' + n(s1[0]) + ' ' + n(s1[1]);
-        if (p0[2] + p1[2] >= 0) f += seg; else b += seg;
+        var on = p0[2] + p1[2] >= 0;
+        if (on) f += (wasOn ? '' : 'M' + n(s0[0]) + ' ' + n(s0[1])) + 'L' + n(s1[0]) + ' ' + n(s1[1]);
+        wasOn = on;
         all.push(s0);
       }
-      back += '<path class="gimbal__back" style="--axis:' + COLOURS[i] + '" d="' + b + '"/>';
+      // The whole ring, softly, underneath; the half facing you, bold, on
+      // top of it — so the ring never looks cut where one becomes the other.
+      var loop = pathOf(all, true);
+      back += '<g style="--axis:' + COLOURS[i] + '"><path class="gimbal__underhalo" d="' + loop + '"/>' +
+        '<path class="gimbal__back" d="' + loop + '"/></g>';
       fronts += '<g data-axis="' + i + '" style="--axis:' + COLOURS[i] + '">' +
-        '<path class="gimbal__halo" d="' + f + '"/><path class="gimbal__ring" d="' + f + '"/>' +
-        '<path class="gimbal__hit" d="' + pathOf(all, true) + '"/></g>';
+        '<path class="gimbal__halo gimbal__halo--butt" d="' + f + '"/><path class="gimbal__ring gimbal__ring--butt" d="' + f + '"/>' +
+        '<path class="gimbal__hit" d="' + loop + '"/></g>';
     }
     var c = gizmo.c, rv = gizmo.r * c.k * perspectiveW(state.z || 0) * 1.14;
     var view = '<g data-axis="view"><circle class="gimbal__view" cx="' + n(c.cx) + '" cy="' + n(c.cy) + '" r="' + n(rv) + '"/>' +
@@ -599,9 +608,9 @@
 
   /* --------------------------------------------------------------- inputs -- */
 
-  var NUM = ['rx', 'ry', 'rz', 'depth', 'size', 'dWeight', 'z', 'x', 'y', 'proportion', 'weight', 'frameMargin', 'frameW', 'frameH', 'corner'];
+  var NUM = ['rx', 'ry', 'rz', 'depth', 'size', 'dWeight', 'ascender', 'z', 'x', 'y', 'proportion', 'weight', 'frameMargin', 'frameW', 'frameH', 'corner'];
   var CHECK = { background: 'background', square: 'square', frameOn: 'frame-on' };
-  var INPUT_ID = { x: 'pos-x', y: 'pos-y', z: 'pos-z', depth: 'perspective', frameMargin: 'frame-margin', frameW: 'frame-w', frameH: 'frame-h', dWeight: 'd-weight' };
+  var INPUT_ID = { x: 'pos-x', y: 'pos-y', z: 'pos-z', depth: 'perspective', frameMargin: 'frame-margin', frameW: 'frame-w', frameH: 'frame-h', dWeight: 'd-weight', ascender: 'ascender' };
   function inputFor(k) { return $(INPUT_ID[k] || k); }
 
   function sync() {
