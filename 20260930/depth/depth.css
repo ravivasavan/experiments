@@ -107,6 +107,9 @@
   gap: var(--gap, 8px);
   overflow-y: auto;
   scrollbar-width: thin;
+  /* The theme's ink on no track, so a classic scrollbar doesn't paint a
+     white rail beside the cards at night. */
+  scrollbar-color: color-mix(in srgb, var(--fg) 24%, transparent) transparent;
 }
 
 .card {
@@ -187,15 +190,17 @@
 .tile--pixels { image-rendering: pixelated; }
 
 /* ------------------------------------------------------------ the folds -- */
-/* Below 900 there is no room beside the rail: the canvas comes first, the
-   cards follow it in one column, and the viewport scrolls. */
+/* Below 900 there is no room for the lineup beside the rail: the canvas comes
+   first, the cards follow it in one column, and the viewport scrolls. Both
+   still keep to the room right of the rail, as on desktop, so the rail's six
+   pills never sit on the d. */
 @media (max-width: 900px) {
   .viewport {
     flex-direction: column;
     justify-content: flex-start;
     gap: var(--gap, 8px);
     overflow-y: auto;
-    padding: var(--chrome-tools, 88px) var(--chrome-top, 16px) var(--dock-room);
+    padding: var(--chrome-tools, 88px) var(--chrome-top, 16px) var(--dock-room) var(--lineup-left);
   }
   .stage { height: auto; flex: none; }
   .mark-box { width: min(100%, 480px); }

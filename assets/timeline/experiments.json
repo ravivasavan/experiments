@@ -99,6 +99,20 @@
         "night.webp",
         "gallery.webp"
       ]
+    },
+    {
+      "slug": "depth",
+      "name": "Depth",
+      "date": "20260930",
+      "description": "The depthcore d, turned in space and cut into icons",
+      "status": "live",
+      "tech": "SVG, 3D gizmos, icon export, DialKit",
+      "glyph": "box",
+      "shots": [
+        "night.webp",
+        "day.webp",
+        "gizmo.webp"
+      ]
     }
   ]
 }

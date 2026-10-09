@@ -383,13 +383,14 @@ corners; only full-view media has square corners. Shared chrome is unchanged.
 
 ## Depth exceptions — requested 2026-09-30
 
-Depth (`poc/depth/`, `/20260930/depth/`) is unlisted: no timeline entry,
-glyph, noscript line or shots, and the page is `noindex`. Its icon lineup is a
+Depth (`poc/depth/`, `/20260930/depth/`) is on the timeline, dated 30 September
+2026, the day it was parked (published 2026-10-10). Its icon lineup is a
 single column of labelled cards beside the rail, each icon at its true size —
 including a mock Discord sidebar whose other servers are well-known marks from
 Simple Icons (CC0), a preview only and never exported — and
 the square canvas centres in the room between that column and the panel rather
-than on the viewport. A 3D-package gizmo is drawn over the d on the canvas, in
+than on the viewport. Below 900 the cards stack under the canvas, and both
+keep to the room right of the rail, so the rail never lies on the d. A 3D-package gizmo is drawn over the d on the canvas, in
 Local orientation and through the d's own camera, X red, Y green, Z blue:
 Move (three cone-tipped arrows, three plane handles, a free centre handle) or
 Rotate (a ring per local axis plus a view ring), switched by Cinema 4D's keys,
