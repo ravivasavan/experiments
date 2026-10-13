@@ -23,6 +23,6 @@ Preview `/20260922/drift/`. `DRIFT_ORIGIN` overrides the test server origin. Ins
 
 Imported from [Ravi's Cargo Play collection](https://ravivasavan.cargo.site/play), 22 September 2026: 27 images and two motion pieces across 15 studies. Full-size WebPs retain the source pixel dimensions; they are compressed viewing copies, not byte-identical archival originals. Source URLs are retained in the manifest. Falling Figure contains only the LAPhil figure render; the two unrelated plant renders have been removed. Bag Close Ups contains only the three puffy bag renders; the unrelated plant and translucent pot have been removed.
 
-The older Bag, Trunk Growth Motion and S001 Avandre Vimeo embeds returned access errors during import. Their videos are omitted; the available Bag and Trunk Growth stills remain. Circular Sideboard and Koto Faces are included as local motion previews.
+The older Bag, Trunk Growth Motion and S001 Avandre Vimeo embeds returned access errors during import. Their videos are omitted; the available Bag and Trunk Growth stills remain. Circular Sideboard and Faces are included as local motion previews.
 
 For eventual main-site use, the media manifest and engine are independent of the panel. Keep the native scrolling, idle handoff, reduced-motion behavior and grouped media; adopt the main site's chrome at integration time.

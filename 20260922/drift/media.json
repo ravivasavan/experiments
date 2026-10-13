@@ -363,20 +363,19 @@
       ]
     },
     {
-      "id": "koto-faces",
-      "title": "Koto Faces",
-      "source": "https://ravivasavan.cargo.site/Koto-Faces",
+      "id": "faces",
+      "title": "Faces",
       "media": [
         {
           "type": "video",
-          "src": "media/koto-faces.mp4",
-          "poster": "media/koto-faces.webp",
-          "full": "media/koto-faces.mp4",
+          "src": "media/faces.mp4",
+          "poster": "media/faces.webp",
+          "full": "media/faces.mp4",
           "original": "https://files.cargocollective.com/c8368/Comp-1.mp4",
           "width": 960,
           "height": 1706,
-          "alt": "Koto Faces",
-          "filename": "2026-02-11-KotoFaces-Motion-001A"
+          "alt": "Faces",
+          "filename": "2026-02-11-Faces-Motion-001A"
         }
       ]
     },
