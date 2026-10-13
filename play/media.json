@@ -3,6 +3,40 @@
   "scraped": "Cargo-scrape-2026-09-22",
   "projects": [
     {
+      "id": "feedback-visualisation",
+      "title": "Feedback Visualisation",
+      "media": [
+        {
+          "type": "video",
+          "src": "media/20250803-Feedback-Visualisation.mp4",
+          "poster": "media/20250803-Feedback-Visualisation.webp",
+          "full": "media/20250803-Feedback-Visualisation.mp4",
+          "original": "Dailies Gallery Curated",
+          "width": 1280,
+          "height": 720,
+          "alt": "Feedback Visualisation",
+          "filename": "20250803-Feedback-Visualisation"
+        }
+      ]
+    },
+    {
+      "id": "disc-spin",
+      "title": "Disc Spin",
+      "media": [
+        {
+          "type": "video",
+          "src": "media/20231121-Disc-Spin.mp4",
+          "poster": "media/20231121-Disc-Spin.webp",
+          "full": "media/20231121-Disc-Spin.mp4",
+          "original": "Dailies Gallery Curated",
+          "width": 1920,
+          "height": 1080,
+          "alt": "Disc Spin",
+          "filename": "20231121-Disc-Spin"
+        }
+      ]
+    },
+    {
       "id": "op-1-field",
       "title": "OP-1 Field",
       "source": "https://ravivasavan.cargo.site/OP-1-Field",
@@ -14,7 +48,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/OP-1-Field/20231016_OP1_Field_174547_Angle0040_4K.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "OP-1 Field \u00b7 1",
+          "alt": "OP-1 Field · 1",
           "filename": "20231016-OP1-Field-Angle0040"
         },
         {
@@ -24,7 +58,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/OP-1-Field/20231016_OP1_Field_193215_Macro0040_4K.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "OP-1 Field \u00b7 2",
+          "alt": "OP-1 Field · 2",
           "filename": "20231016-OP1-Field-Macro0040"
         },
         {
@@ -34,8 +68,34 @@
           "original": "Cargo-scrape-2026-09-22/sources/OP-1-Field/20231016_OP1_Field_201521_Top0040_4K.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "OP-1 Field \u00b7 3",
+          "alt": "OP-1 Field · 3",
           "filename": "20231016-OP1-Field-Top0040"
+        }
+      ]
+    },
+    {
+      "id": "movas-s2-stickers",
+      "title": "Movas S2 Stickers",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20230630-Movas-S2-Stickers-01.webp",
+          "full": "media/20230630-Movas-S2-Stickers-01-full.webp",
+          "original": "Dailies Gallery Curated",
+          "width": 3686,
+          "height": 4877,
+          "alt": "Movas S2 Stickers · 1",
+          "filename": "20230630-Movas-S2-Stickers-01"
+        },
+        {
+          "type": "image",
+          "src": "media/20230630-Movas-S2-Stickers-02.webp",
+          "full": "media/20230630-Movas-S2-Stickers-02-full.webp",
+          "original": "Dailies Gallery Curated",
+          "width": 3686,
+          "height": 4877,
+          "alt": "Movas S2 Stickers · 2",
+          "filename": "20230630-Movas-S2-Stickers-02"
         }
       ]
     },
@@ -51,8 +111,50 @@
           "original": "Cargo-scrape-2026-09-22/sources/Big-Bang/20230504-Big-Bang-0416.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "Big Bang \u00b7 1",
+          "alt": "Big Bang · 1",
           "filename": "20230504-Big-Bang-0416"
+        }
+      ]
+    },
+    {
+      "id": "disintegrating-flowers",
+      "title": "Disintegrating Flowers",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20230410-Disintegrating-Flowers-01.webp",
+          "full": "media/20230410-Disintegrating-Flowers-01-full.webp",
+          "original": "Dailies Gallery Curated",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Disintegrating Flowers · 1",
+          "filename": "20230410-Disintegrating-Flowers-01"
+        },
+        {
+          "type": "image",
+          "src": "media/20230410-Disintegrating-Flowers-02.webp",
+          "full": "media/20230410-Disintegrating-Flowers-02-full.webp",
+          "original": "Dailies Gallery Curated",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Disintegrating Flowers · 2",
+          "filename": "20230410-Disintegrating-Flowers-02"
+        }
+      ]
+    },
+    {
+      "id": "felt-cloth",
+      "title": "Felt Cloth",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20230409-Felt-Cloth.webp",
+          "full": "media/20230409-Felt-Cloth-full.webp",
+          "original": "Dailies Gallery Curated",
+          "width": 3840,
+          "height": 2160,
+          "alt": "Felt Cloth",
+          "filename": "20230409-Felt-Cloth"
         }
       ]
     },
@@ -68,7 +170,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Twisting-Ropes/20230408-Twisting-Ropes-B0002.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "Twisting Ropes \u00b7 1",
+          "alt": "Twisting Ropes · 1",
           "filename": "20230408-Twisting-Ropes-B0002"
         },
         {
@@ -78,7 +180,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Twisting-Ropes/20230408-Twisting-Ropes0013.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "Twisting Ropes \u00b7 2",
+          "alt": "Twisting Ropes · 2",
           "filename": "20230408-Twisting-Ropes-0013"
         }
       ]
@@ -95,7 +197,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Cap/20230401-Cap-Cushion.png",
           "width": 3840,
           "height": 2160,
-          "alt": "Cap \u00b7 1",
+          "alt": "Cap · 1",
           "filename": "20230401-Cap-Cushion"
         }
       ]
@@ -112,7 +214,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Trunk-Growth/20230313-Trunk-Growth-Wide.png",
           "width": 3840,
           "height": 2160,
-          "alt": "Trunk Growth \u00b7 1",
+          "alt": "Trunk Growth · 1",
           "filename": "20230313-Trunk-Growth-Wide"
         },
         {
@@ -140,7 +242,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Angle_a.jpg",
           "width": 2160,
           "height": 2700,
-          "alt": "Movas Sign \u00b7 1",
+          "alt": "Movas Sign · 1",
           "filename": "20230312-Hector-s-Signage-Hardsurface-Angle-a"
         },
         {
@@ -150,7 +252,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Detail_a.jpg",
           "width": 2160,
           "height": 2700,
-          "alt": "Movas Sign \u00b7 2",
+          "alt": "Movas Sign · 2",
           "filename": "20230312-Hector-s-Signage-Hardsurface-Detail-a"
         },
         {
@@ -160,7 +262,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Details_a.jpg",
           "width": 2160,
           "height": 2700,
-          "alt": "Movas Sign \u00b7 3",
+          "alt": "Movas Sign · 3",
           "filename": "20230312-Hector-s-Signage-Hardsurface-Details-a"
         },
         {
@@ -170,7 +272,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Details_b.jpg",
           "width": 2160,
           "height": 2700,
-          "alt": "Movas Sign \u00b7 4",
+          "alt": "Movas Sign · 4",
           "filename": "20230312-Hector-s-Signage-Hardsurface-Details-b"
         },
         {
@@ -180,7 +282,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Details_c.jpg",
           "width": 2160,
           "height": 2700,
-          "alt": "Movas Sign \u00b7 5",
+          "alt": "Movas Sign · 5",
           "filename": "20230312-Hector-s-Signage-Hardsurface-Details-c"
         },
         {
@@ -190,7 +292,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Movas-Sign/20230312-Hector-s-Signage-Hardsurface_Front_a.jpg",
           "width": 2160,
           "height": 2700,
-          "alt": "Movas Sign \u00b7 6",
+          "alt": "Movas Sign · 6",
           "filename": "20230312-Hector-s-Signage-Hardsurface-Front-a"
         }
       ]
@@ -207,7 +309,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Custom-Sideboard/20230302-TV-Unit-Design_Angle_a.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "Custom Sideboard \u00b7 1",
+          "alt": "Custom Sideboard · 1",
           "filename": "20230302-TV-Unit-Design-Angle-a"
         },
         {
@@ -217,7 +319,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Custom-Sideboard/20230302-TV-Unit-Design_Caddy_a.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "Custom Sideboard \u00b7 2",
+          "alt": "Custom Sideboard · 2",
           "filename": "20230302-TV-Unit-Design-Caddy-a"
         },
         {
@@ -227,7 +329,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Custom-Sideboard/20230302-TV-Unit-Design_Close-Up_a.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "Custom Sideboard \u00b7 3",
+          "alt": "Custom Sideboard · 3",
           "filename": "20230302-TV-Unit-Design-Close-Up-a"
         },
         {
@@ -237,7 +339,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Custom-Sideboard/20230302-TV-Unit-Design_Front_a.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "Custom Sideboard \u00b7 4",
+          "alt": "Custom Sideboard · 4",
           "filename": "20230302-TV-Unit-Design-Front-a"
         }
       ]
@@ -254,8 +356,24 @@
           "original": "Cargo-scrape-2026-09-22/sources/Weight-of-World-1/20221129-Weight-of-the-World-Exp03.png",
           "width": 2160,
           "height": 3840,
-          "alt": "Weight of the World \u00b7 1",
+          "alt": "Weight of the World · 1",
           "filename": "20221129-Weight-of-the-World-Exp03"
+        }
+      ]
+    },
+    {
+      "id": "weight-of-world-exp01",
+      "title": "Weight of the World",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20221109-Weight-of-the-World-Exp01.webp",
+          "full": "media/20221109-Weight-of-the-World-Exp01-full.webp",
+          "original": "Dailies Gallery Curated",
+          "width": 1080,
+          "height": 1920,
+          "alt": "Weight of the World, Exp01",
+          "filename": "20221109-Weight-of-the-World-Exp01"
         }
       ]
     },
@@ -271,7 +389,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Doodads-Sculpture/20221128-Random-Sculpture.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "Doodads Sculpture \u00b7 1",
+          "alt": "Doodads Sculpture · 1",
           "filename": "20221128-Random-Sculpture"
         }
       ]
@@ -288,7 +406,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Surface-Ikebana/20221129-Surface-Ikebana.jpg",
           "width": 2468,
           "height": 3840,
-          "alt": "Surface Ikebana \u00b7 1",
+          "alt": "Surface Ikebana · 1",
           "filename": "20221129-Surface-Ikebana"
         }
       ]
@@ -305,7 +423,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Flowers-Mirrors/20221109-Flowers-and-Mirrors-002.jpg",
           "width": 3840,
           "height": 2160,
-          "alt": "Flowers & Mirrors \u00b7 1",
+          "alt": "Flowers & Mirrors · 1",
           "filename": "20221109-Flowers-and-Mirrors-002"
         }
       ]
@@ -340,7 +458,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Bag-Close-Ups/20221109-Puffy-Bag-CloseUpA.png",
           "width": 2160,
           "height": 2160,
-          "alt": "Bag Close Ups \u00b7 1",
+          "alt": "Bag Close Ups · 1",
           "filename": "20221109-Puffy-Bag-CloseUpA"
         },
         {
@@ -350,7 +468,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Bag-Close-Ups/20221109-Puffy-Bag-CloseUpB.png",
           "width": 2160,
           "height": 2160,
-          "alt": "Bag Close Ups \u00b7 2",
+          "alt": "Bag Close Ups · 2",
           "filename": "20221109-Puffy-Bag-CloseUpB"
         },
         {
@@ -360,7 +478,7 @@
           "original": "Cargo-scrape-2026-09-22/sources/Bag-Close-Ups/20221109-Puffy-Bag-CloseUpC.png",
           "width": 2160,
           "height": 2160,
-          "alt": "Bag Close Ups \u00b7 3",
+          "alt": "Bag Close Ups · 3",
           "filename": "20221109-Puffy-Bag-CloseUpC"
         }
       ]
@@ -377,26 +495,25 @@
           "original": "Cargo-scrape-2026-09-22/sources/Falling-Figure/20220115_LAPhil_FallingFigure-Test0002.jpg",
           "width": 5120,
           "height": 2880,
-          "alt": "Falling Figure \u00b7 1",
+          "alt": "Falling Figure · 1",
           "filename": "20220115-LAPhil-FallingFigure-Test0002"
         }
       ]
     },
     {
-      "id": "koto-faces",
-      "title": "Koto Faces",
-      "source": "https://ravivasavan.cargo.site/Koto-Faces",
+      "id": "faces",
+      "title": "Faces",
       "media": [
         {
           "type": "video",
-          "src": "media/20221109-Koto-Faces.mp4",
-          "poster": "media/20221109-Koto-Faces.webp",
-          "full": "media/20221109-Koto-Faces.mp4",
-          "original": "Cargo-scrape-2026-09-22/sources/Koto-Faces/Comp-1.mp4",
+          "src": "media/20221109-Faces.mp4",
+          "poster": "media/20221109-Faces.webp",
+          "full": "media/20221109-Faces.mp4",
+          "original": "Cargo-scrape-2026-09-22",
           "width": 1080,
           "height": 1920,
-          "alt": "Koto Faces",
-          "filename": "20221109-Koto-Faces"
+          "alt": "Faces",
+          "filename": "20221109-Faces"
         }
       ]
     },
@@ -415,6 +532,38 @@
           "height": 1080,
           "alt": "Circular Sideboard",
           "filename": "20231008-Circular-Sidetable"
+        }
+      ]
+    },
+    {
+      "id": "ramen-everyday",
+      "title": "Ramen Everyday",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20161007-Ramen-Everyday.webp",
+          "full": "media/20161007-Ramen-Everyday-full.webp",
+          "original": "Dailies Gallery Curated",
+          "width": 3850,
+          "height": 2750,
+          "alt": "Ramen Everyday",
+          "filename": "20161007-Ramen-Everyday"
+        }
+      ]
+    },
+    {
+      "id": "calvary",
+      "title": "Calvary",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20160907-Calvary.webp",
+          "full": "media/20160907-Calvary-full.webp",
+          "original": "Dailies Gallery Curated",
+          "width": 3850,
+          "height": 2820,
+          "alt": "Calvary",
+          "filename": "20160907-Calvary"
         }
       ]
     }

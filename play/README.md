@@ -7,3 +7,5 @@ The experiment, with Dialkit and the Pause / Randomise / Reset dock, stays at [r
 The collection still drifts at the reviewed defaults (speed 30, size 85, spacing 64, resume 3, seed 1801). Opening a work keeps the gallery rail and dock: grid or single, previous and next, zoom, and play or pause on a motion piece. The resting view has no parameter panel and no experiment bar.
 
 `app.js` resolves media from this directory. `media.json` and `media/` are the collection.
+
+A work can be linked to directly: `/play/?work=<id>` here, or `?play=<id>` on any ravivasavan.com page, which opens Play as a cover on that work (the chrome passes it through as `?work=`). The id is the project's `id` in `media.json`. The address bar follows the work that is open.

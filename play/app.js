@@ -304,6 +304,7 @@
   window.addEventListener('message', (event) => {
     if (event.origin !== location.origin) return;
     if (event.data && event.data.type === 'rv-play-show') arrive(true);
+    if (event.data && event.data.type === 'rv-play-open') openById(event.data.id || null);
   });
   function queueLayout() {
     cancelAnimationFrame(layoutFrame); layoutFrame = requestAnimationFrame(layout);
@@ -530,6 +531,30 @@
     moveMedia(from, el);
     viewer.setAttribute('aria-label', selected.title); viewControls();
   }
+  // A work can be linked to: /play/?work=<id>, or ?play=<id> on any page
+  // (the chrome opens this page as a cover with ?work=). Opening or closing a
+  // work keeps that link current: in the address bar here, or, under the
+  // cover, by telling the page around it.
+  function reportWork(id) {
+    if (layerEmbed()) {
+      if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'rv-play-work', id }, location.origin);
+      return;
+    }
+    const url = new URL(location.href);
+    if (id) url.searchParams.set('work', id); else url.searchParams.delete('work');
+    if (url.href !== location.href) history.replaceState(history.state, '', url);
+  }
+  function openById(id) {
+    if (!id) { if (selected) close(); return true; }
+    if (selected?.id === id) return true;
+    const project = projects.find((p) => p.id === id);
+    const tile = tiles.find((t) => t.dataset.project === id && !t.hasAttribute('aria-hidden')) ||
+      tiles.find((t) => t.dataset.project === id);
+    if (!project || !tile) return false;
+    if (selected) close();
+    open(project, 0, tile);
+    return true;
+  }
   function open(project, index, tile) {
     stopMediaMotion(); galleryScroll = 0;
     selected = project; slide = index; returnFocus = tile;
@@ -543,6 +568,7 @@
     $('detail-rail').hidden = false;
     if (project.media.length > 1) showGrid(); else showSlide(mediaSnapshot(tile.querySelector('img, video')));
     updateVideos(); (project.media.length > 1 ? $('gallery-mode') : $('work-name')).focus({ preventScroll: true });
+    reportWork(project.id);
   }
   function close() {
     if (!selected) return;
@@ -564,6 +590,7 @@
     // Return focus for keyboard users; pointer use of the collection will resume.
     takeover(); playbackFace(); status(); updateVideos();
     if (layoutWidth !== field.clientWidth || layoutHeight !== field.clientHeight) queueLayout();
+    reportWork(null);
   }
   function next(delta) { if (selected) { slide = mod(slide + delta, selected.media.length); showSlide(); } }
 
@@ -693,6 +720,8 @@
       if (!response.ok) throw new Error('Collection unavailable');
       projects = (await response.json()).projects;
       loaded = true; layout(); requestAnimationFrame(frame);
+      const linked = new URLSearchParams(location.search).get('work');
+      if (linked && !openById(linked)) reportWork(null);
       document.fonts.ready.then(queueLayout);
     } catch {
       field.setAttribute('aria-label', 'Collection unavailable');
