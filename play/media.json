@@ -15,7 +15,9 @@
           "width": 1280,
           "height": 720,
           "alt": "Feedback Visualisation",
-          "filename": "20250803-Feedback-Visualisation"
+          "filename": "20250803-Feedback-Visualisation",
+          "srcset": "media/20250803-Feedback-Visualisation-480.webp 480w, media/20250803-Feedback-Visualisation-640.webp 640w, media/20250803-Feedback-Visualisation.webp 960w",
+          "preview": "media/20250803-Feedback-Visualisation-card.mp4"
         }
       ]
     },
@@ -32,7 +34,9 @@
           "width": 1920,
           "height": 1080,
           "alt": "Disc Spin",
-          "filename": "20231121-Disc-Spin"
+          "filename": "20231121-Disc-Spin",
+          "srcset": "media/20231121-Disc-Spin-480.webp 480w, media/20231121-Disc-Spin-640.webp 640w, media/20231121-Disc-Spin.webp 960w",
+          "preview": "media/20231121-Disc-Spin-card.mp4"
         }
       ]
     },
@@ -49,7 +53,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "OP-1 Field · 1",
-          "filename": "20231016-OP1-Field-Angle0040"
+          "filename": "20231016-OP1-Field-Angle0040",
+          "srcset": "media/20231016-OP1-Field-Angle0040-480.webp 480w, media/20231016-OP1-Field-Angle0040-640.webp 640w, media/20231016-OP1-Field-Angle0040.webp 960w"
         },
         {
           "type": "image",
@@ -59,7 +64,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "OP-1 Field · 2",
-          "filename": "20231016-OP1-Field-Macro0040"
+          "filename": "20231016-OP1-Field-Macro0040",
+          "srcset": "media/20231016-OP1-Field-Macro0040-480.webp 480w, media/20231016-OP1-Field-Macro0040-640.webp 640w, media/20231016-OP1-Field-Macro0040.webp 960w"
         },
         {
           "type": "image",
@@ -69,7 +75,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "OP-1 Field · 3",
-          "filename": "20231016-OP1-Field-Top0040"
+          "filename": "20231016-OP1-Field-Top0040",
+          "srcset": "media/20231016-OP1-Field-Top0040-480.webp 480w, media/20231016-OP1-Field-Top0040-640.webp 640w, media/20231016-OP1-Field-Top0040.webp 960w"
         }
       ]
     },
@@ -85,7 +92,8 @@
           "width": 3686,
           "height": 4877,
           "alt": "Movas S2 Stickers · 1",
-          "filename": "20230630-Movas-S2-Stickers-01"
+          "filename": "20230630-Movas-S2-Stickers-01",
+          "srcset": "media/20230630-Movas-S2-Stickers-01-480.webp 480w, media/20230630-Movas-S2-Stickers-01-640.webp 640w, media/20230630-Movas-S2-Stickers-01.webp 726w"
         },
         {
           "type": "image",
@@ -95,7 +103,8 @@
           "width": 3686,
           "height": 4877,
           "alt": "Movas S2 Stickers · 2",
-          "filename": "20230630-Movas-S2-Stickers-02"
+          "filename": "20230630-Movas-S2-Stickers-02",
+          "srcset": "media/20230630-Movas-S2-Stickers-02-480.webp 480w, media/20230630-Movas-S2-Stickers-02-640.webp 640w, media/20230630-Movas-S2-Stickers-02.webp 726w"
         }
       ]
     },
@@ -112,7 +121,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Big Bang · 1",
-          "filename": "20230504-Big-Bang-0416"
+          "filename": "20230504-Big-Bang-0416",
+          "srcset": "media/20230504-Big-Bang-0416-480.webp 480w, media/20230504-Big-Bang-0416-640.webp 640w, media/20230504-Big-Bang-0416.webp 960w"
         }
       ]
     },
@@ -128,7 +138,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Disintegrating Flowers · 1",
-          "filename": "20230410-Disintegrating-Flowers-01"
+          "filename": "20230410-Disintegrating-Flowers-01",
+          "srcset": "media/20230410-Disintegrating-Flowers-01-480.webp 480w, media/20230410-Disintegrating-Flowers-01-640.webp 640w, media/20230410-Disintegrating-Flowers-01.webp 960w"
         },
         {
           "type": "image",
@@ -138,7 +149,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Disintegrating Flowers · 2",
-          "filename": "20230410-Disintegrating-Flowers-02"
+          "filename": "20230410-Disintegrating-Flowers-02",
+          "srcset": "media/20230410-Disintegrating-Flowers-02-480.webp 480w, media/20230410-Disintegrating-Flowers-02-640.webp 640w, media/20230410-Disintegrating-Flowers-02.webp 960w"
         }
       ]
     },
@@ -154,7 +166,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Felt Cloth",
-          "filename": "20230409-Felt-Cloth"
+          "filename": "20230409-Felt-Cloth",
+          "srcset": "media/20230409-Felt-Cloth-480.webp 480w, media/20230409-Felt-Cloth-640.webp 640w, media/20230409-Felt-Cloth.webp 960w"
         }
       ]
     },
@@ -171,7 +184,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Twisting Ropes · 1",
-          "filename": "20230408-Twisting-Ropes-B0002"
+          "filename": "20230408-Twisting-Ropes-B0002",
+          "srcset": "media/20230408-Twisting-Ropes-B0002-480.webp 480w, media/20230408-Twisting-Ropes-B0002-640.webp 640w, media/20230408-Twisting-Ropes-B0002.webp 960w"
         },
         {
           "type": "image",
@@ -181,7 +195,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Twisting Ropes · 2",
-          "filename": "20230408-Twisting-Ropes-0013"
+          "filename": "20230408-Twisting-Ropes-0013",
+          "srcset": "media/20230408-Twisting-Ropes-0013-480.webp 480w, media/20230408-Twisting-Ropes-0013-640.webp 640w, media/20230408-Twisting-Ropes-0013.webp 960w"
         }
       ]
     },
@@ -198,7 +213,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Cap · 1",
-          "filename": "20230401-Cap-Cushion"
+          "filename": "20230401-Cap-Cushion",
+          "srcset": "media/20230401-Cap-Cushion-480.webp 480w, media/20230401-Cap-Cushion-640.webp 640w, media/20230401-Cap-Cushion.webp 960w"
         }
       ]
     },
@@ -215,7 +231,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Trunk Growth · 1",
-          "filename": "20230313-Trunk-Growth-Wide"
+          "filename": "20230313-Trunk-Growth-Wide",
+          "srcset": "media/20230313-Trunk-Growth-Wide-480.webp 480w, media/20230313-Trunk-Growth-Wide-640.webp 640w, media/20230313-Trunk-Growth-Wide.webp 960w"
         },
         {
           "type": "video",
@@ -226,7 +243,9 @@
           "width": 1920,
           "height": 1080,
           "alt": "Trunk Growth",
-          "filename": "20230313-Trunk-Growth"
+          "filename": "20230313-Trunk-Growth",
+          "srcset": "media/20230313-Trunk-Growth-480.webp 480w, media/20230313-Trunk-Growth-640.webp 640w, media/20230313-Trunk-Growth.webp 960w",
+          "preview": "media/20230313-Trunk-Growth-card.mp4"
         }
       ]
     },
@@ -243,7 +262,8 @@
           "width": 2160,
           "height": 2700,
           "alt": "Movas Sign · 1",
-          "filename": "20230312-Hector-s-Signage-Hardsurface-Angle-a"
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Angle-a",
+          "srcset": "media/20230312-Hector-s-Signage-Hardsurface-Angle-a-480.webp 480w, media/20230312-Hector-s-Signage-Hardsurface-Angle-a-640.webp 640w, media/20230312-Hector-s-Signage-Hardsurface-Angle-a.webp 768w"
         },
         {
           "type": "image",
@@ -253,7 +273,8 @@
           "width": 2160,
           "height": 2700,
           "alt": "Movas Sign · 2",
-          "filename": "20230312-Hector-s-Signage-Hardsurface-Detail-a"
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Detail-a",
+          "srcset": "media/20230312-Hector-s-Signage-Hardsurface-Detail-a-480.webp 480w, media/20230312-Hector-s-Signage-Hardsurface-Detail-a-640.webp 640w, media/20230312-Hector-s-Signage-Hardsurface-Detail-a.webp 768w"
         },
         {
           "type": "image",
@@ -263,7 +284,8 @@
           "width": 2160,
           "height": 2700,
           "alt": "Movas Sign · 3",
-          "filename": "20230312-Hector-s-Signage-Hardsurface-Details-a"
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Details-a",
+          "srcset": "media/20230312-Hector-s-Signage-Hardsurface-Details-a-480.webp 480w, media/20230312-Hector-s-Signage-Hardsurface-Details-a-640.webp 640w, media/20230312-Hector-s-Signage-Hardsurface-Details-a.webp 768w"
         },
         {
           "type": "image",
@@ -273,7 +295,8 @@
           "width": 2160,
           "height": 2700,
           "alt": "Movas Sign · 4",
-          "filename": "20230312-Hector-s-Signage-Hardsurface-Details-b"
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Details-b",
+          "srcset": "media/20230312-Hector-s-Signage-Hardsurface-Details-b-480.webp 480w, media/20230312-Hector-s-Signage-Hardsurface-Details-b-640.webp 640w, media/20230312-Hector-s-Signage-Hardsurface-Details-b.webp 768w"
         },
         {
           "type": "image",
@@ -283,7 +306,8 @@
           "width": 2160,
           "height": 2700,
           "alt": "Movas Sign · 5",
-          "filename": "20230312-Hector-s-Signage-Hardsurface-Details-c"
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Details-c",
+          "srcset": "media/20230312-Hector-s-Signage-Hardsurface-Details-c-480.webp 480w, media/20230312-Hector-s-Signage-Hardsurface-Details-c-640.webp 640w, media/20230312-Hector-s-Signage-Hardsurface-Details-c.webp 768w"
         },
         {
           "type": "image",
@@ -293,7 +317,8 @@
           "width": 2160,
           "height": 2700,
           "alt": "Movas Sign · 6",
-          "filename": "20230312-Hector-s-Signage-Hardsurface-Front-a"
+          "filename": "20230312-Hector-s-Signage-Hardsurface-Front-a",
+          "srcset": "media/20230312-Hector-s-Signage-Hardsurface-Front-a-480.webp 480w, media/20230312-Hector-s-Signage-Hardsurface-Front-a-640.webp 640w, media/20230312-Hector-s-Signage-Hardsurface-Front-a.webp 768w"
         }
       ]
     },
@@ -310,7 +335,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Custom Sideboard · 1",
-          "filename": "20230302-TV-Unit-Design-Angle-a"
+          "filename": "20230302-TV-Unit-Design-Angle-a",
+          "srcset": "media/20230302-TV-Unit-Design-Angle-a-480.webp 480w, media/20230302-TV-Unit-Design-Angle-a-640.webp 640w, media/20230302-TV-Unit-Design-Angle-a.webp 960w"
         },
         {
           "type": "image",
@@ -320,7 +346,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Custom Sideboard · 2",
-          "filename": "20230302-TV-Unit-Design-Caddy-a"
+          "filename": "20230302-TV-Unit-Design-Caddy-a",
+          "srcset": "media/20230302-TV-Unit-Design-Caddy-a-480.webp 480w, media/20230302-TV-Unit-Design-Caddy-a-640.webp 640w, media/20230302-TV-Unit-Design-Caddy-a.webp 960w"
         },
         {
           "type": "image",
@@ -330,7 +357,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Custom Sideboard · 3",
-          "filename": "20230302-TV-Unit-Design-Close-Up-a"
+          "filename": "20230302-TV-Unit-Design-Close-Up-a",
+          "srcset": "media/20230302-TV-Unit-Design-Close-Up-a-480.webp 480w, media/20230302-TV-Unit-Design-Close-Up-a-640.webp 640w, media/20230302-TV-Unit-Design-Close-Up-a.webp 960w"
         },
         {
           "type": "image",
@@ -340,7 +368,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Custom Sideboard · 4",
-          "filename": "20230302-TV-Unit-Design-Front-a"
+          "filename": "20230302-TV-Unit-Design-Front-a",
+          "srcset": "media/20230302-TV-Unit-Design-Front-a-480.webp 480w, media/20230302-TV-Unit-Design-Front-a-640.webp 640w, media/20230302-TV-Unit-Design-Front-a.webp 960w"
         }
       ]
     },
@@ -357,7 +386,8 @@
           "width": 2160,
           "height": 3840,
           "alt": "Weight of the World · 1",
-          "filename": "20221129-Weight-of-the-World-Exp03"
+          "filename": "20221129-Weight-of-the-World-Exp03",
+          "srcset": "media/20221129-Weight-of-the-World-Exp03-480.webp 480w, media/20221129-Weight-of-the-World-Exp03.webp 540w"
         }
       ]
     },
@@ -373,7 +403,8 @@
           "width": 1080,
           "height": 1920,
           "alt": "Weight of the World, Exp01",
-          "filename": "20221109-Weight-of-the-World-Exp01"
+          "filename": "20221109-Weight-of-the-World-Exp01",
+          "srcset": "media/20221109-Weight-of-the-World-Exp01-480.webp 480w, media/20221109-Weight-of-the-World-Exp01.webp 540w"
         }
       ]
     },
@@ -390,7 +421,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Doodads Sculpture · 1",
-          "filename": "20221128-Random-Sculpture"
+          "filename": "20221128-Random-Sculpture",
+          "srcset": "media/20221128-Random-Sculpture-480.webp 480w, media/20221128-Random-Sculpture-640.webp 640w, media/20221128-Random-Sculpture.webp 960w"
         }
       ]
     },
@@ -407,7 +439,8 @@
           "width": 2468,
           "height": 3840,
           "alt": "Surface Ikebana · 1",
-          "filename": "20221129-Surface-Ikebana"
+          "filename": "20221129-Surface-Ikebana",
+          "srcset": "media/20221129-Surface-Ikebana-480.webp 480w, media/20221129-Surface-Ikebana.webp 617w"
         }
       ]
     },
@@ -424,7 +457,8 @@
           "width": 3840,
           "height": 2160,
           "alt": "Flowers & Mirrors · 1",
-          "filename": "20221109-Flowers-and-Mirrors-002"
+          "filename": "20221109-Flowers-and-Mirrors-002",
+          "srcset": "media/20221109-Flowers-and-Mirrors-002-480.webp 480w, media/20221109-Flowers-and-Mirrors-002-640.webp 640w, media/20221109-Flowers-and-Mirrors-002.webp 960w"
         }
       ]
     },
@@ -442,7 +476,9 @@
           "width": 2160,
           "height": 2160,
           "alt": "Bag",
-          "filename": "20221109-Bag"
+          "filename": "20221109-Bag",
+          "srcset": "media/20221109-Bag-480.webp 480w, media/20221109-Bag-640.webp 640w, media/20221109-Bag.webp 960w",
+          "preview": "media/20221109-Bag-card.mp4"
         }
       ]
     },
@@ -459,7 +495,8 @@
           "width": 2160,
           "height": 2160,
           "alt": "Bag Close Ups · 1",
-          "filename": "20221109-Puffy-Bag-CloseUpA"
+          "filename": "20221109-Puffy-Bag-CloseUpA",
+          "srcset": "media/20221109-Puffy-Bag-CloseUpA-480.webp 480w, media/20221109-Puffy-Bag-CloseUpA-640.webp 640w, media/20221109-Puffy-Bag-CloseUpA.webp 960w"
         },
         {
           "type": "image",
@@ -469,7 +506,8 @@
           "width": 2160,
           "height": 2160,
           "alt": "Bag Close Ups · 2",
-          "filename": "20221109-Puffy-Bag-CloseUpB"
+          "filename": "20221109-Puffy-Bag-CloseUpB",
+          "srcset": "media/20221109-Puffy-Bag-CloseUpB-480.webp 480w, media/20221109-Puffy-Bag-CloseUpB-640.webp 640w, media/20221109-Puffy-Bag-CloseUpB.webp 960w"
         },
         {
           "type": "image",
@@ -479,7 +517,8 @@
           "width": 2160,
           "height": 2160,
           "alt": "Bag Close Ups · 3",
-          "filename": "20221109-Puffy-Bag-CloseUpC"
+          "filename": "20221109-Puffy-Bag-CloseUpC",
+          "srcset": "media/20221109-Puffy-Bag-CloseUpC-480.webp 480w, media/20221109-Puffy-Bag-CloseUpC-640.webp 640w, media/20221109-Puffy-Bag-CloseUpC.webp 960w"
         }
       ]
     },
@@ -496,7 +535,8 @@
           "width": 5120,
           "height": 2880,
           "alt": "Falling Figure · 1",
-          "filename": "20220115-LAPhil-FallingFigure-Test0002"
+          "filename": "20220115-LAPhil-FallingFigure-Test0002",
+          "srcset": "media/20220115-LAPhil-FallingFigure-Test0002-480.webp 480w, media/20220115-LAPhil-FallingFigure-Test0002-640.webp 640w, media/20220115-LAPhil-FallingFigure-Test0002.webp 960w"
         }
       ]
     },
@@ -513,7 +553,9 @@
           "width": 1080,
           "height": 1920,
           "alt": "Faces",
-          "filename": "20221109-Faces"
+          "filename": "20221109-Faces",
+          "srcset": "media/20221109-Faces-480.webp 480w, media/20221109-Faces.webp 540w",
+          "preview": "media/20221109-Faces-card.mp4"
         }
       ]
     },
@@ -531,7 +573,9 @@
           "width": 1920,
           "height": 1080,
           "alt": "Circular Sideboard",
-          "filename": "20231008-Circular-Sidetable"
+          "filename": "20231008-Circular-Sidetable",
+          "srcset": "media/20231008-Circular-Sidetable-480.webp 480w, media/20231008-Circular-Sidetable-640.webp 640w, media/20231008-Circular-Sidetable.webp 960w",
+          "preview": "media/20231008-Circular-Sidetable-card.mp4"
         }
       ]
     },
@@ -547,7 +591,8 @@
           "width": 3850,
           "height": 2750,
           "alt": "Ramen Everyday",
-          "filename": "20161007-Ramen-Everyday"
+          "filename": "20161007-Ramen-Everyday",
+          "srcset": "media/20161007-Ramen-Everyday-480.webp 480w, media/20161007-Ramen-Everyday-640.webp 640w, media/20161007-Ramen-Everyday.webp 960w"
         }
       ]
     },
@@ -563,7 +608,8 @@
           "width": 3850,
           "height": 2820,
           "alt": "Calvary",
-          "filename": "20160907-Calvary"
+          "filename": "20160907-Calvary",
+          "srcset": "media/20160907-Calvary-480.webp 480w, media/20160907-Calvary-640.webp 640w, media/20160907-Calvary.webp 960w"
         }
       ]
     }

@@ -9,3 +9,5 @@ The collection still drifts at the reviewed defaults (speed 30, size 85, spacing
 `app.js` resolves media from this directory. `media.json` and `media/` are the collection.
 
 A work can be linked to directly: `/play/?work=<id>` here, or `?play=<id>` on any ravivasavan.com page, which opens Play as a cover on that work (the chrome passes it through as `?work=`). The id is the project's `id` in `media.json`. The address bar follows the work that is open.
+
+Cards load lighter copies of the collection: 480 and 640px images picked by the card's width, and a small preview loop for each video (the opened view still shows the full files). After adding a work to `media.json`, run `python3 play/tools/card-media.py` (needs ImageMagick and ffmpeg) to cut them and record them as `srcset` and `preview`.

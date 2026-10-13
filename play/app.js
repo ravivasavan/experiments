@@ -200,7 +200,10 @@
       if (p.paired) tile.dataset.paired = 'true';
       tile.setAttribute('aria-label', `Open ${p.label}${p.project.media.length > 1 ? `, ${p.project.media.length} works` : ''}`);
       Object.assign(tile.style, { left: `${p.x}px`, top: `${p.y + copy * period}px`, width: `${p.width}px`, height: `${p.height}px` });
-      const media = preview(p.media); media.style.height = `${p.mediaHeight}px`;
+      // The middle copy is the one on screen at load; its first screenful
+      // loads eagerly so the opening view isn't waiting on lazy loading.
+      const eager = copy === 1 && p.y < layoutHeight;
+      const media = preview(p.media, false, p.width - 2 * inset, eager); media.style.height = `${p.mediaHeight}px`;
       tile.append(cardHeading(p.label, p.type), media);
       const offset = offsets.get(p.project.id);
       if (offset) tile.style.transform = `translate(${offset.x}px, ${offset.y}px)`;
@@ -277,7 +280,7 @@
       tile.dataset.project = project.id;
       tile.setAttribute('aria-label', `Open ${label}${project.media.length > 1 ? `, ${project.media.length} works` : ''}`);
       Object.assign(tile.style, { left: `${x}px`, top: `${y}px`, width: `${colW}px`, height: `${height}px` });
-      const node = preview(media); node.style.height = `${mediaHeight}px`;
+      const node = preview(media, false, colW - 2 * inset, y < innerHeight); node.style.height = `${mediaHeight}px`;
       tile.append(cardHeading(label, type), node);
       tile.addEventListener('click', () => open(project, 0, tile));
       fragment.append(tile); tiles.push(tile);
@@ -361,16 +364,27 @@
     const badge = document.createElement('span'); badge.className = 'drift-card-type'; badge.textContent = type;
     header.append(name, badge); return header;
   }
-  function preview(media, posterOnly = false) {
+  // `width` is the card's media width in CSS px. Given one, the preview is
+  // a card's: its image comes from the srcset (480/640/960, see
+  // tools/card-media.py) at that width, its video is the light card loop,
+  // and one on the first screen loads eagerly. Without it, it's the opened
+  // view's starting frame.
+  function preview(media, posterOnly = false, width = 0, eager = false) {
     const el = document.createElement(media.type === 'video' && !posterOnly ? 'video' : 'img');
     el.className = 'drift-card-media'; el.draggable = false;
     if (el.tagName === 'VIDEO') {
-      el.poster = asset(media.poster); el.dataset.src = asset(media.src);
+      el.poster = asset(media.poster); el.dataset.src = asset((width && media.preview) || media.src);
       el.muted = true; el.loop = true; el.playsInline = true; el.preload = 'none';
       el.setAttribute('aria-hidden', 'true');
     } else {
+      if (width && media.srcset) {
+        el.srcset = media.srcset.split(', ').map((c) => {
+          const [path, w] = c.split(' '); return `${asset(path)} ${w}`;
+        }).join(', ');
+        el.sizes = `${Math.round(width)}px`;
+      }
       el.src = asset(media.type === 'video' ? media.poster : media.src);
-      el.alt = ''; el.loading = 'lazy'; el.decoding = 'async';
+      el.alt = ''; el.loading = eager ? 'eager' : 'lazy'; el.decoding = 'async';
     }
     return el;
   }
