@@ -275,18 +275,23 @@
     canvas.width = size; canvas.height = size;
     var g = canvas.getContext('2d');
     g.clearRect(0, 0, size, size);
+    // The rounded square is the favicon's edge: the d is cut to it too, or a
+    // d run past the canvas fills the corners back in.
+    var r = rounded ? size * state.corner / 100 : 0;
+    g.save();
+    g.beginPath();
+    if (r > 0 && g.roundRect) g.roundRect(0, 0, size, size, r);
+    else g.rect(0, 0, size, size);
+    g.clip();
     if (state.background) {
-      var r = rounded ? size * state.corner / 100 : 0;
       g.fillStyle = state.field;
-      g.beginPath();
-      if (r > 0 && g.roundRect) g.roundRect(0, 0, size, size, r);
-      else g.rect(0, 0, size, size);
-      g.fill();
+      g.fillRect(0, 0, size, size);
     }
     var d = iconGeom(size, inset);
     g.fillStyle = state.ink;
     if (d.rects.length) g.fill(new Path2D(rectsPath(d.rects)), 'evenodd');
     g.fill(new Path2D(polyPath(d.pts)));
+    g.restore();
     return canvas;
   }
 
@@ -294,8 +299,9 @@
   function faviconSVG() {
     var N = 32, d = iconGeom(N), r = N * state.corner / 100;
     var out = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">';
+    if (r > 0) out += '<clipPath id="c"><rect width="32" height="32" rx="' + n(r) + '"/></clipPath>';
     if (state.background) out += '<rect width="32" height="32" rx="' + n(r) + '" fill="' + state.field + '"/>';
-    out += '<g fill="' + state.ink + '">';
+    out += '<g fill="' + state.ink + '"' + (r > 0 ? ' clip-path="url(#c)"' : '') + '>';
     if (d.rects.length) out += '<path fill-rule="evenodd" d="' + rectsPath(d.rects) + '"/>';
     return out + '<path d="' + polyPath(d.pts) + '"/></g></svg>';
   }
