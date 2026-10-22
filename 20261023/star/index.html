@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Star — play</title>
+  <meta name="description" content="Three diamond needles on X, Y and Z that read as a six-point star from one angle.">
+  <link rel="canonical" href="https://ravivasavan.com/experiments/20261023/star/">
+  <meta property="og:title" content="Star — play">
+  <meta property="og:description" content="Three diamond needles on X, Y and Z that read as a six-point star from one angle.">
+  <meta property="og:url" content="https://ravivasavan.com/experiments/20261023/star/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" id="theme-color" content="#fff5f5">
+  <script>
+    /* Set data-theme before paint to avoid FOUC. Cycles: day → night → system
+       → circadian. Circadian colours are computed by circadian.js (loaded on
+       demand by chrome.js), so re-apply its last cached tokens here to keep
+       first paint correct. Also resolve the theme-color meta (mobile browser
+       chrome) to match, same logic chrome.js uses at runtime. */
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('theme'); } catch (e) {}
+      if (t !== 'day' && t !== 'night' && t !== 'system' && t !== 'circadian') t = 'system';
+      document.documentElement.dataset.theme = t;
+      var DAY = '#fff5f5', NIGHT = '#0d1b1e';
+      var color = t === 'night' ? NIGHT : DAY;
+      if (t === 'system') {
+        try {
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) color = NIGHT;
+        } catch (e) {}
+      }
+      if (t === 'circadian') {
+        try {
+          var cache = JSON.parse(localStorage.getItem('circadian-cache'));
+          for (var k in cache) document.documentElement.style.setProperty(k, cache[k]);
+          if (cache && cache['--bg']) color = cache['--bg'];
+        } catch (e) {}
+      }
+      try {
+        var meta = document.getElementById('theme-color');
+        if (meta) meta.setAttribute('content', color);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+  <link rel="preload" href="https://ravivasavan.com/assets/fonts/LabilGrotesk-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="https://ravivasavan.com/chrome/v1/chrome.css">
+  <link rel="stylesheet" href="/assets/play.css">
+  <style>
+    /* The stage is the whole viewport; the star follows the theme (star.js). */
+    .stage { position: fixed; inset: 0; z-index: 0; touch-action: none; }
+    .stage canvas { display: block; width: 100%; height: 100%; cursor: grab; }
+    .stage canvas:active { cursor: grabbing; }
+  </style>
+</head>
+<body>
+  <div data-chrome></div>
+
+  <main class="stage" id="stage" aria-label="Star, a 3D model you can turn"></main>
+
+  <nav class="rail" aria-label="Star view">
+    <button class="tool-pill" id="t-sketch" type="button" aria-label="Back to the sketch view">
+      <span class="tool-pill__icon"><svg viewBox="-1.3333 -1.3333 26.6667 26.6667" fill="none" stroke="currentColor" stroke-width="2.2222" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></svg></span>
+      <span class="tool-pill__label">Sketch</span>
+    </button>
+    <button class="tool-pill" id="t-turn" type="button" aria-label="Turn the star" aria-pressed="false">
+      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></span>
+      <span class="tool-pill__label">Turn</span>
+    </button>
+  </nav>
+
+  <nav class="dock" aria-label="Star actions">
+    <a class="tool-pill" id="t-download" href="star-v02-assets.zip" download aria-label="Download the assets: FBX, USD, GLB, the Cinema 4D setup and the Octane renders (zip)">
+      <span class="tool-pill__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg></span>
+      <span class="tool-pill__label">Download</span>
+    </a>
+    <p class="readout">
+      <span>FBX</span><span class="readout__sep">·</span><span>USD</span><span class="readout__sep">·</span><span>GLB</span><span class="readout__sep">·</span><span>C4D</span><span class="readout__sep">·</span><span>Renders</span><span class="readout__sep">·</span><span id="zip-size">48 MB</span>
+    </p>
+  </nav>
+
+  <script type="importmap">
+    { "imports": { "three": "./vendor/three.module.min.js", "three/addons/": "./vendor/addons/" } }
+  </script>
+  <script src="/assets/play.js" defer></script>
+  <script src="https://ravivasavan.com/chrome/v1/chrome.js" defer
+          data-surface="play"
+          data-back="https://ravivasavan.com/experiments"
+          data-back-label="Back to Play"></script>
+  <script type="module" src="./star.js"></script>
+</body>
+</html>
