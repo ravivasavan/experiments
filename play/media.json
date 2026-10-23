@@ -3,6 +3,78 @@
   "scraped": "Cargo-scrape-2026-09-22",
   "projects": [
     {
+      "id": "driftstar",
+      "title": "Driftstar",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20261023-Driftstar-Hero-Dark.webp",
+          "full": "media/20261023-Driftstar-Hero-Dark-full.webp",
+          "original": "star/out2/package/renders/studio/star_v02_light_on_dark__hero.jpg",
+          "width": 2400,
+          "height": 2400,
+          "alt": "Driftstar · sketch view, light on dark",
+          "filename": "20261023-Driftstar-Hero-Dark",
+          "srcset": "media/20261023-Driftstar-Hero-Dark-480.webp 480w, media/20261023-Driftstar-Hero-Dark-640.webp 640w, media/20261023-Driftstar-Hero-Dark.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261023-Driftstar-Hero-Light.webp",
+          "full": "media/20261023-Driftstar-Hero-Light-full.webp",
+          "original": "star/out2/package/renders/studio/star_v02_dark_on_light__hero.jpg",
+          "width": 2400,
+          "height": 2400,
+          "alt": "Driftstar · sketch view, dark on light",
+          "filename": "20261023-Driftstar-Hero-Light",
+          "srcset": "media/20261023-Driftstar-Hero-Light-480.webp 480w, media/20261023-Driftstar-Hero-Light-640.webp 640w, media/20261023-Driftstar-Hero-Light.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261023-Driftstar-Low-Dark.webp",
+          "full": "media/20261023-Driftstar-Low-Dark-full.webp",
+          "original": "star/out2/package/renders/studio/star_v02_light_on_dark__low.jpg",
+          "width": 2400,
+          "height": 2400,
+          "alt": "Driftstar · eye level, light on dark",
+          "filename": "20261023-Driftstar-Low-Dark",
+          "srcset": "media/20261023-Driftstar-Low-Dark-480.webp 480w, media/20261023-Driftstar-Low-Dark-640.webp 640w, media/20261023-Driftstar-Low-Dark.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261023-Driftstar-Low-Light.webp",
+          "full": "media/20261023-Driftstar-Low-Light-full.webp",
+          "original": "star/out2/package/renders/studio/star_v02_dark_on_light__low.jpg",
+          "width": 2400,
+          "height": 2400,
+          "alt": "Driftstar · eye level, dark on light",
+          "filename": "20261023-Driftstar-Low-Light",
+          "srcset": "media/20261023-Driftstar-Low-Light-480.webp 480w, media/20261023-Driftstar-Low-Light-640.webp 640w, media/20261023-Driftstar-Low-Light.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261023-Driftstar-Close-Dark.webp",
+          "full": "media/20261023-Driftstar-Close-Dark-full.webp",
+          "original": "star/out2/package/renders/studio/star_v02_light_on_dark__close.jpg",
+          "width": 2400,
+          "height": 2400,
+          "alt": "Driftstar · core, light on dark",
+          "filename": "20261023-Driftstar-Close-Dark",
+          "srcset": "media/20261023-Driftstar-Close-Dark-480.webp 480w, media/20261023-Driftstar-Close-Dark-640.webp 640w, media/20261023-Driftstar-Close-Dark.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261023-Driftstar-Close-Light.webp",
+          "full": "media/20261023-Driftstar-Close-Light-full.webp",
+          "original": "star/out2/package/renders/studio/star_v02_dark_on_light__close.jpg",
+          "width": 2400,
+          "height": 2400,
+          "alt": "Driftstar · core, dark on light",
+          "filename": "20261023-Driftstar-Close-Light",
+          "srcset": "media/20261023-Driftstar-Close-Light-480.webp 480w, media/20261023-Driftstar-Close-Light-640.webp 640w, media/20261023-Driftstar-Close-Light.webp 960w"
+        }
+      ]
+    },
+    {
       "id": "feedback-visualisation",
       "title": "Feedback Visualisation",
       "media": [
