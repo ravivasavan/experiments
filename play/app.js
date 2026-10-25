@@ -307,7 +307,12 @@
   window.addEventListener('message', (event) => {
     if (event.origin !== location.origin) return;
     if (event.data && event.data.type === 'rv-play-show') arrive(true);
-    if (event.data && event.data.type === 'rv-play-open') openById(event.data.id || null);
+    if (event.data && event.data.type === 'rv-play-open') {
+      // A link on the page around sets the layout too; the menu leaves it be.
+      const mode = event.data.layout === 'masonry' ? 'masonry' : 'drift';
+      if (event.data.layout && mode !== layoutMode) setLayout(mode);
+      openById(event.data.id || null);
+    }
   });
   function queueLayout() {
     cancelAnimationFrame(layoutFrame); layoutFrame = requestAnimationFrame(layout);
@@ -610,7 +615,8 @@
 
   // The layout can be linked to: /play/?layout=masonry (drift is the default
   // and carries no param). The button keeps the address bar in step, beside
-  // any ?work=. Under the cover the parent's URL is not ours: read only.
+  // any ?work=. Under the cover the page around owns the address bar, so the
+  // change goes to it instead (the chrome writes &play-layout=).
   function setLayout(mode, { initial = false } = {}) {
     layoutMode = mode === 'masonry' ? 'masonry' : 'drift';
     const glyph = $('layout-mode').querySelector('svg');
@@ -620,7 +626,9 @@
     $('layout-mode').title = label;
     $('layout-mode').querySelector('.tool-pill__label').textContent = layoutMode === 'drift' ? 'Masonry' : 'Drift';
     if (layoutMode === 'masonry') { period = 0; field.scrollTop = 0; scrollPosition = 0; }
-    if (!initial && !layerEmbed()) {
+    if (!initial && layerEmbed()) {
+      if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'rv-play-layout', layout: layoutMode }, location.origin);
+    } else if (!initial) {
       const url = new URL(location.href);
       if (layoutMode === 'masonry') url.searchParams.set('layout', 'masonry'); else url.searchParams.delete('layout');
       if (url.href !== location.href) history.replaceState(history.state, '', url);
