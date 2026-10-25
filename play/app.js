@@ -608,6 +608,25 @@
   }
   function next(delta) { if (selected) { slide = mod(slide + delta, selected.media.length); showSlide(); } }
 
+  // The layout can be linked to: /play/?layout=masonry (drift is the default
+  // and carries no param). The button keeps the address bar in step, beside
+  // any ?work=. Under the cover the parent's URL is not ours: read only.
+  function setLayout(mode, { initial = false } = {}) {
+    layoutMode = mode === 'masonry' ? 'masonry' : 'drift';
+    const glyph = $('layout-mode').querySelector('svg');
+    glyph.dataset.mode = layoutMode;
+    const label = layoutMode === 'drift' ? 'Switch to masonry' : 'Switch to drift';
+    $('layout-mode').setAttribute('aria-label', label);
+    $('layout-mode').title = label;
+    $('layout-mode').querySelector('.tool-pill__label').textContent = layoutMode === 'drift' ? 'Masonry' : 'Drift';
+    if (layoutMode === 'masonry') { period = 0; field.scrollTop = 0; scrollPosition = 0; }
+    if (!initial && !layerEmbed()) {
+      const url = new URL(location.href);
+      if (layoutMode === 'masonry') url.searchParams.set('layout', 'masonry'); else url.searchParams.delete('layout');
+      if (url.href !== location.href) history.replaceState(history.state, '', url);
+    }
+    if (!initial) queueLayout();
+  }
   function layerEmbed() { return document.documentElement.dataset.playEmbed === 'layer'; }
   function exitPlay() {
     if (window.parent && window.parent !== window) window.parent.postMessage({ type: 'rv-play-close' }, location.origin);
@@ -636,17 +655,7 @@
   });
   $('close').addEventListener('click', close);
   $('gallery-mode').addEventListener('click', () => { if (galleryMode === 'grid') showSlide(); else showGrid(); });
-  $('layout-mode').addEventListener('click', () => {
-    layoutMode = layoutMode === 'drift' ? 'masonry' : 'drift';
-    const glyph = $('layout-mode').querySelector('svg');
-    glyph.dataset.mode = layoutMode;
-    const label = layoutMode === 'drift' ? 'Switch to masonry' : 'Switch to drift';
-    $('layout-mode').setAttribute('aria-label', label);
-    $('layout-mode').title = label;
-    $('layout-mode').querySelector('.tool-pill__label').textContent = layoutMode === 'drift' ? 'Masonry' : 'Drift';
-    if (layoutMode === 'masonry') { period = 0; field.scrollTop = 0; scrollPosition = 0; }
-    queueLayout();
-  });
+  $('layout-mode').addEventListener('click', () => setLayout(layoutMode === 'drift' ? 'masonry' : 'drift'));
   $('previous').addEventListener('click', () => next(-1));
   $('next').addEventListener('click', () => next(1));
   dialog.addEventListener('keydown', (event) => {
@@ -729,6 +738,7 @@
     window.drift = { state, get view() { return { period, playing, selected: selected?.id, galleryMode, slide, idleUntil }; } };
     document.dispatchEvent(new Event('drift:ready'));
     playbackFace();
+    if (new URLSearchParams(location.search).get('layout') === 'masonry') setLayout('masonry', { initial: true });
     try {
       const response = await fetch(asset('media.json'));
       if (!response.ok) throw new Error('Collection unavailable');
