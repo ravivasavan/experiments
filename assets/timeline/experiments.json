@@ -113,6 +113,20 @@
         "day.webp",
         "gizmo.webp"
       ]
+    },
+    {
+      "slug": "driftstar",
+      "name": "Driftstar",
+      "date": "20261023",
+      "description": "Three needles on X, Y and Z that read as a six-point star from one angle",
+      "status": "live",
+      "tech": "three.js, Octane, signed distance fields",
+      "glyph": "needles",
+      "shots": [
+        "night.webp",
+        "day.webp",
+        "turned.webp"
+      ]
     }
   ]
 }

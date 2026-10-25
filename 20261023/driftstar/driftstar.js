@@ -1,4 +1,4 @@
-// Star: three diamond needles on X, Y and Z, merged with soft fillets. From the sketch
+// Driftstar: three diamond needles on X, Y and Z, merged with soft fillets. From the sketch
 // camera (39 deg up, turned 45 deg) they read as a flat six-point star; turn it and they
 // come apart into an object. The theme decides the colours: night shows satin porcelain,
 // day shows gloss ink, each on the theme's own background.
@@ -152,12 +152,12 @@ function frame(now) {
 }
 
 const draco = new DRACOLoader().setDecoderPath('./vendor/draco/');
-new GLTFLoader().setDRACOLoader(draco).load('./star.glb', (g) => {
+new GLTFLoader().setDRACOLoader(draco).load('./driftstar.glb', (g) => {
   star = g.scene;
   scene.add(star);
   applyTheme();
-  window.star = { ready: true, look: () => look };
-  document.dispatchEvent(new CustomEvent('star:ready'));
+  window.driftstar = { ready: true, look: () => look };
+  document.dispatchEvent(new CustomEvent('driftstar:ready'));
   wake();
 });
 
