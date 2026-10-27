@@ -3,6 +3,128 @@
   "scraped": "Cargo-scrape-2026-09-22",
   "projects": [
     {
+      "id": "screen-doors",
+      "title": "Screen Doors",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-First-Turn.webp",
+          "full": "media/20261027-Screen-Doors-First-Turn-full.webp",
+          "original": "20260929-screendoors/exports/play-six-v005/png/01-coral-teal.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors · First turn, coral on teal",
+          "filename": "20261027-Screen-Doors-First-Turn",
+          "srcset": "media/20261027-Screen-Doors-First-Turn-480.webp 480w, media/20261027-Screen-Doors-First-Turn-640.webp 640w, media/20261027-Screen-Doors-First-Turn.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-Counterpoint.webp",
+          "full": "media/20261027-Screen-Doors-Counterpoint-full.webp",
+          "original": "20260929-screendoors/exports/play-six-v005/png/02-ivory-violet.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors · Counterpoint, ivory on violet",
+          "filename": "20261027-Screen-Doors-Counterpoint",
+          "srcset": "media/20261027-Screen-Doors-Counterpoint-480.webp 480w, media/20261027-Screen-Doors-Counterpoint-640.webp 640w, media/20261027-Screen-Doors-Counterpoint.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-Long-Pause.webp",
+          "full": "media/20261027-Screen-Doors-Long-Pause-full.webp",
+          "original": "20260929-screendoors/exports/play-six-v005/png/03-charcoal-orange.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors · Long pause, charcoal on orange",
+          "filename": "20261027-Screen-Doors-Long-Pause",
+          "srcset": "media/20261027-Screen-Doors-Long-Pause-480.webp 480w, media/20261027-Screen-Doors-Long-Pause-640.webp 640w, media/20261027-Screen-Doors-Long-Pause.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-Return-Line.webp",
+          "full": "media/20261027-Screen-Doors-Return-Line-full.webp",
+          "original": "20260929-screendoors/exports/play-six-v005/png/04-citron-cobalt.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors · Return line, citron on cobalt",
+          "filename": "20261027-Screen-Doors-Return-Line",
+          "srcset": "media/20261027-Screen-Doors-Return-Line-480.webp 480w, media/20261027-Screen-Doors-Return-Line-640.webp 640w, media/20261027-Screen-Doors-Return-Line.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-Narrow-Rhythm.webp",
+          "full": "media/20261027-Screen-Doors-Narrow-Rhythm-full.webp",
+          "original": "20260929-screendoors/exports/play-six-v005/png/05-blue-terracotta.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors · Narrow rhythm, blue on terracotta",
+          "filename": "20261027-Screen-Doors-Narrow-Rhythm",
+          "srcset": "media/20261027-Screen-Doors-Narrow-Rhythm-480.webp 480w, media/20261027-Screen-Doors-Narrow-Rhythm-640.webp 640w, media/20261027-Screen-Doors-Narrow-Rhythm.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-Offset.webp",
+          "full": "media/20261027-Screen-Doors-Offset-full.webp",
+          "original": "20260929-screendoors/exports/play-six-v005/png/06-green-aubergine.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors · Offset, green on aubergine",
+          "filename": "20261027-Screen-Doors-Offset",
+          "srcset": "media/20261027-Screen-Doors-Offset-480.webp 480w, media/20261027-Screen-Doors-Offset-640.webp 640w, media/20261027-Screen-Doors-Offset.webp 960w"
+        }
+      ]
+    },
+    {
+      "id": "screen-doors-details",
+      "title": "Screen Doors Details",
+      "media": [
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-Detail-The-Turn.webp",
+          "full": "media/20261027-Screen-Doors-Detail-The-Turn-full.webp",
+          "original": "20260929-screendoors/renders/20261027/20261027-211741_play-detail-v003_01-the-turn_final_octane-omarchy.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors Details · the turn, shallow focus",
+          "filename": "20261027-Screen-Doors-Detail-The-Turn",
+          "srcset": "media/20261027-Screen-Doors-Detail-The-Turn-480.webp 480w, media/20261027-Screen-Doors-Detail-The-Turn-640.webp 640w, media/20261027-Screen-Doors-Detail-The-Turn.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-Detail-Junction.webp",
+          "full": "media/20261027-Screen-Doors-Detail-Junction-full.webp",
+          "original": "20260929-screendoors/renders/20261027/20261027-211741_play-detail-v003_02-dressed-junction_final_octane-omarchy.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors Details · T junction weld, shallow focus",
+          "filename": "20261027-Screen-Doors-Detail-Junction",
+          "srcset": "media/20261027-Screen-Doors-Detail-Junction-480.webp 480w, media/20261027-Screen-Doors-Detail-Junction-640.webp 640w, media/20261027-Screen-Doors-Detail-Junction.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-Detail-Crossing.webp",
+          "full": "media/20261027-Screen-Doors-Detail-Crossing-full.webp",
+          "original": "20260929-screendoors/renders/20261027/20261027-211741_play-detail-v003_03-crossing_final_octane-omarchy.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors Details · crossing weld, shallow focus",
+          "filename": "20261027-Screen-Doors-Detail-Crossing",
+          "srcset": "media/20261027-Screen-Doors-Detail-Crossing-480.webp 480w, media/20261027-Screen-Doors-Detail-Crossing-640.webp 640w, media/20261027-Screen-Doors-Detail-Crossing.webp 960w"
+        },
+        {
+          "type": "image",
+          "src": "media/20261027-Screen-Doors-Detail-Sweep.webp",
+          "full": "media/20261027-Screen-Doors-Detail-Sweep-full.webp",
+          "original": "20260929-screendoors/renders/20261027/20261027-211741_play-detail-v003_04-sweep-to-frame_final_octane-omarchy.png",
+          "width": 1920,
+          "height": 2400,
+          "alt": "Screen Doors Details · sweep meeting the frame, shallow focus",
+          "filename": "20261027-Screen-Doors-Detail-Sweep",
+          "srcset": "media/20261027-Screen-Doors-Detail-Sweep-480.webp 480w, media/20261027-Screen-Doors-Detail-Sweep-640.webp 640w, media/20261027-Screen-Doors-Detail-Sweep.webp 960w"
+        }
+      ]
+    },
+    {
       "id": "driftstar",
       "title": "Driftstar",
       "media": [
