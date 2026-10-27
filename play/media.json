@@ -80,47 +80,47 @@
       "media": [
         {
           "type": "image",
-          "src": "media/20261027-Screen-Doors-Detail-The-Turn.webp",
-          "full": "media/20261027-Screen-Doors-Detail-The-Turn-full.webp",
-          "original": "20260929-screendoors/renders/20261027/20261027-211741_play-detail-v003_01-the-turn_final_octane-omarchy.png",
+          "src": "media/20261027-Screen-Doors-Detail-The-Turn-v3b.webp",
+          "full": "media/20261027-Screen-Doors-Detail-The-Turn-v3b-full.webp",
+          "original": "20260929-screendoors/renders/20261027/20261027-221543_play-detail-v003b_01-the-turn_final_octane-omarchy_8bit-dither.png",
           "width": 1920,
           "height": 2400,
           "alt": "Screen Doors Details · the turn, shallow focus",
           "filename": "20261027-Screen-Doors-Detail-The-Turn",
-          "srcset": "media/20261027-Screen-Doors-Detail-The-Turn-480.webp 480w, media/20261027-Screen-Doors-Detail-The-Turn-640.webp 640w, media/20261027-Screen-Doors-Detail-The-Turn.webp 960w"
+          "srcset": "media/20261027-Screen-Doors-Detail-The-Turn-v3b-480.webp 480w, media/20261027-Screen-Doors-Detail-The-Turn-v3b-640.webp 640w, media/20261027-Screen-Doors-Detail-The-Turn-v3b.webp 960w"
         },
         {
           "type": "image",
-          "src": "media/20261027-Screen-Doors-Detail-Junction.webp",
-          "full": "media/20261027-Screen-Doors-Detail-Junction-full.webp",
-          "original": "20260929-screendoors/renders/20261027/20261027-211741_play-detail-v003_02-dressed-junction_final_octane-omarchy.png",
+          "src": "media/20261027-Screen-Doors-Detail-Junction-v3b.webp",
+          "full": "media/20261027-Screen-Doors-Detail-Junction-v3b-full.webp",
+          "original": "20260929-screendoors/renders/20261027/20261027-221543_play-detail-v003b_02-dressed-junction_final_octane-omarchy_8bit-dither.png",
           "width": 1920,
           "height": 2400,
           "alt": "Screen Doors Details · T junction weld, shallow focus",
           "filename": "20261027-Screen-Doors-Detail-Junction",
-          "srcset": "media/20261027-Screen-Doors-Detail-Junction-480.webp 480w, media/20261027-Screen-Doors-Detail-Junction-640.webp 640w, media/20261027-Screen-Doors-Detail-Junction.webp 960w"
+          "srcset": "media/20261027-Screen-Doors-Detail-Junction-v3b-480.webp 480w, media/20261027-Screen-Doors-Detail-Junction-v3b-640.webp 640w, media/20261027-Screen-Doors-Detail-Junction-v3b.webp 960w"
         },
         {
           "type": "image",
-          "src": "media/20261027-Screen-Doors-Detail-Crossing.webp",
-          "full": "media/20261027-Screen-Doors-Detail-Crossing-full.webp",
-          "original": "20260929-screendoors/renders/20261027/20261027-211741_play-detail-v003_03-crossing_final_octane-omarchy.png",
+          "src": "media/20261027-Screen-Doors-Detail-Crossing-v3b.webp",
+          "full": "media/20261027-Screen-Doors-Detail-Crossing-v3b-full.webp",
+          "original": "20260929-screendoors/renders/20261027/20261027-221543_play-detail-v003b_03-crossing_final_octane-omarchy_8bit-dither.png",
           "width": 1920,
           "height": 2400,
           "alt": "Screen Doors Details · crossing weld, shallow focus",
           "filename": "20261027-Screen-Doors-Detail-Crossing",
-          "srcset": "media/20261027-Screen-Doors-Detail-Crossing-480.webp 480w, media/20261027-Screen-Doors-Detail-Crossing-640.webp 640w, media/20261027-Screen-Doors-Detail-Crossing.webp 960w"
+          "srcset": "media/20261027-Screen-Doors-Detail-Crossing-v3b-480.webp 480w, media/20261027-Screen-Doors-Detail-Crossing-v3b-640.webp 640w, media/20261027-Screen-Doors-Detail-Crossing-v3b.webp 960w"
         },
         {
           "type": "image",
-          "src": "media/20261027-Screen-Doors-Detail-Sweep.webp",
-          "full": "media/20261027-Screen-Doors-Detail-Sweep-full.webp",
-          "original": "20260929-screendoors/renders/20261027/20261027-211741_play-detail-v003_04-sweep-to-frame_final_octane-omarchy.png",
+          "src": "media/20261027-Screen-Doors-Detail-Sweep-v3b.webp",
+          "full": "media/20261027-Screen-Doors-Detail-Sweep-v3b-full.webp",
+          "original": "20260929-screendoors/renders/20261027/20261027-221543_play-detail-v003b_04-sweep-to-frame_final_octane-omarchy_8bit-dither.png",
           "width": 1920,
           "height": 2400,
           "alt": "Screen Doors Details · sweep meeting the frame, shallow focus",
           "filename": "20261027-Screen-Doors-Detail-Sweep",
-          "srcset": "media/20261027-Screen-Doors-Detail-Sweep-480.webp 480w, media/20261027-Screen-Doors-Detail-Sweep-640.webp 640w, media/20261027-Screen-Doors-Detail-Sweep.webp 960w"
+          "srcset": "media/20261027-Screen-Doors-Detail-Sweep-v3b-480.webp 480w, media/20261027-Screen-Doors-Detail-Sweep-v3b-640.webp 640w, media/20261027-Screen-Doors-Detail-Sweep-v3b.webp 960w"
         }
       ]
     },
